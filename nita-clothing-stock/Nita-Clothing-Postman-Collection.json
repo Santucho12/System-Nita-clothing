@@ -1,0 +1,283 @@
+{
+    "info": {
+        "name": "Nita Clothing - Stock API",
+        "description": "Sistema de gestión de stock para tienda de ropa femenina",
+        "version": "1.0.0",
+        "contact": {
+            "name": "Nita Clothing"
+        }
+    },
+    "item": [
+        {
+            "name": "📊 General",
+            "item": [
+                {
+                    "name": "Info API",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["api"]
+                        }
+                    }
+                },
+                {
+                    "name": "Health Check",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/health",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["health"]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "📂 Categorías",
+            "item": [
+                {
+                    "name": "Listar Categorías",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/categorias",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["api", "categorias"]
+                        }
+                    }
+                },
+                {
+                    "name": "Obtener Categoría por ID",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/categorias/1",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["api", "categorias", "1"]
+                        }
+                    }
+                },
+                {
+                    "name": "Crear Categoría",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"Zapatos\",\n  \"description\": \"Calzado femenino de todos los estilos\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/categorias",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["api", "categorias"]
+                        }
+                    }
+                },
+                {
+                    "name": "Actualizar Categoría",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"Remeras y Tops\",\n  \"description\": \"Remeras básicas, estampadas y tops para mujer\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/categorias/1",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["api", "categorias", "1"]
+                        }
+                    }
+                },
+                {
+                    "name": "Eliminar Categoría",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/categorias/6",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["api", "categorias", "6"]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "👕 Productos",
+            "item": [
+                {
+                    "name": "Listar Productos",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/productos",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["api", "productos"]
+                        }
+                    }
+                },
+                {
+                    "name": "Obtener Producto por ID",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/productos/1",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["api", "productos", "1"]
+                        }
+                    }
+                },
+                {
+                    "name": "Productos por Categoría",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/productos/categoria/1",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["api", "productos", "categoria", "1"]
+                        }
+                    }
+                },
+                {
+                    "name": "Buscar Productos",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/productos/search?q=remera",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["api", "productos", "search"],
+                            "query": [
+                                {
+                                    "key": "q",
+                                    "value": "remera"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Stock Bajo",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/productos/stock-bajo?min=10",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["api", "productos", "stock-bajo"],
+                            "query": [
+                                {
+                                    "key": "min",
+                                    "value": "10"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Crear Producto",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"Remera Manga Larga\",\n  \"color\": \"Verde\",\n  \"quantity\": 20,\n  \"photo_url\": \"https://example.com/remera-verde.jpg\",\n  \"category_id\": 1\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/productos",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["api", "productos"]
+                        }
+                    }
+                },
+                {
+                    "name": "Actualizar Producto",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"Remera Básica Premium\",\n  \"color\": \"Blanco\",\n  \"quantity\": 30,\n  \"photo_url\": \"https://example.com/remera-premium-blanco.jpg\",\n  \"category_id\": 1\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/productos/1",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["api", "productos", "1"]
+                        }
+                    }
+                },
+                {
+                    "name": "Actualizar Stock",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"quantity\": 50\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/productos/1/stock",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["api", "productos", "1", "stock"]
+                        }
+                    }
+                },
+                {
+                    "name": "Eliminar Producto",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/productos/12",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["api", "productos", "12"]
+                        }
+                    }
+                }
+            ]
+        }
+    ],
+    "variable": [
+        {
+            "key": "baseUrl",
+            "value": "http://localhost:3000",
+            "type": "string"
+        }
+    ]
+}
