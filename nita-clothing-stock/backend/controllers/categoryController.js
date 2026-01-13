@@ -92,6 +92,20 @@ class CategoryController {
             });
         }
     }
+
+    static async changeCategoryStatus(req, res) {
+        try {
+            const { id } = req.params;
+            const { status } = req.body;
+            if (!['activa', 'inactiva'].includes(status)) {
+                return res.status(400).json({ success: false, message: 'Estado inválido' });
+            }
+            const result = await Category.changeStatus(id, status);
+            res.status(200).json({ success: true, message: 'Estado de categoría actualizado', data: result });
+        } catch (error) {
+            res.status(400).json({ success: false, message: error.message });
+        }
+    }
 }
 
 module.exports = CategoryController;

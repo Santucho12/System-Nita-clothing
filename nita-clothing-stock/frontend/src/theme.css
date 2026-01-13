@@ -1,0 +1,212 @@
+/* Variables de tema */
+:root[data-theme="light"] {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8f9fa;
+  --bg-tertiary: #e9ecef;
+  --text-primary: #333333;
+  --text-secondary: #666666;
+  --text-muted: #999999;
+  --border-color: #dee2e6;
+  --border-light: #e0e0e0;
+  --shadow: 0 2px 8px rgba(0,0,0,0.1);
+  --shadow-hover: 0 4px 12px rgba(0,0,0,0.15);
+  --input-bg: #ffffff;
+  --input-border: #ddd;
+  --card-bg: #ffffff;
+  --nav-bg: #ffffff;
+  --accent-blue: #2196F3;
+  --accent-green: #4CAF50;
+  --accent-orange: #FF9800;
+  --accent-red: #f44336;
+}
+
+:root[data-theme="dark"] {
+  --bg-primary: #1a1a1a;
+  --bg-secondary: #2d2d2d;
+  --bg-tertiary: #3a3a3a;
+  --text-primary: #e0e0e0;
+  --text-secondary: #b0b0b0;
+  --text-muted: #808080;
+  --border-color: #404040;
+  --border-light: #505050;
+  --shadow: 0 2px 8px rgba(0,0,0,0.3);
+  --shadow-hover: 0 4px 12px rgba(0,0,0,0.4);
+  --input-bg: #2d2d2d;
+  --input-border: #404040;
+  --card-bg: #2d2d2d;
+  --nav-bg: #1a1a1a;
+  --accent-blue: #42a5f5;
+  --accent-green: #66bb6a;
+  --accent-orange: #ffa726;
+  --accent-red: #ef5350;
+}
+
+/* Aplicar variables a elementos globales */
+body {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  transition: background-color 0.3s, color 0.3s;
+}
+
+/* Navbar */
+.navbar {
+  background-color: var(--nav-bg);
+  border-bottom: 1px solid var(--border-color);
+  box-shadow: var(--shadow);
+}
+
+.nav-link {
+  color: var(--text-secondary);
+}
+
+.nav-link:hover,
+.nav-link.active {
+  color: var(--accent-blue);
+}
+
+/* Cards y containers */
+.card,
+.stat-card,
+.product-card,
+.supplier-card,
+.modal-content,
+.alerts-content,
+.chart-container,
+.reports-content,
+.search-results {
+  background-color: var(--card-bg);
+  border-color: var(--border-color);
+  box-shadow: var(--shadow);
+  color: var(--text-primary);
+}
+
+.card:hover,
+.stat-card:hover {
+  box-shadow: var(--shadow-hover);
+}
+
+/* Inputs y selects */
+input,
+select,
+textarea {
+  background-color: var(--input-bg);
+  border-color: var(--input-border);
+  color: var(--text-primary);
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--accent-blue);
+  background-color: var(--input-bg);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--text-muted);
+}
+
+/* Tablas */
+table {
+  background-color: var(--card-bg);
+  color: var(--text-primary);
+}
+
+thead {
+  background-color: var(--bg-tertiary);
+}
+
+tbody tr {
+  border-bottom-color: var(--border-light);
+}
+
+tbody tr:hover {
+  background-color: var(--bg-tertiary);
+}
+
+/* Botones */
+.btn-primary {
+  background-color: var(--accent-blue);
+}
+
+.btn-success {
+  background-color: var(--accent-green);
+}
+
+.btn-warning {
+  background-color: var(--accent-orange);
+}
+
+.btn-danger {
+  background-color: var(--accent-red);
+}
+
+/* Modales */
+.modal-overlay {
+  background-color: rgba(0, 0, 0, 0.7);
+}
+
+/* Textos auxiliares */
+.text-muted {
+  color: var(--text-muted);
+}
+
+.text-secondary {
+  color: var(--text-secondary);
+}
+
+/* Bordes */
+.border {
+  border-color: var(--border-color);
+}
+
+/* Alertas y badges */
+
+:root[data-theme="dark"] .alert,
+:root[data-theme="dark"] .badge {
+  filter: brightness(0.9);
+}
+
+:root[data-theme="light"] .alert,
+:root[data-theme="light"] .badge {
+  filter: brightness(1);
+}
+
+/* Tabs */
+.tabs button {
+  background-color: var(--bg-secondary);
+  color: var(--text-secondary);
+  border-color: var(--border-light);
+}
+
+.tabs button.active {
+  background-color: var(--accent-blue);
+  color: white;
+}
+
+.tabs button:hover {
+  background-color: var(--bg-tertiary);
+}
+
+/* Headers de secciones */
+.results-header,
+.alerts-tabs button {
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+/* Loading states */
+.loading {
+  color: var(--text-secondary);
+}
+
+/* Empty states */
+.empty-state,
+.no-results {
+  color: var(--text-muted);
+}
+
+/* Transiciones suaves */
+* {
+  transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+}

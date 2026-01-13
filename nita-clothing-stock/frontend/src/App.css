@@ -860,6 +860,52 @@ body {
   .actions-grid {
     grid-template-columns: repeat(2, 1fr);
   }
+
+  /* Suppliers responsive */
+  .suppliers-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Purchase Orders responsive */
+  .purchase-order-form .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .items-table-container {
+    overflow-x: auto;
+  }
+
+  /* Reports responsive */
+  .reports-tabs {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+  }
+
+  .report-cards {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .chart-container canvas {
+    max-height: 250px !important;
+  }
+
+  /* Alerts responsive */
+  .alerts-tabs {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+  }
+
+  /* Global Search responsive */
+  .global-search-container {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .search-results {
+    width: calc(100vw - 2rem);
+    left: 50%;
+    transform: translateX(-50%);
+  }
 }
 
 @media (max-width: 480px) {
@@ -879,5 +925,27 @@ body {
 
   .form-actions {
     flex-direction: column;
+  }
+
+  /* Reports mobile */
+  .report-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .reports-table-container {
+    overflow-x: auto;
+  }
+
+  /* Modal responsive */
+  .modal-content {
+    width: 95vw;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+
+  /* Buttons stack vertically */
+  .page-header .btn-primary,
+  .page-header .btn-secondary {
+    width: 100%;
   }
 }

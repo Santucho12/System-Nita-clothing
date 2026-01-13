@@ -1,4 +1,5 @@
 const express = require('express');
+const promotionRoutes = require('./promotions');
 
 const router = express.Router();
 
@@ -39,10 +40,22 @@ router.get('/', (req, res) => {
                 'GET /api/reportes/payment-methods?year=YYYY&month=MM': 'Ventas por método de pago',
                 'GET /api/reportes/daily-sales?year=YYYY&month=MM': 'Ventas diarias del mes',
                 'GET /api/reportes/performance': 'Reporte de rendimiento vs mes anterior'
+            },
+            promociones: {
+                'GET /api/promociones': 'Obtener todas las promociones',
+                'GET /api/promociones/active': 'Obtener promociones activas',
+                'GET /api/promociones/for-product?productId=X&categoryId=Y': 'Promoción para producto',
+                'GET /api/promociones/:id': 'Obtener promoción por ID',
+                'POST /api/promociones': 'Crear promoción',
+                'PUT /api/promociones/:id': 'Actualizar promoción',
+                'PATCH /api/promociones/:id/status': 'Cambiar estado',
+                'DELETE /api/promociones/:id': 'Eliminar promoción'
             }
         },
         documentation: 'Ver comentarios en archivos de rutas para ejemplos de Postman'
     });
 });
+
+router.use('/promociones', promotionRoutes);
 
 module.exports = router;

@@ -1,7 +1,7 @@
 module.exports = {
   host: '127.0.0.1',
   user: 'root',
-  password: '', // <--- Coloca aquí tu contraseña de MySQL si tiene
+  password: 'purre1010',
   database: 'nita',
   port: 3306,
   waitForConnections: true,

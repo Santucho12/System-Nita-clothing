@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Configuración base de Axios
-const API_BASE_URL = 'http://localhost:3001/api';
+const API_BASE_URL = 'http://localhost:3000/api';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -10,11 +10,29 @@ const api = axios.create({
   },
 });
 
+// Interceptor para añadir token de autenticación
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
 // Interceptor para manejo de errores globales
 api.interceptors.response.use(
   (response) => response,
   (error) => {
     console.error('Error en API:', error);
+    if (error.response?.status === 401) {
+      localStorage.removeItem('token');
+      window.location.href = '/login';
+    }
     return Promise.reject(error);
   }
 );
@@ -68,6 +86,16 @@ export const categoryService = {
       return response.data;
     } catch (error) {
       throw new Error(error.response?.data?.message || 'Error eliminando categoría');
+    }
+  },
+
+  // Cambiar estado de la categoría (activa/inactiva)
+  changeStatus: async (id, status) => {
+    try {
+      const response = await api.patch(`/categorias/${id}/status`, { status });
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response?.data?.message || 'Error cambiando estado de categoría');
     }
   }
 };
@@ -124,20 +152,51 @@ export const productService = {
     }
   },
 
-  // Crear nuevo producto
+  // Crear nuevo producto (con imágenes)
   create: async (productData) => {
     try {
-      const response = await api.post('/productos', productData);
+      let dataToSend;
+      let headers = {};
+      if (productData.images && productData.images.length > 0 && productData.images[0] instanceof File) {
+        // Si hay archivos, usar FormData
+        dataToSend = new FormData();
+        Object.entries(productData).forEach(([key, value]) => {
+          if (key === 'images') {
+            Array.from(value).forEach(img => dataToSend.append('images', img));
+          } else {
+            dataToSend.append(key, value);
+          }
+        });
+        headers['Content-Type'] = 'multipart/form-data';
+      } else {
+        dataToSend = productData;
+      }
+      const response = await api.post('/productos', dataToSend, { headers });
       return response.data;
     } catch (error) {
       throw new Error(error.response?.data?.message || 'Error creando producto');
     }
   },
 
-  // Actualizar producto
+  // Actualizar producto (con imágenes)
   update: async (id, productData) => {
     try {
-      const response = await api.put(`/productos/${id}`, productData);
+      let dataToSend;
+      let headers = {};
+      if (productData.images && productData.images.length > 0 && productData.images[0] instanceof File) {
+        dataToSend = new FormData();
+        Object.entries(productData).forEach(([key, value]) => {
+          if (key === 'images') {
+            Array.from(value).forEach(img => dataToSend.append('images', img));
+          } else {
+            dataToSend.append(key, value);
+          }
+        });
+        headers['Content-Type'] = 'multipart/form-data';
+      } else {
+        dataToSend = productData;
+      }
+      const response = await api.put(`/productos/${id}`, dataToSend, { headers });
       return response.data;
     } catch (error) {
       throw new Error(error.response?.data?.message || 'Error actualizando producto');
@@ -151,6 +210,26 @@ export const productService = {
       return response.data;
     } catch (error) {
       throw new Error(error.response?.data?.message || 'Error actualizando stock');
+    }
+  },
+
+  // Cambiar estado del producto
+  changeStatus: async (id, status) => {
+    try {
+      const response = await api.patch(`/productos/${id}/status`, { status });
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response?.data?.message || 'Error cambiando estado del producto');
+    }
+  },
+
+  // Duplicar producto
+  duplicate: async (id) => {
+    try {
+      const response = await api.post(`/productos/${id}/duplicar`);
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response?.data?.message || 'Error duplicando producto');
     }
   },
 

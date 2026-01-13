@@ -29,6 +29,18 @@ const Categories = () => {
     }
   };
 
+  // Cambiar estado de la categoría
+  const handleToggleStatus = async (category) => {
+    const newStatus = category.status === 'activa' ? 'inactiva' : 'activa';
+    try {
+      await categoryService.changeStatus(category.id, newStatus);
+      toast.success(`Categoría ${newStatus === 'activa' ? 'activada' : 'desactivada'} correctamente`);
+      loadCategories();
+    } catch (error) {
+      toast.error('Error cambiando estado: ' + error.message);
+    }
+  };
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -184,7 +196,7 @@ const Categories = () => {
           </div>
         ) : (
           categories.map(category => (
-            <div key={category.id} className="category-card">
+            <div key={category.id} className={`category-card ${category.status === 'inactiva' ? 'inactive' : ''}`}>
               <div className="category-header">
                 <h3>{category.name}</h3>
                 <div className="category-actions">
@@ -202,18 +214,24 @@ const Categories = () => {
                   >
                     <i className="fas fa-trash"></i>
                   </button>
+                  <button
+                    className={`btn btn-icon btn-status ${category.status === 'activa' ? 'btn-inactive' : 'btn-active'}`}
+                    onClick={() => handleToggleStatus(category)}
+                    title={category.status === 'activa' ? 'Desactivar' : 'Activar'}
+                  >
+                    <i className={`fas fa-toggle-${category.status === 'activa' ? 'on' : 'off'}`}></i>
+                  </button>
                 </div>
               </div>
-              
               {category.description && (
                 <p className="category-description">{category.description}</p>
               )}
-              
               <div className="category-meta">
                 <small>
                   <i className="fas fa-calendar"></i>
                   Creada: {new Date(category.created_at).toLocaleDateString()}
                 </small>
+                <span className={`category-status ${category.status}`}>{category.status === 'activa' ? 'Activa' : 'Inactiva'}</span>
               </div>
             </div>
           ))

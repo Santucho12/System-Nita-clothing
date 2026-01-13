@@ -1,6 +1,138 @@
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 999;
+  background: var(--nav-bg);
+  box-shadow: var(--shadow);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.nav-container {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
 .nav-menu {
   display: flex;
-  gap: 2.5rem;
+  gap: 1.5rem;
   flex: 1;
-  justify-content: flex-end;
+  justify-content: center;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.nav-link {
+  padding: 0.8rem 1rem;
+  text-decoration: none;
+  color: var(--text-secondary);
+  font-weight: 500;
+  font-size: 14px;
+  transition: all 0.3s;
+  border-bottom: 2px solid transparent;
+  white-space: nowrap;
+}
+
+.nav-link:hover {
+  color: var(--accent-blue);
+}
+
+.nav-link.active {
+  color: var(--accent-blue);
+  border-bottom-color: var(--accent-blue);
+}
+
+.nav-logo-img {
+  height: 48px;
+  transition: transform 0.3s;
+}
+
+.nav-logo:hover .nav-logo-img {
+  transform: scale(1.05);
+}
+
+/* Mobile Responsive */
+@media (max-width: 1400px) {
+  .nav-menu {
+    gap: 1rem;
+  }
+  
+  .nav-link {
+    font-size: 13px;
+    padding: 0.6rem 0.8rem;
+  }
+}
+
+@media (max-width: 1200px) {
+  .nav-container {
+    flex-wrap: wrap;
+    gap: 15px;
+  }
+  
+  .nav-menu {
+    order: 3;
+    width: 100%;
+    justify-content: center;
+    gap: 0.8rem;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border-light);
+  }
+  
+  .nav-link {
+    font-size: 12px;
+    padding: 0.5rem 0.6rem;
+  }
+  
+  .nav-link span[role="img"] {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 768px) {
+  .nav-logo-img {
+    height: 36px;
+  }
+  
+  .nav-menu {
+    gap: 0.5rem;
+    font-size: 11px;
+  }
+  
+  .nav-link {
+    padding: 0.4rem 0.5rem;
+    font-size: 11px;
+  }
+  
+  .nav-link span[role="img"] {
+    margin-right: 0.2em;
+  }
+}
+
+@media (max-width: 480px) {
+  .nav-container {
+    padding: 0 10px;
+  }
+  
+  .nav-menu {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+  }
+  
+  .nav-link {
+    padding: 0.8rem 1rem;
+    border-bottom: none;
+    border-left: 3px solid transparent;
+    text-align: left;
+  }
+  
+  .nav-link.active {
+    border-left-color: var(--accent-blue);
+    background-color: var(--bg-tertiary);
+  }
+  
+  .nav-link:hover {
+    background-color: var(--bg-secondary);
+  }
 }

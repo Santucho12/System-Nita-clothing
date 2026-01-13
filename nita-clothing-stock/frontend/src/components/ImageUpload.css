@@ -1,0 +1,144 @@
+.image-upload-container {
+  padding: 1.5rem;
+  background: var(--card-bg);
+  border-radius: 8px;
+  border: 2px dashed var(--border-color);
+}
+
+.upload-section {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.upload-label {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 2rem;
+  background: var(--bg-secondary);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s;
+  border: 2px dashed var(--border-color);
+}
+
+.upload-label:hover {
+  background: var(--accent-blue);
+  color: white;
+  border-color: var(--accent-blue);
+  transform: scale(1.02);
+}
+
+.upload-label i {
+  font-size: 2.5rem;
+}
+
+.upload-label small {
+  font-size: 0.85rem;
+  opacity: 0.8;
+}
+
+.previews-section {
+  margin-top: 1.5rem;
+}
+
+.previews-section h4 {
+  color: var(--text-primary);
+  margin-bottom: 1rem;
+  font-size: 1rem;
+}
+
+.preview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.preview-item {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.preview-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.remove-preview {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: rgba(220, 53, 69, 0.9);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.remove-preview:hover {
+  background: #dc3545;
+  transform: scale(1.1);
+}
+
+.upload-button {
+  width: 100%;
+  padding: 0.9rem;
+  background: var(--accent-green);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: all 0.3s;
+}
+
+.upload-button:hover:not(:disabled) {
+  background: #218838;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+}
+
+.upload-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.upload-error {
+  margin-top: 1rem;
+  padding: 0.8rem;
+  background: rgba(220, 53, 69, 0.1);
+  color: #dc3545;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .preview-grid {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 0.8rem;
+  }
+
+  .upload-label {
+    padding: 1.5rem;
+  }
+}

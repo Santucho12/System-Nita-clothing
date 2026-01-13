@@ -11,8 +11,8 @@ class Category {
         try {
             const { name, description } = categoryData;
             const sql = `
-                INSERT INTO categories (name, description, created_at, updated_at)
-                VALUES (?, ?, datetime('now'), datetime('now'))
+                INSERT INTO categorias (nombre, descripcion, created_at, updated_at)
+                VALUES (?, ?, NOW(), NOW())
             `;
             const result = await database.run(sql, [name, description]);
             return { id: result.lastID, name, description };
@@ -25,9 +25,9 @@ class Category {
     static async getAll() {
         try {
             const sql = `
-                SELECT id, name, description, created_at, updated_at
-                FROM categories
-                ORDER BY name ASC
+                SELECT id, nombre as name, descripcion as description, created_at, updated_at
+                FROM categorias
+                ORDER BY nombre ASC
             `;
             return await database.all(sql);
         } catch (error) {
@@ -39,8 +39,8 @@ class Category {
     static async getById(id) {
         try {
             const sql = `
-                SELECT id, name, description, created_at, updated_at
-                FROM categories
+                SELECT id, nombre as name, descripcion as description, created_at, updated_at
+                FROM categorias
                 WHERE id = ?
             `;
             return await database.get(sql, [id]);
@@ -54,8 +54,8 @@ class Category {
         try {
             const { name, description } = categoryData;
             const sql = `
-                UPDATE categories
-                SET name = ?, description = ?, updated_at = datetime('now')
+                UPDATE categorias
+                SET nombre = ?, descripcion = ?, updated_at = NOW()
                 WHERE id = ?
             `;
             await database.run(sql, [name, description, id]);
@@ -68,11 +68,22 @@ class Category {
     // Eliminar categoría
     static async delete(id) {
         try {
-            const sql = `DELETE FROM categories WHERE id = ?`;
+            const sql = `DELETE FROM categorias WHERE id = ?`;
             await database.run(sql, [id]);
             return true;
         } catch (error) {
             throw new Error(`Error eliminando categoría: ${error.message}`);
+        }
+    }
+
+    // Cambiar estado de la categoría (activa/inactiva)
+    static async changeStatus(id, status) {
+        try {
+            const sql = `UPDATE categories SET status = ?, updated_at = datetime('now') WHERE id = ?`;
+            await database.run(sql, [status, id]);
+            return { id, status };
+        } catch (error) {
+            throw new Error(`Error cambiando estado de categoría: ${error.message}`);
         }
     }
 }

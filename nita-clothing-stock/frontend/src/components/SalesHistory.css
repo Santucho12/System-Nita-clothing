@@ -1,0 +1,101 @@
+.sales-history {
+  max-width: 900px;
+  margin: 2rem auto;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  padding: 2rem;
+}
+.sales-history h2 {
+  margin-bottom: 1.5rem;
+  font-size: 1.5rem;
+  color: #222;
+}
+.filters {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+.filters input, .filters select {
+  padding: 0.3rem 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+.sales-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1rem;
+}
+.sales-table th, .sales-table td {
+  border: 1px solid #eee;
+  padding: 0.5rem 0.7rem;
+  text-align: left;
+}
+.sales-table th {
+  background: #f5f5f5;
+}
+.pagination {
+  display: flex;
+  gap: 0.3rem;
+  justify-content: flex-end;
+}
+.pagination button {
+  background: #eee;
+  border: none;
+  border-radius: 3px;
+  padding: 0.3rem 0.7rem;
+  cursor: pointer;
+}
+.pagination .active {
+  background: #1976d2;
+  color: #fff;
+}
+.sale-detail-modal {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+.modal-content {
+  background: #fff;
+  border-radius: 8px;
+  padding: 2rem;
+  min-width: 350px;
+  max-width: 90vw;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.15);
+  position: relative;
+}
+.modal-content .close {
+  position: absolute;
+  top: 0.7rem;
+  right: 0.7rem;
+  background: #f44336;
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+.actions {
+  display: flex;
+  gap: 0.7rem;
+  margin-top: 1.2rem;
+}
+.actions button {
+  background: #1976d2;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 0.4rem 1rem;
+  cursor: pointer;
+}
+.error {
+  color: #d32f2f;
+  margin-top: 1rem;
+}
