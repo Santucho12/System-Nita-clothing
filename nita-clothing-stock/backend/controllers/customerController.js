@@ -43,9 +43,11 @@ class CustomerController {
     static async getPurchaseHistory(req, res) {
         try {
             const { email } = req.params;
+            console.log('Getting purchase history for email:', email);
             const history = await Customer.getPurchaseHistory(email);
             res.status(200).json({ success: true, data: history });
         } catch (error) {
+            console.error('Error in getPurchaseHistory:', error);
             res.status(500).json({ success: false, message: error.message });
         }
     }
@@ -53,9 +55,11 @@ class CustomerController {
     static async getStats(req, res) {
         try {
             const { email } = req.params;
+            console.log('Getting stats for email:', email);
             const stats = await Customer.getStats(email);
             res.status(200).json({ success: true, data: stats });
         } catch (error) {
+            console.error('Error in getStats:', error);
             res.status(500).json({ success: false, message: error.message });
         }
     }
