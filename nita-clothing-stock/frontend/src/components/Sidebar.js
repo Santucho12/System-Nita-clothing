@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { FaHome, FaTshirt, FaShoppingCart, FaHistory, FaChartBar, FaUsers, FaIndustry, FaBookmark, FaExchangeAlt, FaBell } from 'react-icons/fa';
+import { FaHome, FaTshirt, FaShoppingCart, FaHistory, FaChartBar, FaUsers, FaTruck, FaBookmark, FaExchangeAlt, FaBell } from 'react-icons/fa';
 import './Sidebar.css';
 
 const menuItems = [
@@ -10,7 +10,7 @@ const menuItems = [
   { to: '/sales/history', icon: FaHistory, label: 'Historial Ventas' },
   { to: '/reports', icon: FaChartBar, label: 'Estadísticas' },
   { to: '/customers', icon: FaUsers, label: 'Clientes' },
-  { to: '/suppliers', icon: FaIndustry, label: 'Proveedores' },
+  { to: '/suppliers', icon: FaTruck, label: 'Proveedores' },
   { to: '/reservations', icon: FaBookmark, label: 'Reservas', comingSoon: true },
   { to: '/exchange-returns', icon: FaExchangeAlt, label: 'Cambios/Devoluciones', comingSoon: true },
   { to: '/alerts', icon: FaBell, label: 'Alertas', comingSoon: true },
@@ -36,7 +36,7 @@ const Sidebar = () => {
           </Link>
         </div>
         <nav className="sidebar-menu">
-          {menuItems.map((item) => {
+          {menuItems.map((item, index) => {
             const IconComponent = item.icon;
             return item.comingSoon ? (
               <a
@@ -44,7 +44,7 @@ const Sidebar = () => {
                 key={item.to}
                 className={`sidebar-link${location.pathname === item.to ? ' active' : ''}`}
                 onClick={(e) => handleComingSoon(item.label, e)}
-                style={{ cursor: 'pointer' }}
+                style={{ cursor: 'pointer', animationDelay: `${index * 0.15}s` }}
               >
                 <IconComponent />
                 <span>{item.label}</span>
@@ -54,6 +54,7 @@ const Sidebar = () => {
                 key={item.to}
                 to={item.to}
                 className={`sidebar-link${location.pathname === item.to ? ' active' : ''}`}
+                style={{ animationDelay: `${index * 0.15}s` }}
               >
                 <IconComponent />
                 <span>{item.label}</span>

@@ -46,7 +46,7 @@ const PurchaseOrders = () => {
       setSuppliers(suppliersRes.data.data || []);
       setProducts(productsRes.data.data || []);
     } catch (error) {
-      toast.error('Error cargando datos: ' + (error.response?.data?.message || error.message));
+      // toast.error('Error cargando datos: ' + (error.response?.data?.message || error.message));
     } finally {
       setLoading(false);
     }
@@ -70,7 +70,7 @@ const PurchaseOrders = () => {
 
   const addItem = () => {
     if (!newItem.product_id || !newItem.quantity || !newItem.unit_cost) {
-      toast.error('Complete todos los campos del producto');
+      // toast.error('Complete todos los campos del producto');
       return;
     }
 
@@ -104,12 +104,12 @@ const PurchaseOrders = () => {
     e.preventDefault();
     
     if (!formData.supplier_id) {
-      toast.error('Seleccione un proveedor');
+      // toast.error('Seleccione un proveedor');
       return;
     }
 
     if (formData.items.length === 0) {
-      toast.error('Agregue al menos un producto');
+      // toast.error('Agregue al menos un producto');
       return;
     }
 
@@ -119,11 +119,11 @@ const PurchaseOrders = () => {
         headers: { Authorization: `Bearer ${token}` }
       });
       
-      toast.success('Orden de compra creada exitosamente');
+      // toast.success('Orden de compra creada exitosamente');
       resetForm();
       loadData();
     } catch (error) {
-      toast.error('Error: ' + (error.response?.data?.message || error.message));
+      // toast.error('Error: ' + (error.response?.data?.message || error.message));
     }
   };
 
@@ -138,10 +138,10 @@ const PurchaseOrders = () => {
         headers: { Authorization: `Bearer ${token}` }
       });
       
-      toast.success('Orden marcada como recibida y stock actualizado');
+      // toast.success('Orden marcada como recibida y stock actualizado');
       loadData();
     } catch (error) {
-      toast.error('Error: ' + (error.response?.data?.message || error.message));
+      // toast.error('Error: ' + (error.response?.data?.message || error.message));
     }
   };
 
@@ -156,10 +156,10 @@ const PurchaseOrders = () => {
         headers: { Authorization: `Bearer ${token}` }
       });
       
-      toast.success('Orden cancelada exitosamente');
+      // toast.success('Orden cancelada exitosamente');
       loadData();
     } catch (error) {
-      toast.error('Error: ' + (error.response?.data?.message || error.message));
+      // toast.error('Error: ' + (error.response?.data?.message || error.message));
     }
   };
 
@@ -171,7 +171,7 @@ const PurchaseOrders = () => {
       });
       setSelectedOrder(response.data.data);
     } catch (error) {
-      toast.error('Error cargando detalles');
+      // toast.error('Error cargando detalles');
     }
   };
 

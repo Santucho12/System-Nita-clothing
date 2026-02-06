@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import { FaChartBar } from 'react-icons/fa';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -89,7 +90,7 @@ function Reports() {
         setCategoriesData(res.data.data || []);
       }
     } catch (error) {
-      toast.error('Error cargando reportes: ' + (error.response?.data?.message || error.message));
+      // toast.error('Error cargando reportes: ' + (error.response?.data?.message || error.message));
     } finally {
       setLoading(false);
     }
@@ -171,115 +172,178 @@ function Reports() {
   };
 
   return (
-    <div className="reports-container">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-        <h1>📊 Reportes y Estadísticas</h1>
+    <div className="reports-container" style={{ padding: '30px', background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)', minHeight: '100vh' }}>
+      <style>
+        {`
+          @keyframes perspective3DFlip {
+            0% {
+              opacity: 0;
+              transform: perspective(1000px) rotateY(-15deg) rotateX(10deg);
+            }
+            100% {
+              opacity: 1;
+              transform: perspective(1000px) rotateY(0deg) rotateX(0deg);
+            }
+          }
+
+          .report-header {
+            animation: perspective3DFlip 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+          }
+
+          .tabs {
+            animation: perspective3DFlip 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 0.15s both;
+          }
+
+          .stat-card {
+            animation: perspective3DFlip 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+            transition: all 0.3s ease;
+          }
+
+          .chart-container {
+            animation: perspective3DFlip 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+            transition: all 0.3s ease;
+          }
+
+          .stat-card:hover, .chart-container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(247, 49, 148, 0.2) !important;
+          }
+        `}
+      </style>
+      <div className="report-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px', background: 'white', padding: '25px', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
+        <h1 style={{ display: 'flex', alignItems: 'center', margin: 0, fontSize: '28px', color: '#333', fontWeight: '600' }}>
+          <FaChartBar style={{ marginRight: '12px', color: '#f73194', fontSize: '32px' }} />
+          Reportes y Estadísticas
+        </h1>
         <button 
           className="btn-advanced-dashboard"
           onClick={() => navigate('/reports/advanced')}
           style={{
             padding: '12px 24px',
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            background: '#f73194',
             color: 'white',
             border: 'none',
             borderRadius: '8px',
-            fontSize: '1rem',
-            fontWeight: '600',
+            fontSize: '15px',
+            fontWeight: '500',
             cursor: 'pointer',
-            boxShadow: '0 4px 15px rgba(102, 126, 234, 0.3)',
+            boxShadow: '0 2px 8px rgba(247, 49, 148, 0.3)',
             transition: 'all 0.3s ease',
             display: 'flex',
             alignItems: 'center',
             gap: '10px'
           }}
           onMouseEnter={(e) => {
-            e.target.style.transform = 'translateY(-2px)';
-            e.target.style.boxShadow = '0 6px 20px rgba(102, 126, 234, 0.4)';
+            e.target.style.transform = 'scale(1.1)';
+            e.target.style.boxShadow = '0 4px 12px rgba(247, 49, 148, 0.4)';
           }}
           onMouseLeave={(e) => {
-            e.target.style.transform = 'translateY(0)';
-            e.target.style.boxShadow = '0 4px 15px rgba(102, 126, 234, 0.3)';
+            e.target.style.transform = 'scale(1)';
+            e.target.style.boxShadow = '0 2px 8px rgba(247, 49, 148, 0.3)';
           }}
         >
           <i className="fas fa-chart-line"></i>
-          Dashboard Ejecutivo
+          Estadisticas premium
         </button>
       </div>
       
-      <div className="tabs">
+      <div className="tabs" style={{ display: 'flex', gap: '10px', marginBottom: '30px', background: 'white', padding: '15px', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)', flexWrap: 'wrap' }}>
         <button 
           className={activeTab === 'sales' ? 'active' : ''} 
           onClick={() => setActiveTab('sales')}
+          style={{ padding: '10px 20px', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '14px', fontWeight: '500', background: activeTab === 'sales' ? '#f73194' : '#f5f5f5', color: activeTab === 'sales' ? 'white' : '#666', display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.3s ease' }}
+          onMouseOver={(e) => { if (activeTab !== 'sales') { e.currentTarget.style.background = '#e0e0e0'; e.currentTarget.style.transform = 'scale(1.05)'; } }}
+          onMouseOut={(e) => { if (activeTab !== 'sales') { e.currentTarget.style.background = '#f5f5f5'; e.currentTarget.style.transform = 'scale(1)'; } }}
         >
           <i className="fas fa-chart-line"></i> Ventas
         </button>
         <button 
           className={activeTab === 'products' ? 'active' : ''} 
           onClick={() => setActiveTab('products')}
+          style={{ padding: '10px 20px', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '14px', fontWeight: '500', background: activeTab === 'products' ? '#f73194' : '#f5f5f5', color: activeTab === 'products' ? 'white' : '#666', display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.3s ease' }}
+          onMouseOver={(e) => { if (activeTab !== 'products') { e.currentTarget.style.background = '#e0e0e0'; e.currentTarget.style.transform = 'scale(1.05)'; } }}
+          onMouseOut={(e) => { if (activeTab !== 'products') { e.currentTarget.style.background = '#f5f5f5'; e.currentTarget.style.transform = 'scale(1)'; } }}
         >
           <i className="fas fa-box"></i> Productos
         </button>
         <button 
           className={activeTab === 'profits' ? 'active' : ''} 
           onClick={() => setActiveTab('profits')}
+          style={{ padding: '10px 20px', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '14px', fontWeight: '500', background: activeTab === 'profits' ? '#f73194' : '#f5f5f5', color: activeTab === 'profits' ? 'white' : '#666', display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.3s ease' }}
+          onMouseOver={(e) => { if (activeTab !== 'profits') { e.currentTarget.style.background = '#e0e0e0'; e.currentTarget.style.transform = 'scale(1.05)'; } }}
+          onMouseOut={(e) => { if (activeTab !== 'profits') { e.currentTarget.style.background = '#f5f5f5'; e.currentTarget.style.transform = 'scale(1)'; } }}
         >
           <i className="fas fa-dollar-sign"></i> Ganancias
         </button>
         <button 
           className={activeTab === 'categories' ? 'active' : ''} 
           onClick={() => setActiveTab('categories')}
+          style={{ padding: '10px 20px', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '14px', fontWeight: '500', background: activeTab === 'categories' ? '#f73194' : '#f5f5f5', color: activeTab === 'categories' ? 'white' : '#666', display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.3s ease' }}
+          onMouseOver={(e) => { if (activeTab !== 'categories') { e.currentTarget.style.background = '#e0e0e0'; e.currentTarget.style.transform = 'scale(1.05)'; } }}
+          onMouseOut={(e) => { if (activeTab !== 'categories') { e.currentTarget.style.background = '#f5f5f5'; e.currentTarget.style.transform = 'scale(1)'; } }}
         >
           <i className="fas fa-tags"></i> Categorías
         </button>
       </div>
 
       {loading ? (
-        <div className="loading">
-          <i className="fas fa-spinner fa-spin"></i> Cargando reportes...
+        <div className="loading" style={{ textAlign: 'center', padding: '80px', background: 'white', borderRadius: '16px' }}>
+          <div style={{ fontSize: '48px', color: '#f73194', marginBottom: '20px' }}>⏳</div>
+          <p style={{ fontSize: '18px', color: '#666' }}>Cargando reportes...</p>
         </div>
       ) : (
         <div className="reports-content">
           {activeTab === 'sales' && salesData && (
             <div className="sales-report">
-              <h2>📈 Reporte de Ventas</h2>
+              <h2 style={{ margin: '0 0 25px 0', fontSize: '24px', color: '#333', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <span style={{ color: '#f73194' }}>📈</span> Reporte de Ventas
+              </h2>
               
-              <div className="stats-grid">
-                <div className="stat-card">
-                  <div className="stat-icon" style={{ background: '#4CAF50' }}>
-                    <i className="fas fa-calendar-day"></i>
-                  </div>
-                  <div className="stat-info">
-                    <h3>Hoy</h3>
-                    <p className="amount">${parseFloat(salesData.day?.total || 0).toLocaleString()}</p>
-                    <span className="stat-detail">{salesData.day?.count || 0} ventas</span>
-                  </div>
-                </div>
-                <div className="stat-card">
-                  <div className="stat-icon" style={{ background: '#2196F3' }}>
-                    <i className="fas fa-calendar-week"></i>
-                  </div>
-                  <div className="stat-info">
-                    <h3>Este Mes</h3>
-                    <p className="amount">${parseFloat(salesData.month?.total || 0).toLocaleString()}</p>
-                    <span className="stat-detail">{salesData.month?.count || 0} ventas</span>
+              <div className="stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '20px', marginBottom: '30px' }}>
+                <div className="stat-card" style={{ background: 'white', padding: '25px', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', borderTop: '4px solid #4CAF50', animationDelay: '0.3s' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <div>
+                      <h3 style={{ margin: '0 0 8px 0', fontSize: '14px', color: '#999', fontWeight: '500' }}>Hoy</h3>
+                      <p className="amount" style={{ margin: '0 0 5px 0', fontSize: '28px', fontWeight: 'bold', color: '#333' }}>${parseFloat(salesData.day?.total || 0).toLocaleString()}</p>
+                      <span className="stat-detail" style={{ fontSize: '13px', color: '#666' }}>{salesData.day?.count || 0} ventas</span>
+                    </div>
+                    <div style={{ width: '60px', height: '60px', borderRadius: '12px', background: 'linear-gradient(135deg, #4CAF50 0%, #45a049 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '28px', color: 'white' }}>
+                      <i className="fas fa-calendar-day"></i>
+                    </div>
                   </div>
                 </div>
-                <div className="stat-card">
-                  <div className="stat-icon" style={{ background: '#FF9800' }}>
-                    <i className="fas fa-calendar-alt"></i>
+                <div className="stat-card" style={{ background: 'white', padding: '25px', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', borderTop: '4px solid #2196F3', animationDelay: '0.4s' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <div>
+                      <h3 style={{ margin: '0 0 8px 0', fontSize: '14px', color: '#999', fontWeight: '500' }}>Este Mes</h3>
+                      <p className="amount" style={{ margin: '0 0 5px 0', fontSize: '28px', fontWeight: 'bold', color: '#333' }}>${parseFloat(salesData.month?.total || 0).toLocaleString()}</p>
+                      <span className="stat-detail" style={{ fontSize: '13px', color: '#666' }}>{salesData.month?.count || 0} ventas</span>
+                    </div>
+                    <div style={{ width: '60px', height: '60px', borderRadius: '12px', background: 'linear-gradient(135deg, #2196F3 0%, #1976D2 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '28px', color: 'white' }}>
+                      <i className="fas fa-calendar-week"></i>
+                    </div>
                   </div>
-                  <div className="stat-info">
-                    <h3>Este Año</h3>
-                    <p className="amount">${parseFloat(salesData.year?.total || 0).toLocaleString()}</p>
-                    <span className="stat-detail">{salesData.year?.count || 0} ventas</span>
+                </div>
+                <div className="stat-card" style={{ background: 'white', padding: '25px', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', borderTop: '4px solid #FF9800', animationDelay: '0.5s' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <div>
+                      <h3 style={{ margin: '0 0 8px 0', fontSize: '14px', color: '#999', fontWeight: '500' }}>Este Año</h3>
+                      <p className="amount" style={{ margin: '0 0 5px 0', fontSize: '28px', fontWeight: 'bold', color: '#333' }}>${parseFloat(salesData.year?.total || 0).toLocaleString()}</p>
+                      <span className="stat-detail" style={{ fontSize: '13px', color: '#666' }}>{salesData.year?.count || 0} ventas</span>
+                    </div>
+                    <div style={{ width: '60px', height: '60px', borderRadius: '12px', background: 'linear-gradient(135deg, #FF9800 0%, #F57C00 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '28px', color: 'white' }}>
+                      <i className="fas fa-calendar-alt"></i>
+                    </div>
                   </div>
                 </div>
               </div>
 
               {getSalesChartData() && (
-                <div className="chart-container" style={{ height: '300px', marginTop: '30px' }}>
-                  <h3>Ventas Diarias del Mes</h3>
-                  <Line data={getSalesChartData()} options={chartOptions} />
+                <div className="chart-container" style={{ background: 'white', padding: '25px', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', animationDelay: '0.6s' }}>
+                  <h3 style={{ margin: '0 0 20px 0', fontSize: '18px', color: '#333', fontWeight: '600' }}>Ventas Diarias del Mes</h3>
+                  <div style={{ height: '300px' }}>
+                    <Line data={getSalesChartData()} options={chartOptions} />
+                  </div>
                 </div>
               )}
             </div>
@@ -287,69 +351,78 @@ function Reports() {
 
           {activeTab === 'products' && productsData && (
             <div className="products-report">
-              <h2>📦 Análisis de Productos</h2>
+              <h2 style={{ margin: '0 0 25px 0', fontSize: '24px', color: '#333', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <span style={{ color: '#f73194' }}>📦</span> Análisis de Productos
+              </h2>
               
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginTop: '20px' }}>
-                <div>
-                  <h3>🔝 Productos Más Vendidos</h3>
+                <div className="chart-container" style={{ background: 'white', padding: '25px', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', animationDelay: '0.3s' }}>
+                  <h3 style={{ margin: '0 0 15px 0', fontSize: '18px', color: '#333', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ color: '#4CAF50' }}>🔝</span> Productos Más Vendidos
+                  </h3>
                   {productsData.top.length > 0 ? (
-                    <table className="report-table">
+                    <table className="report-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
                       <thead>
-                        <tr>
-                          <th>#</th>
-                          <th>Producto</th>
-                          <th>Vendidos</th>
-                          <th>Total</th>
+                        <tr style={{ background: '#f5f5f5' }}>
+                          <th style={{ padding: '12px', textAlign: 'left', fontSize: '13px', fontWeight: '600', color: '#666' }}>#</th>
+                          <th style={{ padding: '12px', textAlign: 'left', fontSize: '13px', fontWeight: '600', color: '#666' }}>Producto</th>
+                          <th style={{ padding: '12px', textAlign: 'left', fontSize: '13px', fontWeight: '600', color: '#666' }}>Vendidos</th>
+                          <th style={{ padding: '12px', textAlign: 'left', fontSize: '13px', fontWeight: '600', color: '#666' }}>Total</th>
                         </tr>
                       </thead>
                       <tbody>
                         {productsData.top.map((product, index) => (
-                          <tr key={index}>
-                            <td>{index + 1}</td>
-                            <td>{product.product_name}</td>
-                            <td>{product.total_quantity}</td>
-                            <td>${parseFloat(product.total_revenue).toLocaleString()}</td>
+                          <tr key={index} style={{ borderBottom: '1px solid #f0f0f0' }}>
+                            <td style={{ padding: '12px', fontSize: '14px', color: '#333' }}>{index + 1}</td>
+                            <td style={{ padding: '12px', fontSize: '14px', color: '#333' }}>{product.product_name}</td>
+                            <td style={{ padding: '12px', fontSize: '14px', color: '#333' }}>{product.total_quantity}</td>
+                            <td style={{ padding: '12px', fontSize: '14px', color: '#4CAF50', fontWeight: '600' }}>${parseFloat(product.total_revenue).toLocaleString()}</td>
                           </tr>
                         ))}
                       </tbody>
                     </table>
                   ) : (
-                    <p className="empty-message">No hay datos disponibles</p>
+                    <p className="empty-message" style={{ textAlign: 'center', color: '#999', padding: '40px', fontSize: '15px' }}>No hay datos disponibles</p>
                   )}
                 </div>
 
-                <div>
+                <div className="chart-container" style={{ background: 'white', padding: '25px', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', animationDelay: '0.4s' }}>
                   {getTopProductsChartData() && (
-                    <div className="chart-container" style={{ height: '350px' }}>
-                      <Bar data={getTopProductsChartData()} options={chartOptions} />
-                    </div>
+                    <>
+                      <h3 style={{ margin: '0 0 20px 0', fontSize: '18px', color: '#333', fontWeight: '600' }}>Gráfico de Productos</h3>
+                      <div style={{ height: '350px' }}>
+                        <Bar data={getTopProductsChartData()} options={chartOptions} />
+                      </div>
+                    </>
                   )}
                 </div>
               </div>
 
-              <div style={{ marginTop: '30px' }}>
-                <h3>📉 Productos de Baja Rotación</h3>
+              <div className="chart-container" style={{ marginTop: '20px', background: 'white', padding: '25px', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', animationDelay: '0.5s' }}>
+                <h3 style={{ margin: '0 0 15px 0', fontSize: '18px', color: '#333', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ color: '#FF5722' }}>📉</span> Productos de Baja Rotación
+                </h3>
                 {productsData.low.length > 0 ? (
-                  <table className="report-table">
+                  <table className="report-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
                     <thead>
-                      <tr>
-                        <th>Producto</th>
-                        <th>Stock Actual</th>
-                        <th>Último Movimiento</th>
+                      <tr style={{ background: '#f5f5f5' }}>
+                        <th style={{ padding: '12px', textAlign: 'left', fontSize: '13px', fontWeight: '600', color: '#666' }}>Producto</th>
+                        <th style={{ padding: '12px', textAlign: 'left', fontSize: '13px', fontWeight: '600', color: '#666' }}>Stock Actual</th>
+                        <th style={{ padding: '12px', textAlign: 'left', fontSize: '13px', fontWeight: '600', color: '#666' }}>Último Movimiento</th>
                       </tr>
                     </thead>
                     <tbody>
                       {productsData.low.map((product, index) => (
-                        <tr key={index}>
-                          <td>{product.name}</td>
-                          <td>{product.stock_quantity}</td>
-                          <td>{product.last_sale ? new Date(product.last_sale).toLocaleDateString() : 'Sin movimiento'}</td>
+                        <tr key={index} style={{ borderBottom: '1px solid #f0f0f0' }}>
+                          <td style={{ padding: '12px', fontSize: '14px', color: '#333' }}>{product.name}</td>
+                          <td style={{ padding: '12px', fontSize: '14px', color: '#333' }}>{product.stock_quantity}</td>
+                          <td style={{ padding: '12px', fontSize: '14px', color: '#999' }}>{product.last_sale ? new Date(product.last_sale).toLocaleDateString() : 'Sin movimiento'}</td>
                         </tr>
                       ))}
                     </tbody>
                   </table>
                 ) : (
-                  <p className="empty-message">Todos los productos tienen buena rotación</p>
+                  <p className="empty-message" style={{ textAlign: 'center', color: '#999', padding: '40px', fontSize: '15px' }}>Todos los productos tienen buena rotación</p>
                 )}
               </div>
             </div>
@@ -357,71 +430,81 @@ function Reports() {
 
           {activeTab === 'profits' && profitData && (
             <div className="profits-report">
-              <h2>💰 Análisis de Ganancias</h2>
+              <h2 style={{ margin: '0 0 25px 0', fontSize: '24px', color: '#333', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <span style={{ color: '#f73194' }}>💰</span> Análisis de Ganancias
+              </h2>
               
-              <div className="stats-grid">
-                <div className="stat-card">
-                  <div className="stat-icon" style={{ background: '#4CAF50' }}>
-                    <i className="fas fa-money-bill-wave"></i>
-                  </div>
-                  <div className="stat-info">
-                    <h3>Ganancia Total</h3>
-                    <p className="amount">${parseFloat(profitData.general?.total_profit || 0).toLocaleString()}</p>
-                  </div>
-                </div>
-                <div className="stat-card">
-                  <div className="stat-icon" style={{ background: '#2196F3' }}>
-                    <i className="fas fa-percentage"></i>
-                  </div>
-                  <div className="stat-info">
-                    <h3>Margen Promedio</h3>
-                    <p className="amount">{parseFloat(profitData.general?.avg_profit_margin || 0).toFixed(1)}%</p>
+              <div className="stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '20px', marginBottom: '30px' }}>
+                <div className="stat-card" style={{ background: 'white', padding: '25px', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', borderTop: '4px solid #4CAF50', animationDelay: '0.3s' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <div>
+                      <h3 style={{ margin: '0 0 8px 0', fontSize: '14px', color: '#999', fontWeight: '500' }}>Ganancia Total</h3>
+                      <p className="amount" style={{ margin: '0', fontSize: '28px', fontWeight: 'bold', color: '#333' }}>${parseFloat(profitData.general?.total_profit || 0).toLocaleString()}</p>
+                    </div>
+                    <div style={{ width: '60px', height: '60px', borderRadius: '12px', background: 'linear-gradient(135deg, #4CAF50 0%, #45a049 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '28px', color: 'white' }}>
+                      <i className="fas fa-money-bill-wave"></i>
+                    </div>
                   </div>
                 </div>
-                <div className="stat-card">
-                  <div className="stat-icon" style={{ background: '#FF9800' }}>
-                    <i className="fas fa-chart-line"></i>
+                <div className="stat-card" style={{ background: 'white', padding: '25px', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', borderTop: '4px solid #2196F3', animationDelay: '0.4s' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <div>
+                      <h3 style={{ margin: '0 0 8px 0', fontSize: '14px', color: '#999', fontWeight: '500' }}>Margen Promedio</h3>
+                      <p className="amount" style={{ margin: '0', fontSize: '28px', fontWeight: 'bold', color: '#333' }}>{parseFloat(profitData.general?.avg_profit_margin || 0).toFixed(1)}%</p>
+                    </div>
+                    <div style={{ width: '60px', height: '60px', borderRadius: '12px', background: 'linear-gradient(135deg, #2196F3 0%, #1976D2 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '28px', color: 'white' }}>
+                      <i className="fas fa-percentage"></i>
+                    </div>
                   </div>
-                  <div className="stat-info">
-                    <h3>ROI</h3>
-                    <p className="amount">{parseFloat(profitData.general?.roi || 0).toFixed(1)}%</p>
+                </div>
+                <div className="stat-card" style={{ background: 'white', padding: '25px', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', borderTop: '4px solid #FF9800', animationDelay: '0.5s' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <div>
+                      <h3 style={{ margin: '0 0 8px 0', fontSize: '14px', color: '#999', fontWeight: '500' }}>ROI</h3>
+                      <p className="amount" style={{ margin: '0', fontSize: '28px', fontWeight: 'bold', color: '#333' }}>{parseFloat(profitData.general?.roi || 0).toFixed(1)}%</p>
+                    </div>
+                    <div style={{ width: '60px', height: '60px', borderRadius: '12px', background: 'linear-gradient(135deg, #FF9800 0%, #F57C00 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '28px', color: 'white' }}>
+                      <i className="fas fa-chart-line"></i>
+                    </div>
                   </div>
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginTop: '30px' }}>
-                <div>
-                  <h3>💎 Top Productos por Ganancia</h3>
-                  {profitData.byProduct.length > 0 ? (
-                    <table className="report-table">
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                <div className="chart-container" style={{ background: 'white', padding: '25px', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', animationDelay: '0.6s' }}>
+                  <h3 style={{ margin: '0 0 15px 0', fontSize: '18px', color: '#333', fontWeight: '600' }}>Top 10 Productos por Ganancia</h3>
+                  {profitData.byProduct && profitData.byProduct.length > 0 ? (
+                    <table className="report-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
                       <thead>
-                        <tr>
-                          <th>Producto</th>
-                          <th>Ganancia</th>
-                          <th>Margen</th>
+                        <tr style={{ background: '#f5f5f5' }}>
+                          <th style={{ padding: '12px', textAlign: 'left', fontSize: '13px', fontWeight: '600', color: '#666' }}>Producto</th>
+                          <th style={{ padding: '12px', textAlign: 'left', fontSize: '13px', fontWeight: '600', color: '#666' }}>Ganancia</th>
+                          <th style={{ padding: '12px', textAlign: 'left', fontSize: '13px', fontWeight: '600', color: '#666' }}>Margen</th>
                         </tr>
                       </thead>
                       <tbody>
                         {profitData.byProduct.slice(0, 10).map((product, index) => (
-                          <tr key={index}>
-                            <td>{product.product_name}</td>
-                            <td>${parseFloat(product.total_profit).toLocaleString()}</td>
-                            <td>{parseFloat(product.profit_margin).toFixed(1)}%</td>
+                          <tr key={index} style={{ borderBottom: '1px solid #f0f0f0' }}>
+                            <td style={{ padding: '12px', fontSize: '14px', color: '#333' }}>{product.product_name}</td>
+                            <td style={{ padding: '12px', fontSize: '14px', color: '#4CAF50', fontWeight: '600' }}>${parseFloat(product.total_profit).toLocaleString()}</td>
+                            <td style={{ padding: '12px', fontSize: '14px', color: '#2196F3', fontWeight: '600' }}>{parseFloat(product.profit_margin).toFixed(1)}%</td>
                           </tr>
                         ))}
                       </tbody>
                     </table>
                   ) : (
-                    <p className="empty-message">No hay datos disponibles</p>
+                    <p className="empty-message" style={{ textAlign: 'center', color: '#999', padding: '40px', fontSize: '15px' }}>No hay datos disponibles</p>
                   )}
                 </div>
 
-                <div>
+                <div className="chart-container" style={{ background: 'white', padding: '25px', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', animationDelay: '0.7s' }}>
                   {getProfitByCategoryChartData() && (
-                    <div className="chart-container" style={{ height: '350px' }}>
-                      <h3>Ganancias por Categoría</h3>
-                      <Pie data={getProfitByCategoryChartData()} options={chartOptions} />
-                    </div>
+                    <>
+                      <h3 style={{ margin: '0 0 20px 0', fontSize: '18px', color: '#333', fontWeight: '600' }}>Ganancias por Categoría</h3>
+                      <div style={{ height: '350px' }}>
+                        <Pie data={getProfitByCategoryChartData()} options={chartOptions} />
+                      </div>
+                    </>
                   )}
                 </div>
               </div>
@@ -430,37 +513,50 @@ function Reports() {
 
           {activeTab === 'categories' && categoriesData && (
             <div className="categories-report">
-              <h2>🏷️ Rotación de Categorías</h2>
+              <h2 style={{ margin: '0 0 25px 0', fontSize: '24px', color: '#333', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <span style={{ color: '#f73194' }}>🏷️</span> Rotación de Categorías
+              </h2>
               
               {categoriesData.length > 0 ? (
-                <table className="report-table">
-                  <thead>
-                    <tr>
-                      <th>Categoría</th>
-                      <th>Total Vendido</th>
-                      <th>Stock Actual</th>
-                      <th>Rotación</th>
-                      <th>Días para Vender</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {categoriesData.map((cat, index) => (
-                      <tr key={index}>
-                        <td>{cat.category_name}</td>
-                        <td>${parseFloat(cat.total_sold).toLocaleString()}</td>
-                        <td>{cat.current_stock}</td>
-                        <td>
-                          <span className={`badge ${cat.rotation_rate > 5 ? 'success' : cat.rotation_rate > 2 ? 'warning' : 'danger'}`}>
-                            {parseFloat(cat.rotation_rate).toFixed(1)}x
-                          </span>
-                        </td>
-                        <td>{cat.days_to_sell || 'N/A'} días</td>
+                <div className="chart-container" style={{ background: 'white', padding: '25px', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', animationDelay: '0.3s' }}>
+                  <table className="report-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
+                    <thead>
+                      <tr style={{ background: '#f5f5f5' }}>
+                        <th style={{ padding: '12px', textAlign: 'left', fontSize: '13px', fontWeight: '600', color: '#666' }}>Categoría</th>
+                        <th style={{ padding: '12px', textAlign: 'left', fontSize: '13px', fontWeight: '600', color: '#666' }}>Total Vendido</th>
+                        <th style={{ padding: '12px', textAlign: 'left', fontSize: '13px', fontWeight: '600', color: '#666' }}>Stock Actual</th>
+                        <th style={{ padding: '12px', textAlign: 'left', fontSize: '13px', fontWeight: '600', color: '#666' }}>Rotación</th>
+                        <th style={{ padding: '12px', textAlign: 'left', fontSize: '13px', fontWeight: '600', color: '#666' }}>Días para Vender</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {categoriesData.map((cat, index) => (
+                        <tr key={index} style={{ borderBottom: '1px solid #f0f0f0' }}>
+                          <td style={{ padding: '12px', fontSize: '14px', color: '#333', fontWeight: '600' }}>{cat.category_name}</td>
+                          <td style={{ padding: '12px', fontSize: '14px', color: '#4CAF50', fontWeight: '600' }}>${parseFloat(cat.total_sold).toLocaleString()}</td>
+                          <td style={{ padding: '12px', fontSize: '14px', color: '#333' }}>{cat.current_stock}</td>
+                          <td style={{ padding: '12px' }}>
+                            <span style={{ 
+                              padding: '4px 12px', 
+                              borderRadius: '12px', 
+                              fontSize: '13px', 
+                              fontWeight: '600',
+                              background: cat.rotation_rate > 5 ? '#E8F5E9' : cat.rotation_rate > 2 ? '#FFF3E0' : '#FFEBEE',
+                              color: cat.rotation_rate > 5 ? '#4CAF50' : cat.rotation_rate > 2 ? '#FF9800' : '#F44336'
+                            }}>
+                              {parseFloat(cat.rotation_rate).toFixed(1)}x
+                            </span>
+                          </td>
+                          <td style={{ padding: '12px', fontSize: '14px', color: '#999' }}>{cat.days_to_sell || 'N/A'} días</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               ) : (
-                <p className="empty-message">No hay datos de categorías disponibles</p>
+                <div className="chart-container" style={{ background: 'white', padding: '25px', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', animationDelay: '0.3s' }}>
+                  <p className="empty-message" style={{ textAlign: 'center', color: '#999', padding: '40px', fontSize: '15px' }}>No hay datos de categorías disponibles</p>
+                </div>
               )}
             </div>
           )}
