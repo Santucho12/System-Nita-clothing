@@ -23,7 +23,7 @@ const Categories = () => {
       const response = await categoryService.getAll();
       setCategories(response.data || []);
     } catch (error) {
-      // toast.error('Error cargando categorías: ' + error.message);
+      toast.error('Error cargando categorías: ' + error.message);
     } finally {
       setLoading(false);
     }
@@ -34,10 +34,10 @@ const Categories = () => {
     const newStatus = category.status === 'activa' ? 'inactiva' : 'activa';
     try {
       await categoryService.changeStatus(category.id, newStatus);
-      // toast.success(`Categoría ${newStatus === 'activa' ? 'activada' : 'desactivada'} correctamente`);
+      toast.success(`Categoría ${newStatus === 'activa' ? 'activada' : 'desactivada'} correctamente`);
       loadCategories();
     } catch (error) {
-      // toast.error('Error cambiando estado: ' + error.message);
+      toast.error('Error cambiando estado: ' + error.message);
     }
   };
 
@@ -53,17 +53,17 @@ const Categories = () => {
     e.preventDefault();
     
     if (!formData.name.trim()) {
-      // toast.error('El nombre de la categoría es requerido');
+      toast.error('El nombre de la categoría es requerido');
       return;
     }
 
     try {
       if (editingCategory) {
         await categoryService.update(editingCategory.id, formData);
-        // toast.success('Categoría actualizada exitosamente');
+        toast.success('Categoría actualizada exitosamente');
       } else {
         await categoryService.create(formData);
-        // toast.success('Categoría creada exitosamente');
+        toast.success('Categoría creada exitosamente');
       }
       
       setFormData({ name: '', description: '' });
@@ -71,7 +71,7 @@ const Categories = () => {
       setEditingCategory(null);
       loadCategories();
     } catch (error) {
-      // toast.error('Error: ' + error.message);
+      toast.error('Error: ' + error.message);
     }
   };
 
@@ -88,10 +88,10 @@ const Categories = () => {
     if (window.confirm('¿Estás seguro de que quieres eliminar esta categoría?')) {
       try {
         await categoryService.delete(id);
-        // toast.success('Categoría eliminada exitosamente');
+        toast.success('Categoría eliminada exitosamente');
         loadCategories();
       } catch (error) {
-        // toast.error('Error eliminando categoría: ' + error.message);
+        toast.error('Error eliminando categoría: ' + error.message);
       }
     }
   };

@@ -32,6 +32,8 @@ const imageRoutes = require('./routes/images');
 const exportRoutes = require('./routes/exports');
 // Rutas de logs de actividad
 const activityLogRoutes = require('./routes/activityLogs');
+// Rutas de reportes
+const reportRoutes = require('./routes/reports');
 // WebSocket
 const { initWebSocket } = require('./utils/websocket');
 
@@ -65,6 +67,7 @@ app.use('/api/ordenes-compra', purchaseOrderRoutes);
 app.use('/api/images', imageRoutes);
 app.use('/api/export', exportRoutes);
 app.use('/api/activity-logs', activityLogRoutes);
+app.use('/api/reportes', reportRoutes);
 
 // Ruta de salud del servidor
 app.get('/health', (req, res) => {

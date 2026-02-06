@@ -82,7 +82,7 @@ const ExchangeReturns = () => {
       setExchangeReturns(response.data.data || []);
     } catch (error) {
       console.error('Error al cargar cambios/devoluciones:', error);
-      // toast.error('Error al cargar cambios/devoluciones');
+      toast.error('Error al cargar cambios/devoluciones');
     } finally {
       setLoading(false);
     }
@@ -103,7 +103,7 @@ const ExchangeReturns = () => {
       setSales(response.data.sales || []);
     } catch (error) {
       console.error('Error al cargar ventas:', error);
-      // toast.error('Error al cargar ventas del cliente');
+      toast.error('Error al cargar ventas del cliente');
     }
   };
 
@@ -180,13 +180,13 @@ const ExchangeReturns = () => {
 
   const handleAddItem = () => {
     if (!currentItem.product_id || currentItem.quantity <= 0) {
-      // toast.warning('Debe seleccionar un producto y cantidad válida');
+      toast.warning('Debe seleccionar un producto y cantidad válida');
       return;
     }
 
     const product = products.find(p => p.id === parseInt(currentItem.product_id));
     if (!product) {
-      // toast.error('Producto no encontrado');
+      toast.error('Producto no encontrado');
       return;
     }
 
@@ -213,7 +213,7 @@ const ExchangeReturns = () => {
       subtotal: 0
     });
 
-    // toast.success('Item agregado');
+    toast.success('Item agregado');
   };
 
   const handleRemoveItem = (index) => {
@@ -222,26 +222,26 @@ const ExchangeReturns = () => {
       ...formData,
       items: newItems
     });
-    // toast.info('Item removido');
+    toast.info('Item removido');
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (formData.items.length === 0) {
-      // toast.warning('Debe agregar al menos un item');
+      toast.warning('Debe agregar al menos un item');
       return;
     }
 
     if (!formData.original_sale_id) {
-      // toast.warning('Debe seleccionar la venta original');
+      toast.warning('Debe seleccionar la venta original');
       return;
     }
 
     try {
       setLoading(true);
       await api.post('/cambios-devoluciones', formData);
-      // toast.success('Cambio/devolución registrado exitosamente');
+      toast.success('Cambio/devolución registrado exitosamente');
       
       // Reset form
       setFormData({
@@ -260,7 +260,7 @@ const ExchangeReturns = () => {
       fetchExchangeReturns();
     } catch (error) {
       console.error('Error al registrar:', error);
-      // toast.error(error.response?.data?.error || 'Error al registrar cambio/devolución');
+      toast.error(error.response?.data?.error || 'Error al registrar cambio/devolución');
     } finally {
       setLoading(false);
     }
@@ -275,7 +275,7 @@ const ExchangeReturns = () => {
         status: newStatus,
         approval_notes: notes || ''
       });
-      // toast.success(`Estado actualizado a ${newStatus}`);
+      toast.success(`Estado actualizado a ${newStatus}`);
       fetchExchangeReturns();
       if (showDetailModal) {
         const response = await api.get(`/cambios-devoluciones/${id}`);
@@ -283,7 +283,7 @@ const ExchangeReturns = () => {
       }
     } catch (error) {
       console.error('Error al actualizar estado:', error);
-      // toast.error(error.response?.data?.error || 'Error al actualizar estado');
+      toast.error(error.response?.data?.error || 'Error al actualizar estado');
     } finally {
       setLoading(false);
     }
@@ -295,12 +295,12 @@ const ExchangeReturns = () => {
     try {
       setLoading(true);
       await api.delete(`/cambios-devoluciones/${id}`);
-      // toast.success('Cambio/devolución eliminado');
+      toast.success('Cambio/devolución eliminado');
       fetchExchangeReturns();
       setShowDetailModal(false);
     } catch (error) {
       console.error('Error al eliminar:', error);
-      // toast.error(error.response?.data?.error || 'Error al eliminar');
+      toast.error(error.response?.data?.error || 'Error al eliminar');
     } finally {
       setLoading(false);
     }
@@ -314,7 +314,7 @@ const ExchangeReturns = () => {
       setShowDetailModal(true);
     } catch (error) {
       console.error('Error al cargar detalle:', error);
-      // toast.error('Error al cargar detalle');
+      toast.error('Error al cargar detalle');
     } finally {
       setLoading(false);
     }

@@ -115,6 +115,16 @@ export const reportsService = {
         } catch (error) {
             throw error.response?.data || { message: 'Error al obtener reporte de rendimiento' };
         }
+    },
+
+    // Obtener valor del inventario (Capital en Ropa)
+    getInventoryValue: async () => {
+        try {
+            const response = await api.get('/reportes/inventory-value');
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || { message: 'Error al obtener valor del inventario' };
+        }
     }
 };
 

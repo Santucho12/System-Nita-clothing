@@ -121,7 +121,7 @@ class SaleController {
     static async createSale(req, res) {
         try {
             // Permitir ventas con múltiples items (carrito)
-            const { items, customer_name, payment_method, discount_percent, discount_amount } = req.body;
+            const { items, customer_name, customer_email, payment_method, discount_percent, discount_amount } = req.body;
             if (!Array.isArray(items) || items.length === 0) {
                 return res.status(400).json({
                     success: false,
@@ -159,10 +159,12 @@ class SaleController {
                 discount_amount: discount_amount || 0,
                 total,
                 customer_name: customer_name || null,
+                customer_email: customer_email || null,
                 payment_method: payment_method || 'efectivo',
             };
             // Usar método extendido en Sale para ventas con items
-            const newSale = await Sale.createWithItems(saleData, items);
+            // IMPORTANTE: Pasar customer_email como tercer parámetro para integración automática
+            const newSale = await Sale.createWithItems(saleData, items, customer_email);
             
             // Notificar nueva venta en tiempo real
             notificationHelper.notifyNewSale(newSale);

@@ -12,7 +12,7 @@ import {
 const Dashboard = () => {
   const [stats, setStats] = useState({
     totalProducts: 0,
-    totalCategories: 0,
+    inventoryValue: 0,
     monthlyRevenue: 0,
     monthlySales: 0
   });
@@ -27,22 +27,22 @@ const Dashboard = () => {
     try {
       setLoading(true);
       
-      // Cargar productos, categorías, estadísticas de ventas y productos más vendidos
-      const [productsResponse, categoriesResponse, monthlyStatsResponse, topProductsResponse] = await Promise.all([
+      // Cargar productos, valor del inventario, estadísticas de ventas y productos más vendidos
+      const [productsResponse, inventoryValueResponse, monthlyStatsResponse, topProductsResponse] = await Promise.all([
         productService.getAll(),
-        categoryService.getAll(),
+        reportsService.getInventoryValue(),
         reportsService.getMonthlyStats(),
         reportsService.getTopProducts(5)
       ]);
 
       const products = productsResponse.data || [];
-      const categories = categoriesResponse.data || [];
+      const inventoryData = inventoryValueResponse.data || {};
       const monthlyStats = monthlyStatsResponse.data || {};
       const topProductsData = topProductsResponse.data || [];
 
       setStats({
         totalProducts: products.length,
-        totalCategories: categories.length,
+        inventoryValue: inventoryData.total_value || 0,
         monthlyRevenue: monthlyStats.total_revenue || 0,
         monthlySales: monthlyStats.total_sales || 0
       });
@@ -50,7 +50,7 @@ const Dashboard = () => {
       setTopProducts(topProductsData);
 
     } catch (error) {
-      // toast.error('Error cargando datos del dashboard: ' + error.message);
+      toast.error('Error cargando datos del dashboard: ' + error.message);
       console.log('Error cargando datos del dashboard:', error.message);
     } finally {
       setLoading(false);
@@ -123,13 +123,13 @@ const Dashboard = () => {
           }
 
           .btn-gray {
-            background: #6c757d;
+            background: #343a40;
             transition: all 0.3s ease;
           }
 
           .btn-gray:hover {
             transform: scale(1.1) !important;
-            background: #6c757d !important;
+            background: #23272b !important;
           }
 
           .product-item {
@@ -155,7 +155,7 @@ const Dashboard = () => {
       {/* Estadísticas principales */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px', marginBottom: '30px' }}>
         {/* Total Productos */}
-        <div className="stat-card" style={{ background: 'white', borderRadius: '12px', padding: '20px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', borderTop: '4px solid #f73194', animationDelay: '0.1s', textAlign: 'center' }}>
+        <div className="stat-card" style={{ background: 'white', borderRadius: '12px', padding: '20px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', animationDelay: '0.1s', textAlign: 'center' }}>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '12px' }}>
             <div style={{ background: 'linear-gradient(135deg, #f73194 0%, #ff6b9d 100%)', width: '50px', height: '50px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '10px' }}>
               <FaTshirt style={{ fontSize: '24px', color: 'white' }} />
@@ -165,9 +165,9 @@ const Dashboard = () => {
           </div>
           <Link 
             to="/products" 
-            style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 10px', background: '#f8f9fa', borderRadius: '6px', textDecoration: 'none', color: '#f73194', fontWeight: '500', fontSize: '11px', transition: 'all 0.3s' }}
-            onMouseOver={(e) => e.currentTarget.style.background = '#e9ecef'}
-            onMouseOut={(e) => e.currentTarget.style.background = '#f8f9fa'}
+            style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 10px', background: 'rgba(108, 117, 125, 0.14)', borderRadius: '6px', textDecoration: 'none', color: '#f73194', fontWeight: '500', fontSize: '11px', transition: 'all 0.3s' }}
+            onMouseOver={(e) => e.currentTarget.style.background = 'rgba(108, 117, 125, 0.25)'}
+            onMouseOut={(e) => e.currentTarget.style.background = 'rgba(108, 117, 125, 0.14)'}
           >
             Ver productos
             <FaArrowRight style={{ fontSize: '10px' }} />
@@ -175,27 +175,27 @@ const Dashboard = () => {
         </div>
 
         {/* Capital */}
-        <div className="stat-card" style={{ background: 'white', borderRadius: '12px', padding: '20px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', borderTop: '4px solid #f73194', animationDelay: '0.2s', textAlign: 'center' }}>
+        <div className="stat-card" style={{ background: 'white', borderRadius: '12px', padding: '20px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', animationDelay: '0.2s', textAlign: 'center' }}>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '12px' }}>
             <div style={{ background: 'linear-gradient(135deg, #f73194 0%, #ff6b9d 100%)', width: '50px', height: '50px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '10px' }}>
               <FaStore style={{ fontSize: '24px', color: 'white' }} />
             </div>
-            <h3 style={{ margin: '0 0 4px 0', fontSize: '28px', fontWeight: '700', color: '#f73194' }}>{stats.totalCategories}</h3>
+            <h3 style={{ margin: '0 0 4px 0', fontSize: '28px', fontWeight: '700', color: '#f73194' }}>${parseFloat(stats.inventoryValue || 0).toFixed(2)}</h3>
             <p style={{ margin: 0, fontSize: '13px', color: '#666', fontWeight: '500', minHeight: '32px', display: 'flex', alignItems: 'center' }}>Capital en Ropa</p>
           </div>
           <Link 
-            to="/categories" 
-            style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 10px', background: '#f8f9fa', borderRadius: '6px', textDecoration: 'none', color: '#f73194', fontWeight: '500', fontSize: '11px', transition: 'all 0.3s' }}
-            onMouseOver={(e) => e.currentTarget.style.background = '#e9ecef'}
-            onMouseOut={(e) => e.currentTarget.style.background = '#f8f9fa'}
+            to="/products" 
+            style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 10px', background: 'rgba(108, 117, 125, 0.14)', borderRadius: '6px', textDecoration: 'none', color: '#f73194', fontWeight: '500', fontSize: '11px', transition: 'all 0.3s' }}
+            onMouseOver={(e) => e.currentTarget.style.background = 'rgba(108, 117, 125, 0.25)'}
+            onMouseOut={(e) => e.currentTarget.style.background = 'rgba(108, 117, 125, 0.14)'}
           >
-            Ver capital
+            Ver inventario
             <FaArrowRight style={{ fontSize: '10px' }} />
           </Link>
         </div>
 
         {/* Ventas del Mes */}
-        <div className="stat-card" style={{ background: 'white', borderRadius: '12px', padding: '20px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', borderTop: '4px solid #f73194', animationDelay: '0.3s', textAlign: 'center' }}>
+        <div className="stat-card" style={{ background: 'white', borderRadius: '12px', padding: '20px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', animationDelay: '0.3s', textAlign: 'center' }}>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '12px' }}>
             <div style={{ background: 'linear-gradient(135deg, #f73194 0%, #ff6b9d 100%)', width: '50px', height: '50px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '10px' }}>
               <FaShoppingCart style={{ fontSize: '24px', color: 'white' }} />
@@ -205,9 +205,9 @@ const Dashboard = () => {
           </div>
           <Link 
             to="/reports" 
-            style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 10px', background: '#f8f9fa', borderRadius: '6px', textDecoration: 'none', color: '#f73194', fontWeight: '500', fontSize: '11px', transition: 'all 0.3s' }}
-            onMouseOver={(e) => e.currentTarget.style.background = '#e9ecef'}
-            onMouseOut={(e) => e.currentTarget.style.background = '#f8f9fa'}
+            style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 10px', background: 'rgba(108, 117, 125, 0.14)', borderRadius: '6px', textDecoration: 'none', color: '#f73194', fontWeight: '500', fontSize: '11px', transition: 'all 0.3s' }}
+            onMouseOver={(e) => e.currentTarget.style.background = 'rgba(108, 117, 125, 0.25)'}
+            onMouseOut={(e) => e.currentTarget.style.background = 'rgba(108, 117, 125, 0.14)'}
           >
             Ver ventas
             <FaArrowRight style={{ fontSize: '10px' }} />
@@ -215,7 +215,7 @@ const Dashboard = () => {
         </div>
 
         {/* Facturación */}
-        <div className="stat-card" style={{ background: 'white', borderRadius: '12px', padding: '20px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', borderTop: '4px solid #f73194', animationDelay: '0.4s', textAlign: 'center' }}>
+        <div className="stat-card" style={{ background: 'white', borderRadius: '12px', padding: '20px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', animationDelay: '0.4s', textAlign: 'center' }}>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '12px' }}>
             <div style={{ background: 'linear-gradient(135deg, #f73194 0%, #ff6b9d 100%)', width: '50px', height: '50px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '10px' }}>
               <FaDollarSign style={{ fontSize: '24px', color: 'white' }} />
@@ -225,9 +225,9 @@ const Dashboard = () => {
           </div>
           <Link 
             to="/reports" 
-            style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 10px', background: '#f8f9fa', borderRadius: '6px', textDecoration: 'none', color: '#f73194', fontWeight: '500', fontSize: '11px', transition: 'all 0.3s' }}
-            onMouseOver={(e) => e.currentTarget.style.background = '#e9ecef'}
-            onMouseOut={(e) => e.currentTarget.style.background = '#f8f9fa'}
+            style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 10px', background: 'rgba(108, 117, 125, 0.14)', borderRadius: '6px', textDecoration: 'none', color: '#f73194', fontWeight: '500', fontSize: '11px', transition: 'all 0.3s' }}
+            onMouseOver={(e) => e.currentTarget.style.background = 'rgba(108, 117, 125, 0.25)'}
+            onMouseOut={(e) => e.currentTarget.style.background = 'rgba(108, 117, 125, 0.14)'}
           >
             Ver reportes
             <FaArrowRight style={{ fontSize: '10px' }} />

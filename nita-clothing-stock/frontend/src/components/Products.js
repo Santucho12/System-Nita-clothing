@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { productService, categoryService } from '../services/api';
+import { productService, categoryService, supplierService } from '../services/api';
 import { toast } from 'react-toastify';
-import { exportToExcel, formatProductsForExport } from '../utils/exportUtils';
 import { 
   FaTshirt, FaPlus, FaEdit, FaTrash, FaCopy, FaSearch, FaFilter, 
   FaFileExcel, FaTimes, FaBox, FaDollarSign, FaBarcode, FaTag,
@@ -12,6 +11,7 @@ import {
 const Products = () => {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [suppliers, setSuppliers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
@@ -37,6 +37,12 @@ const Products = () => {
   });
   const [showDetail, setShowDetail] = useState(false);
   const [detailProduct, setDetailProduct] = useState(null);
+  const [showExportModal, setShowExportModal] = useState(false);
+  const [showCategoryForm, setShowCategoryForm] = useState(false);
+  const [categoryFormData, setCategoryFormData] = useState({
+    name: '',
+    description: ''
+  });
 
   // Cargar datos al montar el componente
   useEffect(() => {
@@ -55,9 +61,9 @@ const Products = () => {
   const loadInitialData = async () => {
     try {
       setLoading(true);
-      await Promise.all([loadProducts(), loadCategories()]);
+      await Promise.all([loadProducts(), loadCategories(), loadSuppliers()]);
     } catch (error) {
-      // toast.error('Error cargando datos iniciales');
+      toast.error('Error cargando datos iniciales');
     } finally {
       setLoading(false);
     }
@@ -68,7 +74,7 @@ const Products = () => {
       const response = await productService.getAll();
       setProducts(response.data || []);
     } catch (error) {
-      // toast.error('Error cargando productos: ' + error.message);
+      toast.error('Error cargando productos: ' + error.message);
     }
   };
 
@@ -77,7 +83,16 @@ const Products = () => {
       const response = await categoryService.getAll();
       setCategories(response.data || []);
     } catch (error) {
-      // toast.error('Error cargando categorías: ' + error.message);
+      toast.error('Error cargando categorías: ' + error.message);
+    }
+  };
+
+  const loadSuppliers = async () => {
+    try {
+      const response = await supplierService.getAll();
+      setSuppliers(response.data || []);
+    } catch (error) {
+      toast.error('Error cargando proveedores: ' + error.message);
     }
   };
 
@@ -86,10 +101,10 @@ const Products = () => {
     if (!window.confirm(`¿Cambiar estado a "${newStatus}"?`)) return;
     try {
       await productService.changeStatus(product.id, newStatus);
-      // toast.success('Estado actualizado');
+      toast.success('Estado actualizado');
       loadProducts();
     } catch (error) {
-      // toast.error('Error cambiando estado: ' + error.message);
+      toast.error('Error cambiando estado: ' + error.message);
     }
   };
 
@@ -112,7 +127,7 @@ const Products = () => {
       if (selectedStatus) filtered = filtered.filter(p => p.status === selectedStatus);
       setProducts(filtered);
     } catch (error) {
-      // toast.error('Error filtrando productos: ' + error.message);
+      toast.error('Error filtrando productos: ' + error.message);
     }
   };
 
@@ -135,27 +150,27 @@ const Products = () => {
     e.preventDefault();
     // Validaciones mínimas
     if (!formData.name.trim() || !formData.color.trim() || !formData.category_id) {
-      // toast.error('Nombre, color y categoría son requeridos');
+      toast.error('Nombre, color y categoría son requeridos');
       return;
     }
     if (formData.quantity === '' || parseInt(formData.quantity) < 0) {
-      // toast.error('La cantidad debe ser un número mayor o igual a 0');
+      toast.error('La cantidad debe ser un número mayor o igual a 0');
       return;
     }
     if (!formData.size.trim()) {
-      // toast.error('El talle es requerido');
+      toast.error('El talle es requerido');
       return;
     }
     if (!formData.sale_price || isNaN(parseFloat(formData.sale_price))) {
-      // toast.error('Precio de venta requerido');
+      toast.error('Precio de venta requerido');
       return;
     }
     if (!formData.cost_price || isNaN(parseFloat(formData.cost_price))) {
-      // toast.error('Precio de costo requerido');
+      toast.error('Precio de costo requerido');
       return;
     }
     if (!formData.min_stock || isNaN(parseInt(formData.min_stock))) {
-      // toast.error('Stock mínimo requerido');
+      toast.error('Stock mínimo requerido');
       return;
     }
     // supplier_id puede ser opcional por ahora
@@ -172,15 +187,15 @@ const Products = () => {
       };
       if (editingProduct) {
         await productService.update(editingProduct.id, productData);
-        // toast.success('Producto actualizado exitosamente');
+        toast.success('Producto actualizado exitosamente');
       } else {
         await productService.create(productData);
-        // toast.success('Producto creado exitosamente');
+        toast.success('Producto creado exitosamente');
       }
       resetForm();
       loadProducts();
     } catch (error) {
-      // toast.error('Error: ' + error.message);
+      toast.error('Error: ' + error.message);
     }
   };
 
@@ -189,10 +204,10 @@ const Products = () => {
     if (!window.confirm('¿Deseas duplicar este producto?')) return;
     try {
       await productService.duplicate(product.id);
-      // toast.success('Producto duplicado exitosamente');
+      toast.success('Producto duplicado exitosamente');
       loadProducts();
     } catch (error) {
-      // toast.error('Error duplicando producto: ' + error.message);
+      toast.error('Error duplicando producto: ' + error.message);
     }
   };
 
@@ -230,10 +245,10 @@ const Products = () => {
     if (window.confirm('¿Estás seguro de que quieres eliminar este producto?')) {
       try {
         await productService.delete(id);
-        // toast.success('Producto eliminado exitosamente');
+        toast.success('Producto eliminado exitosamente');
         loadProducts();
       } catch (error) {
-        // toast.error('Error eliminando producto: ' + error.message);
+        toast.error('Error eliminando producto: ' + error.message);
       }
     }
   };
@@ -244,16 +259,16 @@ const Products = () => {
     if (newQuantity !== null) {
       const quantity = parseInt(newQuantity);
       if (isNaN(quantity) || quantity < 0) {
-        // toast.error('La cantidad debe ser un número mayor o igual a 0');
+        toast.error('La cantidad debe ser un número mayor o igual a 0');
         return;
       }
 
       try {
         await productService.updateStock(productId, quantity);
-        // toast.success('Stock actualizado exitosamente');
+        toast.success('Stock actualizado exitosamente');
         loadProducts();
       } catch (error) {
-        // toast.error('Error actualizando stock: ' + error.message);
+        toast.error('Error actualizando stock: ' + error.message);
       }
     }
   };
@@ -300,16 +315,36 @@ const Products = () => {
     );
   };
 
-  // Exportar productos a Excel
+  // Mostrar modal de funcionalidad próxima
   const handleExport = () => {
-    if (products.length === 0) {
-      // toast.warning('No hay productos para exportar');
+    setShowExportModal(true);
+  };
+
+  // Manejar creación de categoría
+  const handleCategorySubmit = async (e) => {
+    e.preventDefault();
+    if (!categoryFormData.name.trim()) {
+      toast.warning('El nombre de la categoría es requerido');
       return;
     }
-    const formattedData = formatProductsForExport(products);
-    const filename = `productos_${new Date().toISOString().split('T')[0]}.xlsx`;
-    exportToExcel(formattedData, filename, 'Productos');
-    // toast.success('Productos exportados exitosamente');
+
+    try {
+      await categoryService.create(categoryFormData);
+      toast.success('Categoría creada exitosamente');
+      setCategoryFormData({ name: '', description: '' });
+      setShowCategoryForm(false);
+      loadCategories();
+    } catch (error) {
+      toast.error('Error creando categoría: ' + error.message);
+    }
+  };
+
+  const handleCategoryInputChange = (e) => {
+    const { name, value } = e.target;
+    setCategoryFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
   };
 
   return (
@@ -462,19 +497,30 @@ const Products = () => {
               <FaTag style={{ marginRight: '6px', color: '#f73194' }} />
               Categoría
             </label>
-            <select
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-              className="filter-select"
-              style={{ width: '100%', padding: '10px 14px', border: '2px solid #e0e0e0', borderRadius: '8px', fontSize: '14px', background: '#fafafa', cursor: 'pointer' }}
-            >
-              <option value="">Todas</option>
-              {categories.map(category => (
-                <option key={category.id} value={category.id}>
-                  {category.name}
-                </option>
-              ))}
-            </select>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <select
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+                className="filter-select"
+                style={{ flex: 1, padding: '10px 14px', border: '2px solid #e0e0e0', borderRadius: '8px', fontSize: '14px', background: '#fafafa', cursor: 'pointer' }}
+              >
+                <option value="">Todas</option>
+                {categories.map(category => (
+                  <option key={category.id} value={category.id}>
+                    {category.name}
+                  </option>
+                ))}
+              </select>
+              <button
+                onClick={() => setShowCategoryForm(true)}
+                title="Nueva categoría"
+                style={{ padding: '10px 12px', background: '#f73194', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '16px', fontWeight: 'bold', transition: 'all 0.3s' }}
+                onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+                onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
+              >
+                +
+              </button>
+            </div>
           </div>
 
           {/* Talle */}
@@ -720,16 +766,20 @@ const Products = () => {
                 </div>
                 <div>
                   <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', fontSize: '14px', color: '#555' }}>Proveedor</label>
-                  <input
-                    type="number"
+                  <select
                     name="supplier_id"
                     value={formData.supplier_id}
                     onChange={handleInputChange}
-                    min="0"
-                    placeholder="ID (opcional)"
                     className="form-input"
-                    style={{ width: '100%', padding: '10px 14px', border: '2px solid #e0e0e0', borderRadius: '8px', fontSize: '14px' }}
-                  />
+                    style={{ width: '100%', padding: '10px 14px', border: '2px solid #e0e0e0', borderRadius: '8px', fontSize: '14px', cursor: 'pointer' }}
+                  >
+                    <option value="">Selecciona</option>
+                    {suppliers.map(supplier => (
+                      <option key={supplier.id} value={supplier.id}>
+                        {supplier.name}
+                      </option>
+                    ))}
+                  </select>
                 </div>
               </div>
 
@@ -1112,6 +1162,88 @@ const Products = () => {
                 {new Date(detailProduct.created_at).toLocaleString()}
               </p>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de funcionalidad próxima */}
+      {showExportModal && (
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.18)', zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={() => setShowExportModal(false)}>
+          <div style={{ background: '#fff', borderRadius: '14px', boxShadow: '0 8px 32px rgba(0,0,0,0.18)', padding: '32px 28px 24px 28px', minWidth: '320px', maxWidth: '90vw', textAlign: 'center', animation: 'sidebarModalIn 0.18s cubic-bezier(.4,1.4,.6,1) both' }} onClick={e => e.stopPropagation()}>
+            <div style={{ fontSize: '1.25rem', fontWeight: '700', marginBottom: '12px', color: '#c8b273', letterSpacing: '0.5px' }}>Funcionalidad Próxima a implementar</div>
+            <div style={{ fontSize: '1rem', color: '#444', marginBottom: '22px' }}>La sección <b>Exportar a Excel</b> estará disponible próximamente.</div>
+            <button style={{ background: '#c8b273', color: '#fff', border: 'none', borderRadius: '6px', padding: '8px 22px', fontSize: '1rem', fontWeight: '500', cursor: 'pointer', transition: 'background 0.18s' }} onClick={() => setShowExportModal(false)} onMouseOver={(e) => e.currentTarget.style.background = '#a08d5c'} onMouseOut={(e) => e.currentTarget.style.background = '#c8b273'}>Cerrar</button>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de crear categoría */}
+      {showCategoryForm && (
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.5)', zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={() => setShowCategoryForm(false)}>
+          <div style={{ background: 'white', borderRadius: '12px', boxShadow: '0 8px 32px rgba(0,0,0,0.2)', padding: '30px', maxWidth: '500px', width: '90%' }} onClick={e => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px', borderBottom: '2px solid #f5f5f5', paddingBottom: '15px' }}>
+              <h3 style={{ margin: 0, fontSize: '22px', color: '#333', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <FaTag style={{ color: '#f73194' }} />
+                Nueva Categoría
+              </h3>
+              <button onClick={() => setShowCategoryForm(false)} style={{ background: 'none', border: 'none', fontSize: '28px', cursor: 'pointer', color: '#999', lineHeight: 1 }}>×</button>
+            </div>
+            
+            <form onSubmit={handleCategorySubmit}>
+              <div style={{ marginBottom: '20px' }}>
+                <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600', color: '#555' }}>
+                  Nombre *
+                </label>
+                <input
+                  type="text"
+                  name="name"
+                  value={categoryFormData.name}
+                  onChange={handleCategoryInputChange}
+                  required
+                  placeholder="Ej: Remeras, Pantalones, Accesorios..."
+                  style={{ width: '100%', padding: '12px', border: '2px solid #e0e0e0', borderRadius: '8px', fontSize: '14px', transition: 'all 0.3s' }}
+                  onFocus={(e) => e.target.style.borderColor = '#f73194'}
+                  onBlur={(e) => e.target.style.borderColor = '#e0e0e0'}
+                />
+              </div>
+
+              <div style={{ marginBottom: '25px' }}>
+                <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600', color: '#555' }}>
+                  Descripción
+                </label>
+                <textarea
+                  name="description"
+                  value={categoryFormData.description}
+                  onChange={handleCategoryInputChange}
+                  rows="3"
+                  placeholder="Descripción opcional de la categoría..."
+                  style={{ width: '100%', padding: '12px', border: '2px solid #e0e0e0', borderRadius: '8px', fontSize: '14px', resize: 'vertical', transition: 'all 0.3s' }}
+                  onFocus={(e) => e.target.style.borderColor = '#f73194'}
+                  onBlur={(e) => e.target.style.borderColor = '#e0e0e0'}
+                />
+              </div>
+
+              <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+                <button 
+                  type="button" 
+                  onClick={() => setShowCategoryForm(false)}
+                  style={{ padding: '12px 24px', background: '#6c757d', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '15px', fontWeight: '500', transition: 'all 0.3s' }}
+                  onMouseOver={(e) => e.currentTarget.style.background = '#5a6268'}
+                  onMouseOut={(e) => e.currentTarget.style.background = '#6c757d'}
+                >
+                  Cancelar
+                </button>
+                <button 
+                  type="submit"
+                  style={{ padding: '12px 24px', background: '#f73194', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '15px', fontWeight: '500', display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.3s' }}
+                  onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
+                  onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                >
+                  <FaPlus />
+                  Crear Categoría
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

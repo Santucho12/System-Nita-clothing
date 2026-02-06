@@ -365,6 +365,40 @@ class ReportController {
             res.status(500).json({ success: false, message: error.message });
         }
     }
+
+    /**
+     * Obtener valor total del inventario (Capital en Ropa)
+     * Calcula: Σ(precio_venta × stock) de productos activos
+     */
+    static async getInventoryValue(req, res) {
+        try {
+            const database = require('../config/database');
+            
+            const result = await database.get(`
+                SELECT 
+                    IFNULL(SUM(sale_price * quantity), 0) as total_value,
+                    IFNULL(SUM(cost_price * quantity), 0) as total_cost,
+                    COUNT(*) as total_products,
+                    SUM(quantity) as total_units
+                FROM products
+                WHERE status = 'activo'
+            `);
+
+            res.status(200).json({
+                success: true,
+                data: {
+                    total_value: parseFloat(result.total_value || 0),
+                    total_cost: parseFloat(result.total_cost || 0),
+                    total_products: parseInt(result.total_products || 0),
+                    total_units: parseInt(result.total_units || 0),
+                    potential_profit: parseFloat((result.total_value || 0) - (result.total_cost || 0))
+                }
+            });
+        } catch (error) {
+            console.error('Error en getInventoryValue:', error);
+            res.status(500).json({ success: false, message: error.message });
+        }
+    }
 }
 
 module.exports = ReportController;

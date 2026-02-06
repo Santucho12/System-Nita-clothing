@@ -244,4 +244,57 @@ export const productService = {
   }
 };
 
+// Servicios de Proveedores
+export const supplierService = {
+  // Obtener todos los proveedores
+  getAll: async () => {
+    try {
+      const response = await api.get('/proveedores');
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response?.data?.message || 'Error obteniendo proveedores');
+    }
+  },
+
+  // Obtener proveedor por ID
+  getById: async (id) => {
+    try {
+      const response = await api.get(`/proveedores/${id}`);
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response?.data?.message || 'Error obteniendo proveedor');
+    }
+  },
+
+  // Crear nuevo proveedor
+  create: async (supplierData) => {
+    try {
+      const response = await api.post('/proveedores', supplierData);
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response?.data?.message || 'Error creando proveedor');
+    }
+  },
+
+  // Actualizar proveedor
+  update: async (id, supplierData) => {
+    try {
+      const response = await api.put(`/proveedores/${id}`, supplierData);
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response?.data?.message || 'Error actualizando proveedor');
+    }
+  },
+
+  // Eliminar proveedor
+  delete: async (id) => {
+    try {
+      const response = await api.delete(`/proveedores/${id}`);
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response?.data?.message || 'Error eliminando proveedor');
+    }
+  }
+};
+
 export default api;

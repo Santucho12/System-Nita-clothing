@@ -2,7 +2,18 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'react-toastify';
-import { FaChartBar } from 'react-icons/fa';
+import { 
+  FaChartBar, 
+  FaChartLine, 
+  FaBox, 
+  FaDollarSign, 
+  FaTags, 
+  FaCalendarDay, 
+  FaCalendarWeek, 
+  FaCalendarAlt, 
+  FaMoneyBillWave, 
+  FaPercentage 
+} from 'react-icons/fa';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -90,7 +101,7 @@ function Reports() {
         setCategoriesData(res.data.data || []);
       }
     } catch (error) {
-      // toast.error('Error cargando reportes: ' + (error.response?.data?.message || error.message));
+      toast.error('Error cargando reportes: ' + (error.response?.data?.message || error.message));
     } finally {
       setLoading(false);
     }
@@ -242,7 +253,7 @@ function Reports() {
             e.target.style.boxShadow = '0 2px 8px rgba(247, 49, 148, 0.3)';
           }}
         >
-          <i className="fas fa-chart-line"></i>
+          <FaChartLine />
           Estadisticas premium
         </button>
       </div>
@@ -255,7 +266,7 @@ function Reports() {
           onMouseOver={(e) => { if (activeTab !== 'sales') { e.currentTarget.style.background = '#e0e0e0'; e.currentTarget.style.transform = 'scale(1.05)'; } }}
           onMouseOut={(e) => { if (activeTab !== 'sales') { e.currentTarget.style.background = '#f5f5f5'; e.currentTarget.style.transform = 'scale(1)'; } }}
         >
-          <i className="fas fa-chart-line"></i> Ventas
+          <FaChartLine /> Ventas
         </button>
         <button 
           className={activeTab === 'products' ? 'active' : ''} 
@@ -264,7 +275,7 @@ function Reports() {
           onMouseOver={(e) => { if (activeTab !== 'products') { e.currentTarget.style.background = '#e0e0e0'; e.currentTarget.style.transform = 'scale(1.05)'; } }}
           onMouseOut={(e) => { if (activeTab !== 'products') { e.currentTarget.style.background = '#f5f5f5'; e.currentTarget.style.transform = 'scale(1)'; } }}
         >
-          <i className="fas fa-box"></i> Productos
+          <FaBox /> Productos
         </button>
         <button 
           className={activeTab === 'profits' ? 'active' : ''} 
@@ -273,7 +284,7 @@ function Reports() {
           onMouseOver={(e) => { if (activeTab !== 'profits') { e.currentTarget.style.background = '#e0e0e0'; e.currentTarget.style.transform = 'scale(1.05)'; } }}
           onMouseOut={(e) => { if (activeTab !== 'profits') { e.currentTarget.style.background = '#f5f5f5'; e.currentTarget.style.transform = 'scale(1)'; } }}
         >
-          <i className="fas fa-dollar-sign"></i> Ganancias
+          <FaDollarSign /> Ganancias
         </button>
         <button 
           className={activeTab === 'categories' ? 'active' : ''} 
@@ -282,7 +293,7 @@ function Reports() {
           onMouseOver={(e) => { if (activeTab !== 'categories') { e.currentTarget.style.background = '#e0e0e0'; e.currentTarget.style.transform = 'scale(1.05)'; } }}
           onMouseOut={(e) => { if (activeTab !== 'categories') { e.currentTarget.style.background = '#f5f5f5'; e.currentTarget.style.transform = 'scale(1)'; } }}
         >
-          <i className="fas fa-tags"></i> Categorías
+          <FaTags /> Categorías
         </button>
       </div>
 
@@ -308,7 +319,7 @@ function Reports() {
                       <span className="stat-detail" style={{ fontSize: '13px', color: '#666' }}>{salesData.day?.count || 0} ventas</span>
                     </div>
                     <div style={{ width: '60px', height: '60px', borderRadius: '12px', background: 'linear-gradient(135deg, #4CAF50 0%, #45a049 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '28px', color: 'white' }}>
-                      <i className="fas fa-calendar-day"></i>
+                      <FaCalendarDay />
                     </div>
                   </div>
                 </div>
@@ -320,7 +331,7 @@ function Reports() {
                       <span className="stat-detail" style={{ fontSize: '13px', color: '#666' }}>{salesData.month?.count || 0} ventas</span>
                     </div>
                     <div style={{ width: '60px', height: '60px', borderRadius: '12px', background: 'linear-gradient(135deg, #2196F3 0%, #1976D2 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '28px', color: 'white' }}>
-                      <i className="fas fa-calendar-week"></i>
+                      <FaCalendarWeek />
                     </div>
                   </div>
                 </div>
@@ -332,7 +343,7 @@ function Reports() {
                       <span className="stat-detail" style={{ fontSize: '13px', color: '#666' }}>{salesData.year?.count || 0} ventas</span>
                     </div>
                     <div style={{ width: '60px', height: '60px', borderRadius: '12px', background: 'linear-gradient(135deg, #FF9800 0%, #F57C00 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '28px', color: 'white' }}>
-                      <i className="fas fa-calendar-alt"></i>
+                      <FaCalendarAlt />
                     </div>
                   </div>
                 </div>
@@ -442,7 +453,7 @@ function Reports() {
                       <p className="amount" style={{ margin: '0', fontSize: '28px', fontWeight: 'bold', color: '#333' }}>${parseFloat(profitData.general?.total_profit || 0).toLocaleString()}</p>
                     </div>
                     <div style={{ width: '60px', height: '60px', borderRadius: '12px', background: 'linear-gradient(135deg, #4CAF50 0%, #45a049 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '28px', color: 'white' }}>
-                      <i className="fas fa-money-bill-wave"></i>
+                      <FaMoneyBillWave />
                     </div>
                   </div>
                 </div>
@@ -453,7 +464,7 @@ function Reports() {
                       <p className="amount" style={{ margin: '0', fontSize: '28px', fontWeight: 'bold', color: '#333' }}>{parseFloat(profitData.general?.avg_profit_margin || 0).toFixed(1)}%</p>
                     </div>
                     <div style={{ width: '60px', height: '60px', borderRadius: '12px', background: 'linear-gradient(135deg, #2196F3 0%, #1976D2 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '28px', color: 'white' }}>
-                      <i className="fas fa-percentage"></i>
+                      <FaPercentage />
                     </div>
                   </div>
                 </div>
@@ -464,7 +475,7 @@ function Reports() {
                       <p className="amount" style={{ margin: '0', fontSize: '28px', fontWeight: 'bold', color: '#333' }}>{parseFloat(profitData.general?.roi || 0).toFixed(1)}%</p>
                     </div>
                     <div style={{ width: '60px', height: '60px', borderRadius: '12px', background: 'linear-gradient(135deg, #FF9800 0%, #F57C00 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '28px', color: 'white' }}>
-                      <i className="fas fa-chart-line"></i>
+                      <FaChartLine />
                     </div>
                   </div>
                 </div>

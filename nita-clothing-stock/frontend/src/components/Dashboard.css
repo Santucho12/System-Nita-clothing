@@ -79,23 +79,25 @@
   justify-content: center;
   margin-bottom: 0.15rem;
   font-size: 1.5rem;
-  color: white;
+  color: #6b7280;
+  background: #f3f4f6;
+  border: 2px solid #e5e7eb;
 }
 
 .stat-icon.products {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #6b7280;
 }
 
 .stat-icon.categories {
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  color: #6b7280;
 }
 
 .stat-icon.revenue {
-  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  color: #6b7280;
 }
 
 .stat-icon.sales {
-  background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+  color: #6b7280;
 }
 
 .stat-content h3 {
@@ -367,12 +369,12 @@
 }
 
 .btn-secondary {
-  background: #ecf0f1;
-  color: #2c3e50;
+  background: #343a40;
+  color: white;
 }
 
 .btn-secondary:hover {
-  background: #d5dbdb;
+  background: #23272b;
 }
 
 .btn-primary {

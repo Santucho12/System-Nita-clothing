@@ -43,7 +43,7 @@ const Alerts = () => {
       });
     } catch (error) {
       console.error('Error cargando alertas:', error);
-      // toast.error('Error cargando alertas');
+      toast.error('Error cargando alertas');
     } finally {
       setLoading(false);
     }

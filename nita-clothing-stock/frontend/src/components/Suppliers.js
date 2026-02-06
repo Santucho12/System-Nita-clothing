@@ -17,10 +17,6 @@ const Suppliers = () => {
     email: '',
     phone: '',
     address: '',
-    city: '',
-    state: '',
-    postal_code: '',
-    country: 'Argentina',
     website: '',
     tax_id: '',
     payment_terms: 'net_30',
@@ -40,7 +36,7 @@ const Suppliers = () => {
       });
       setSuppliers(response.data.data || []);
     } catch (error) {
-      // toast.error('Error cargando proveedores: ' + (error.response?.data?.message || error.message));
+      toast.error('Error cargando proveedores: ' + (error.response?.data?.message || error.message));
     } finally {
       setLoading(false);
     }
@@ -58,7 +54,7 @@ const Suppliers = () => {
     e.preventDefault();
     
     if (!formData.name.trim()) {
-      // toast.error('El nombre del proveedor es requerido');
+      toast.error('El nombre del proveedor es requerido');
       return;
     }
 
@@ -68,18 +64,18 @@ const Suppliers = () => {
         await axios.put(`${API_URL}/proveedores/${editingSupplier.id}`, formData, {
           headers: { Authorization: `Bearer ${token}` }
         });
-        // toast.success('Proveedor actualizado exitosamente');
+        toast.success('Proveedor actualizado exitosamente');
       } else {
         await axios.post(`${API_URL}/proveedores`, formData, {
           headers: { Authorization: `Bearer ${token}` }
         });
-        // toast.success('Proveedor creado exitosamente');
+        toast.success('Proveedor creado exitosamente');
       }
       
       resetForm();
       loadSuppliers();
     } catch (error) {
-      // toast.error('Error: ' + (error.response?.data?.message || error.message));
+      toast.error('Error: ' + (error.response?.data?.message || error.message));
     }
   };
 
@@ -91,10 +87,6 @@ const Suppliers = () => {
       email: supplier.email || '',
       phone: supplier.phone || '',
       address: supplier.address || '',
-      city: supplier.city || '',
-      state: supplier.state || '',
-      postal_code: supplier.postal_code || '',
-      country: supplier.country || 'Argentina',
       website: supplier.website || '',
       tax_id: supplier.tax_id || '',
       payment_terms: supplier.payment_terms || 'net_30',
@@ -110,10 +102,10 @@ const Suppliers = () => {
         await axios.delete(`${API_URL}/proveedores/${id}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
-        // toast.success('Proveedor eliminado exitosamente');
+        toast.success('Proveedor eliminado exitosamente');
         loadSuppliers();
       } catch (error) {
-        // toast.error('Error eliminando proveedor: ' + (error.response?.data?.message || error.message));
+        toast.error('Error eliminando proveedor: ' + (error.response?.data?.message || error.message));
       }
     }
   };
@@ -125,10 +117,6 @@ const Suppliers = () => {
       email: '',
       phone: '',
       address: '',
-      city: '',
-      state: '',
-      postal_code: '',
-      country: 'Argentina',
       website: '',
       tax_id: '',
       payment_terms: 'net_30',
@@ -266,7 +254,7 @@ const Suppliers = () => {
               }
             `}
           </style>
-          <div className="modal-content" style={{ background: 'white', padding: '30px', borderRadius: '8px', maxWidth: '600px', width: '90%', maxHeight: '90vh', overflow: 'auto' }} onClick={e => e.stopPropagation()}>
+          <div className="modal-content" style={{ background: 'white', padding: '30px', borderRadius: '8px', maxWidth: '600px', width: '90%' }} onClick={e => e.stopPropagation()}>
             <div className="form-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
               <h3>{editingSupplier ? 'Editar Proveedor' : 'Nuevo Proveedor'}</h3>
               <button onClick={resetForm} style={{ background: 'none', border: 'none', fontSize: '24px', cursor: 'pointer' }}>×</button>
@@ -336,50 +324,6 @@ const Suppliers = () => {
                     type="text"
                     name="address"
                     value={formData.address}
-                    onChange={handleInputChange}
-                    style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '4px' }}
-                  />
-                </div>
-
-                <div>
-                  <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Ciudad</label>
-                  <input
-                    type="text"
-                    name="city"
-                    value={formData.city}
-                    onChange={handleInputChange}
-                    style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '4px' }}
-                  />
-                </div>
-
-                <div>
-                  <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Provincia</label>
-                  <input
-                    type="text"
-                    name="state"
-                    value={formData.state}
-                    onChange={handleInputChange}
-                    style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '4px' }}
-                  />
-                </div>
-
-                <div>
-                  <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Código Postal</label>
-                  <input
-                    type="text"
-                    name="postal_code"
-                    value={formData.postal_code}
-                    onChange={handleInputChange}
-                    style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '4px' }}
-                  />
-                </div>
-
-                <div>
-                  <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>País</label>
-                  <input
-                    type="text"
-                    name="country"
-                    value={formData.country}
                     onChange={handleInputChange}
                     style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '4px' }}
                   />

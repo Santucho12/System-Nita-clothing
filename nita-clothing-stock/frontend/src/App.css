@@ -196,12 +196,12 @@ body {
 }
 
 .btn-secondary {
-  background-color: var(--secondary-color);
+  background-color: #343a40;
   color: white;
 }
 
 .btn-secondary:hover {
-  background-color: #475569;
+  background-color: #23272b;
 }
 
 .btn-success {

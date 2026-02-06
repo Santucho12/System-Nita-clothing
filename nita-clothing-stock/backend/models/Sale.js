@@ -1,4 +1,5 @@
 const SaleItem = require('./SaleItem');
+const Customer = require('./Customer');
 const database = require('../config/database');
 
 class Sale {
@@ -112,7 +113,7 @@ class Sale {
                             }
                         }
                     // Crear una nueva venta con múltiples items (carrito)
-                    static async createWithItems(saleData, items) {
+                    static async createWithItems(saleData, items, customerEmail = null) {
                         const database = require('../config/database');
                         try {
                             // Validar stock de todos los productos
@@ -126,10 +127,15 @@ class Sale {
                             // Iniciar transacción
                             await database.run('BEGIN TRANSACTION');
                             try {
+                                // Crear o actualizar cliente si hay email
+                                if (customerEmail) {
+                                    await Sale.createOrUpdateCustomer(customerEmail, saleData.customer_name);
+                                }
+
                                 // Insertar venta principal
                                 const sql = `
-                                    INSERT INTO sales (subtotal, discount_percent, discount_amount, total, customer_name, payment_method, sale_date, created_at)
-                                    VALUES (?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
+                                    INSERT INTO sales (subtotal, discount_percent, discount_amount, total, customer_name, customer_email, payment_method, sale_date, created_at)
+                                    VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
                                 `;
                                 const result = await database.run(sql, [
                                     saleData.subtotal,
@@ -137,6 +143,7 @@ class Sale {
                                     saleData.discount_amount,
                                     saleData.total,
                                     saleData.customer_name,
+                                    customerEmail || null,
                                     saleData.payment_method
                                 ]);
                                 const sale_id = result.lastID;
@@ -539,6 +546,89 @@ class Sale {
             return stats;
         } catch (error) {
             throw new Error(`Error obteniendo ventas del año: ${error.message}`);
+        }
+    }
+
+    // ========== MÉTODOS PARA INTEGRACIÓN DE CLIENTES ==========
+
+    /**
+     * Crear o actualizar cliente automáticamente al registrar venta
+     * @param {string} email - Email del cliente
+     * @param {string} customerName - Nombre del cliente
+     */
+    static async createOrUpdateCustomer(email, customerName) {
+        try {
+            // Verificar si el cliente ya existe
+            const existingCustomer = await Customer.getByEmail(email);
+
+            if (existingCustomer) {
+                // Cliente existe: actualizar solo updated_at
+                await database.run(
+                    'UPDATE customers SET updated_at = datetime("now") WHERE email = ?',
+                    [email]
+                );
+            } else {
+                // Cliente nuevo: crear registro
+                await Customer.create({
+                    email,
+                    name: customerName || 'Cliente',
+                    phone: null,
+                    birth_date: null,
+                    address: null,
+                    city: null,
+                    province: null,
+                    postal_code: null,
+                    notes: 'Cliente creado automáticamente desde venta'
+                });
+            }
+
+            // Actualizar segmentación del cliente
+            await Sale.updateCustomerSegment(email);
+        } catch (error) {
+            // No lanzar error para no romper la venta
+            console.error('Error creando/actualizando cliente:', error.message);
+        }
+    }
+
+    /**
+     * Actualizar segmentación del cliente basado en su historial de compras
+     * @param {string} email - Email del cliente
+     */
+    static async updateCustomerSegment(email) {
+        try {
+            // Contar compras en últimos 90 días
+            const result = await database.get(`
+                SELECT COUNT(*) as purchase_count,
+                       MAX(sale_date) as last_purchase
+                FROM sales
+                WHERE customer_email = ?
+                  AND sale_date >= date('now', '-90 days')
+            `, [email]);
+
+            // Determinar segmento
+            let segment = 'new';
+            
+            if (result.purchase_count >= 5) {
+                segment = 'frequent';
+            } else if (result.purchase_count >= 2) {
+                segment = 'occasional';
+            } else if (result.last_purchase) {
+                const daysSinceLastPurchase = await database.get(`
+                    SELECT julianday('now') - julianday(?) as days_diff
+                `, [result.last_purchase]);
+                
+                if (daysSinceLastPurchase && daysSinceLastPurchase.days_diff > 90) {
+                    segment = 'inactive';
+                }
+            }
+
+            // Actualizar segmento
+            await database.run(
+                'UPDATE customers SET segment = ? WHERE email = ?',
+                [segment, email]
+            );
+        } catch (error) {
+            console.error('Error actualizando segmentación:', error.message);
         }
     }
 }

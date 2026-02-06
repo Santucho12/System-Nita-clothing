@@ -26,6 +26,9 @@ router.get('/ventas-dia', auth(['admin', 'vendedor']), ReportController.getSales
 router.get('/ventas-mes', auth(['admin', 'vendedor']), ReportController.getSalesOfMonth);
 router.get('/ventas-anio', auth(['admin', 'vendedor']), ReportController.getSalesOfYear);
 
+// Valor del inventario (Capital en Ropa)
+router.get('/inventory-value', auth(['admin', 'vendedor']), ReportController.getInventoryValue);
+
 // Nuevos endpoints avanzados
 router.get('/kpis-avanzados', auth(['admin', 'vendedor']), ReportController.getAdvancedKPIs);
 router.get('/tendencia-ventas', auth(['admin', 'vendedor']), ReportController.getSalesTrend);

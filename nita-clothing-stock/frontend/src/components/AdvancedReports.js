@@ -1,7 +1,30 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
-import { FaChartBar } from 'react-icons/fa';
+import { 
+  FaChartBar, 
+  FaArrowUp, 
+  FaArrowDown, 
+  FaMinus, 
+  FaFilePdf, 
+  FaFileExcel, 
+  FaTachometerAlt, 
+  FaShoppingCart, 
+  FaBox, 
+  FaDollarSign, 
+  FaWarehouse, 
+  FaCrown, 
+  FaMedal, 
+  FaTimesCircle, 
+  FaExclamationTriangle, 
+  FaCheckCircle,
+  FaChartLine,
+  FaReceipt,
+  FaBoxes,
+  FaPercent,
+  FaBoxOpen,
+  FaTags
+} from 'react-icons/fa';
 import { format, startOfMonth, endOfMonth, subMonths, startOfYear, subDays, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
 import {
@@ -83,7 +106,7 @@ function AdvancedReports() {
       
     } catch (error) {
       console.error('Error fetching reports:', error);
-      // toast.error('Error cargando reportes avanzados');
+      toast.error('Error cargando reportes avanzados');
     } finally {
       setLoading(false);
     }
@@ -149,29 +172,29 @@ function AdvancedReports() {
   };
 
   const exportReport = (format) => {
-    // toast.info(`Exportando reporte en formato ${format}...`);
+    toast.info(`Exportando reporte en formato ${format}...`);
     // Implementar lógica de exportación
   };
 
   // Componentes de KPIs
-  const KPICard = ({ title, value, subtitle, icon, color, trend }) => (
+  const KPICard = ({ title, value, subtitle, icon: Icon, color, trend }) => (
     <div className="kpi-card" style={{ borderTop: `4px solid ${color}`, background: 'white', padding: '24px', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
       <div className="kpi-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '15px' }}>
         <div className="kpi-icon" style={{ background: `${color}20`, color, width: '48px', height: '48px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' }}>
-          <i className={icon}></i>
+          <Icon />
         </div>
         <div className="kpi-trend">
           {trend > 0 ? (
             <span className="trend-up" style={{ color: '#4CAF50', fontSize: '14px', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <i className="fas fa-arrow-up"></i> {trend}%
+              <FaArrowUp /> {trend}%
             </span>
           ) : trend < 0 ? (
             <span className="trend-down" style={{ color: '#F44336', fontSize: '14px', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <i className="fas fa-arrow-down"></i> {Math.abs(trend)}%
+              <FaArrowDown /> {Math.abs(trend)}%
             </span>
           ) : (
             <span className="trend-neutral" style={{ color: '#999', fontSize: '14px', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <i className="fas fa-minus"></i> 0%
+              <FaMinus /> 0%
             </span>
           )}
         </div>
@@ -293,13 +316,13 @@ function AdvancedReports() {
               onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
               onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
             >
-              <i className="fas fa-file-pdf"></i> PDF
+              <FaFilePdf /> PDF
             </button>
             <button onClick={() => exportReport('excel')} className="btn-export" style={{ padding: '10px 18px', background: '#f73194', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '13px', fontWeight: '500', display: 'flex', alignItems: 'center', gap: '6px', transition: 'all 0.3s ease' }}
               onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
               onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
             >
-              <i className="fas fa-file-excel"></i> Excel
+              <FaFileExcel /> Excel
             </button>
           </div>
         </div>
@@ -314,7 +337,7 @@ function AdvancedReports() {
           onMouseOver={(e) => { if (activeView !== 'overview') { e.currentTarget.style.background = '#e0e0e0'; e.currentTarget.style.transform = 'scale(1.05)'; } }}
           onMouseOut={(e) => { if (activeView !== 'overview') { e.currentTarget.style.background = '#f5f5f5'; e.currentTarget.style.transform = 'scale(1)'; } }}
         >
-          <i className="fas fa-tachometer-alt"></i> General
+          <FaTachometerAlt /> General
         </button>
         <button 
           className={activeView === 'sales' ? 'btn-pink' : ''}
@@ -323,7 +346,7 @@ function AdvancedReports() {
           onMouseOver={(e) => { if (activeView !== 'sales') { e.currentTarget.style.background = '#e0e0e0'; e.currentTarget.style.transform = 'scale(1.05)'; } }}
           onMouseOut={(e) => { if (activeView !== 'sales') { e.currentTarget.style.background = '#f5f5f5'; e.currentTarget.style.transform = 'scale(1)'; } }}
         >
-          <i className="fas fa-shopping-cart"></i> Ventas
+          <FaShoppingCart /> Ventas
         </button>
         <button 
           className={activeView === 'products' ? 'btn-pink' : ''}
@@ -332,7 +355,7 @@ function AdvancedReports() {
           onMouseOver={(e) => { if (activeView !== 'products') { e.currentTarget.style.background = '#e0e0e0'; e.currentTarget.style.transform = 'scale(1.05)'; } }}
           onMouseOut={(e) => { if (activeView !== 'products') { e.currentTarget.style.background = '#f5f5f5'; e.currentTarget.style.transform = 'scale(1)'; } }}
         >
-          <i className="fas fa-box"></i> Productos
+          <FaBox /> Productos
         </button>
         <button 
           className={activeView === 'profits' ? 'btn-pink' : ''}
@@ -341,7 +364,7 @@ function AdvancedReports() {
           onMouseOver={(e) => { if (activeView !== 'profits') { e.currentTarget.style.background = '#e0e0e0'; e.currentTarget.style.transform = 'scale(1.05)'; } }}
           onMouseOut={(e) => { if (activeView !== 'profits') { e.currentTarget.style.background = '#f5f5f5'; e.currentTarget.style.transform = 'scale(1)'; } }}
         >
-          <i className="fas fa-dollar-sign"></i> Rentabilidad
+          <FaDollarSign /> Rentabilidad
         </button>
         <button 
           className={activeView === 'inventory' ? 'btn-pink' : ''}
@@ -350,7 +373,7 @@ function AdvancedReports() {
           onMouseOver={(e) => { if (activeView !== 'inventory') { e.currentTarget.style.background = '#e0e0e0'; e.currentTarget.style.transform = 'scale(1.05)'; } }}
           onMouseOut={(e) => { if (activeView !== 'inventory') { e.currentTarget.style.background = '#f5f5f5'; e.currentTarget.style.transform = 'scale(1)'; } }}
         >
-          <i className="fas fa-warehouse"></i> Inventario
+          <FaWarehouse /> Inventario
         </button>
       </div>
 
@@ -364,7 +387,7 @@ function AdvancedReports() {
                 title="Ventas Totales"
                 value={`$${(kpis.totalSales || 0).toLocaleString()}`}
                 subtitle={`${kpis.totalTransactions || 0} transacciones`}
-                icon="fas fa-shopping-cart"
+                icon={FaShoppingCart}
                 color="#f73194"
                 trend={kpis.salesGrowth || 0}
               />
@@ -374,7 +397,7 @@ function AdvancedReports() {
                 title="Ganancia Neta"
                 value={`$${(kpis.netProfit || 0).toLocaleString()}`}
                 subtitle={`Margen: ${(kpis.profitMargin || 0).toFixed(1)}%`}
-                icon="fas fa-chart-line"
+                icon={FaChartLine}
                 color="#2196F3"
                 trend={kpis.profitGrowth || 0}
               />
@@ -384,7 +407,7 @@ function AdvancedReports() {
                 title="Ticket Promedio"
                 value={`$${(kpis.avgTicket || 0).toLocaleString()}`}
                 subtitle="Por transacción"
-                icon="fas fa-receipt"
+                icon={FaReceipt}
                 color="#FF9800"
                 trend={kpis.ticketGrowth || 0}
               />
@@ -394,7 +417,7 @@ function AdvancedReports() {
                 title="Productos Vendidos"
                 value={(kpis.totalProducts || 0).toLocaleString()}
                 subtitle="Unidades totales"
-                icon="fas fa-boxes"
+                icon={FaBoxes}
                 color="#9C27B0"
                 trend={kpis.productsGrowth || 0}
               />
@@ -404,7 +427,7 @@ function AdvancedReports() {
                 title="Valor Inventario"
                 value={`$${(kpis.inventoryValue || 0).toLocaleString()}`}
                 subtitle={`${kpis.totalSKUs || 0} productos diferentes`}
-                icon="fas fa-warehouse"
+                icon={FaWarehouse}
                 color="#00BCD4"
                 trend={0}
               />
@@ -414,7 +437,7 @@ function AdvancedReports() {
                 title="ROI"
                 value={`${(kpis.roi || 0).toFixed(1)}%`}
                 subtitle="Retorno de inversión"
-                icon="fas fa-percent"
+                icon={FaPercent}
                 color="#4CAF50"
                 trend={kpis.roiGrowth || 0}
               />
@@ -704,14 +727,14 @@ function AdvancedReports() {
                     <div className="ranking-details">
                       <h4>{product.product_name}</h4>
                       <div className="ranking-stats">
-                        <span><i className="fas fa-dollar-sign"></i> ${(product.total_revenue || 0).toLocaleString()}</span>
-                        <span><i className="fas fa-box"></i> {product.total_quantity} und.</span>
+                        <span><FaDollarSign /> ${(product.total_revenue || 0).toLocaleString()}</span>
+                        <span><FaBox /> {product.total_quantity} und.</span>
                       </div>
                     </div>
                     <div className="ranking-badge">
-                      {index === 0 && <i className="fas fa-crown gold"></i>}
-                      {index === 1 && <i className="fas fa-medal silver"></i>}
-                      {index === 2 && <i className="fas fa-medal bronze"></i>}
+                      {index === 0 && <FaCrown className="gold" />}
+                      {index === 1 && <FaMedal className="silver" />}
+                      {index === 2 && <FaMedal className="bronze" />}
                     </div>
                   </div>
                 ))}
@@ -828,7 +851,7 @@ function AdvancedReports() {
               title="Valor Total Inventario"
               value={`$${(inventoryHealth.totalValue || 0).toLocaleString()}`}
               subtitle="Valor en stock"
-              icon="fas fa-box-open"
+              icon={FaBoxOpen}
               color="#00BCD4"
               trend={0}
             />
@@ -836,7 +859,7 @@ function AdvancedReports() {
               title="Stock Total"
               value={(inventoryHealth.totalUnits || 0).toLocaleString()}
               subtitle="Unidades disponibles"
-              icon="fas fa-boxes"
+              icon={FaBoxes}
               color="#4CAF50"
               trend={0}
             />
@@ -844,7 +867,7 @@ function AdvancedReports() {
               title="Productos Activos"
               value={inventoryHealth.activeProducts || 0}
               subtitle="SKUs diferentes"
-              icon="fas fa-tags"
+              icon={FaTags}
               color="#FF9800"
               trend={0}
             />
@@ -852,7 +875,7 @@ function AdvancedReports() {
               title="Stock Bajo"
               value={inventoryHealth.lowStock || 0}
               subtitle="Productos críticos"
-              icon="fas fa-exclamation-triangle"
+              icon={FaExclamationTriangle}
               color="#F44336"
               trend={0}
             />
@@ -897,21 +920,21 @@ function AdvancedReports() {
               </div>
               <div className="stock-alerts">
                 <div className="alert-item critical">
-                  <i className="fas fa-times-circle"></i>
+                  <FaTimesCircle />
                   <div>
                     <h4>Sin Stock</h4>
                     <p>{inventoryHealth.outOfStock || 0} productos</p>
                   </div>
                 </div>
                 <div className="alert-item warning">
-                  <i className="fas fa-exclamation-triangle"></i>
+                  <FaExclamationTriangle />
                   <div>
                     <h4>Stock Bajo</h4>
                     <p>{inventoryHealth.lowStock || 0} productos</p>
                   </div>
                 </div>
                 <div className="alert-item success">
-                  <i className="fas fa-check-circle"></i>
+                  <FaCheckCircle />
                   <div>
                     <h4>Stock OK</h4>
                     <p>{inventoryHealth.healthyStock || 0} productos</p>

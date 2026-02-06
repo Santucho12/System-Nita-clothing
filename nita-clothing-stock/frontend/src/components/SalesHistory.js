@@ -69,21 +69,21 @@ export default function SalesHistory() {
   const handleCloseDetail = () => setSelectedSale(null);
 
   const handlePrintTicket = (sale) => {
-    // toast.info('Función de impresión en desarrollo');
+    toast.info('Función de impresión en desarrollo');
   };
 
   const handleSendEmail = (sale) => {
-    // toast.info('Función de envío de email en desarrollo');
+    toast.info('Función de envío de email en desarrollo');
   };
 
   const handleCancelSale = (sale) => {
     if (window.confirm('¿Está seguro de cancelar esta venta?')) {
-      // toast.info('Función de cancelación en desarrollo');
+      toast.info('Función de cancelación en desarrollo');
     }
   };
 
   const handleExportPDF = (sale) => {
-    // toast.info('Función de exportación a PDF en desarrollo');
+    toast.info('Función de exportación a PDF en desarrollo');
   };
 
   const getStatusBadge = (status) => {
@@ -201,7 +201,7 @@ export default function SalesHistory() {
         <button 
           className="btn-secondary"
           onClick={() => setShowFilters(!showFilters)}
-          style={{ padding: '12px 24px', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '15px', fontWeight: '500', background: '#6c757d' }}
+          style={{ padding: '12px 24px', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '15px', fontWeight: '500', background: '#343a40' }}
         >
           <FaFilter />
           {showFilters ? 'Ocultar Filtros' : 'Mostrar Filtros'}
@@ -317,7 +317,7 @@ export default function SalesHistory() {
                 type="button"
                 onClick={handleClearFilters}
                 className="btn-secondary"
-                style={{ padding: '12px 24px', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '15px', fontWeight: '500', background: '#6c757d' }}
+                style={{ padding: '12px 24px', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '15px', fontWeight: '500', background: '#343a40' }}
               >
                 <FaTimes />
                 Limpiar
@@ -393,8 +393,8 @@ export default function SalesHistory() {
         </div>
       ) : error ? (
         <div style={{ textAlign: 'center', padding: '80px 40px', background: 'white', borderRadius: '16px', boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }}>
-          <div style={{ background: 'linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%)', width: '120px', height: '120px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 30px' }}>
-            <FaTimesCircle style={{ fontSize: '60px', color: '#d32f2f' }} />
+          <div style={{ background: 'linear-gradient(135deg, #e0e0e0 0%, #bdbdbd 100%)', width: '120px', height: '120px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 30px' }}>
+            <FaTimesCircle style={{ fontSize: '60px', color: '#616161' }} />
           </div>
           <h3 style={{ fontSize: '24px', color: '#333', margin: '0 0 12px 0', fontWeight: '600' }}>{error}</h3>
           <p style={{ color: '#666', fontSize: '16px', margin: '0 0 30px 0' }}>Intenta recargar la página o contacta con soporte</p>
