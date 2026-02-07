@@ -21,7 +21,7 @@ export const NotificationProvider = ({ children }) => {
     const token = localStorage.getItem('token');
     if (!token) return;
 
-    const websocket = new WebSocket(`ws://localhost:3000/ws?token=${token}`);
+    const websocket = new WebSocket(`ws://localhost:5000/ws?token=${token}`);
 
     websocket.onopen = () => {
       console.log('✅ WebSocket conectado');

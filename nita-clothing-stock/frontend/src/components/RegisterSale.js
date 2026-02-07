@@ -49,6 +49,36 @@ export default function RegisterSale() {
     }
   };
 
+  // Obtener productos únicos filtrados por categoría
+  const getProductNamesForCategory = (categoryId) => {
+    if (!categoryId) return [];
+    const filtered = products.filter(p => p.categoria_id == categoryId);
+    const uniqueNames = [...new Set(filtered.map(p => p.nombre))];
+    return uniqueNames;
+  };
+
+  // Obtener colores disponibles para un producto en una categoría
+  const getColorsForProduct = (categoryId, productName) => {
+    if (!categoryId || !productName) return [];
+    const filtered = products.filter(p => 
+      p.categoria_id == categoryId && p.nombre === productName
+    );
+    const uniqueColors = [...new Set(filtered.map(p => p.colores))];
+    return uniqueColors;
+  };
+
+  // Obtener talles disponibles para un producto/color específico
+  const getSizesForProductColor = (categoryId, productName, color) => {
+    if (!categoryId || !productName || !color) return [];
+    const filtered = products.filter(p => 
+      p.categoria_id == categoryId && 
+      p.nombre === productName && 
+      p.colores === color
+    );
+    const uniqueSizes = [...new Set(filtered.map(p => p.talle))];
+    return uniqueSizes;
+  };
+
   const handleItemChange = (idx, field, value) => {
     const newItems = [...items];
     newItems[idx][field] = value;
@@ -64,12 +94,36 @@ export default function RegisterSale() {
       newItems[idx].unit_price = 0;
     }
     
+    // Si cambia la categoría, resetear producto, color y talle
+    if (field === 'category_id') {
+      newItems[idx].product_name = '';
+      newItems[idx].color = '';
+      newItems[idx].size = '';
+      newItems[idx].product_id = '';
+      newItems[idx].unit_price = 0;
+    }
+    
+    // Si cambia el producto, resetear color y talle
+    if (field === 'product_name') {
+      newItems[idx].color = '';
+      newItems[idx].size = '';
+      newItems[idx].product_id = '';
+      newItems[idx].unit_price = 0;
+    }
+    
+    // Si cambia el color, resetear talle
+    if (field === 'color') {
+      newItems[idx].size = '';
+      newItems[idx].product_id = '';
+      newItems[idx].unit_price = 0;
+    }
+    
     // Si busca por SKU y se selecciona un producto, auto-completar precio
     if (field === 'sku' && value) {
       const product = products.find(p => p.sku === value);
       if (product) {
         newItems[idx].product_id = product.id;
-        newItems[idx].unit_price = product.sale_price;
+        newItems[idx].unit_price = product.precio;
       }
     }
     
@@ -78,14 +132,14 @@ export default function RegisterSale() {
       const item = newItems[idx];
       if (item.category_id && item.product_name && item.color && item.size) {
         const product = products.find(p => 
-          p.category_id == item.category_id && 
-          p.name === item.product_name &&
-          p.color === item.color &&
-          p.size === item.size
+          p.categoria_id == item.category_id && 
+          p.nombre === item.product_name &&
+          p.colores === item.color &&
+          p.talle === item.size
         );
         if (product) {
           newItems[idx].product_id = product.id;
-          newItems[idx].unit_price = product.sale_price;
+          newItems[idx].unit_price = product.precio;
         }
       }
     }
@@ -355,15 +409,19 @@ export default function RegisterSale() {
                             <FaTshirt style={{ marginRight: '8px', color: '#f73194' }} />
                             Producto
                           </label>
-                          <input
-                            type="text"
-                            placeholder="Nombre del producto"
+                          <select
                             value={item.product_name}
                             onChange={e => handleItemChange(idx, 'product_name', e.target.value)}
                             required
+                            disabled={!item.category_id}
                             className="form-input"
-                            style={{ width: '100%', padding: '14px', border: '2px solid #e0e0e0', borderRadius: '8px', fontSize: '15px' }}
-                          />
+                            style={{ width: '100%', padding: '14px', border: '2px solid #e0e0e0', borderRadius: '8px', fontSize: '15px', cursor: item.category_id ? 'pointer' : 'not-allowed', opacity: item.category_id ? 1 : 0.6 }}
+                          >
+                            <option value="">Selecciona producto</option>
+                            {getProductNamesForCategory(item.category_id).map((name, i) => (
+                              <option key={i} value={name}>{name}</option>
+                            ))}
+                          </select>
                         </div>
                       </div>
                       
@@ -374,30 +432,38 @@ export default function RegisterSale() {
                             <FaPalette style={{ marginRight: '8px', color: '#f73194' }} />
                             Color
                           </label>
-                          <input
-                            type="text"
-                            placeholder="Ej: Rojo"
+                          <select
                             value={item.color}
                             onChange={e => handleItemChange(idx, 'color', e.target.value)}
                             required
+                            disabled={!item.product_name}
                             className="form-input"
-                            style={{ width: '100%', padding: '14px', border: '2px solid #e0e0e0', borderRadius: '8px', fontSize: '15px' }}
-                          />
+                            style={{ width: '100%', padding: '14px', border: '2px solid #e0e0e0', borderRadius: '8px', fontSize: '15px', cursor: item.product_name ? 'pointer' : 'not-allowed', opacity: item.product_name ? 1 : 0.6 }}
+                          >
+                            <option value="">Selecciona color</option>
+                            {getColorsForProduct(item.category_id, item.product_name).map((color, i) => (
+                              <option key={i} value={color}>{color}</option>
+                            ))}
+                          </select>
                         </div>
                         <div>
                           <label style={{ display: 'block', marginBottom: '10px', fontSize: '14px', fontWeight: '600', color: '#555' }}>
                             <FaRulerVertical style={{ marginRight: '8px', color: '#f73194' }} />
                             Talle
                           </label>
-                          <input
-                            type="text"
-                            placeholder="Ej: M"
+                          <select
                             value={item.size}
                             onChange={e => handleItemChange(idx, 'size', e.target.value)}
                             required
+                            disabled={!item.color}
                             className="form-input"
-                            style={{ width: '100%', padding: '14px', border: '2px solid #e0e0e0', borderRadius: '8px', fontSize: '15px' }}
-                          />
+                            style={{ width: '100%', padding: '14px', border: '2px solid #e0e0e0', borderRadius: '8px', fontSize: '15px', cursor: item.color ? 'pointer' : 'not-allowed', opacity: item.color ? 1 : 0.6 }}
+                          >
+                            <option value="">Selecciona talle</option>
+                            {getSizesForProductColor(item.category_id, item.product_name, item.color).map((size, i) => (
+                              <option key={i} value={size}>{size}</option>
+                            ))}
+                          </select>
                         </div>
                       </div>
                       

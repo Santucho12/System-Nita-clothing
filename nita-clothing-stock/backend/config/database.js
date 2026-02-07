@@ -41,6 +41,11 @@ class Database {
         const [rows] = await pool.execute(sql, params);
         return rows[0] || null;
     }
+
+    async query(sql, params = []) {
+        const pool = await this.connect();
+        return await pool.execute(sql, params);
+    }
 }
 
 module.exports = new Database();

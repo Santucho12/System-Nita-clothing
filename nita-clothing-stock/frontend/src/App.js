@@ -47,7 +47,7 @@ function App() {
   }
 
   return (
-    <Router>
+    <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <div className="App" style={{ display: 'flex', minHeight: '100vh' }}>
         <Sidebar />
         <div style={{ flex: 1, marginLeft: 230, minHeight: '100vh', background: '#f8fafc', display: 'flex', flexDirection: 'column' }}>

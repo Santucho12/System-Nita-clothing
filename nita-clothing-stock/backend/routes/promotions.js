@@ -1,10 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const promotionController = require('../controllers/promotionController');
-const auth = require('../middleware/auth');
+const { authMiddleware } = require('../middleware/auth');
 
 // Aplicar autenticación a todas las rutas
-router.use(auth);
+router.use(authMiddleware);
 
 // Rutas de promociones
 router.get('/', promotionController.getAllPromotions);

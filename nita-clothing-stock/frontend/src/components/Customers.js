@@ -207,7 +207,7 @@ export default function Customers() {
                   </div>
                 ) : (
                   filteredCustomers.map((customer, index) => (
-                    <>
+                    <React.Fragment key={customer.email}>
                       <style>
                         {`
                           .customer-card:nth-child(${index + 1}) {
@@ -215,7 +215,7 @@ export default function Customers() {
                           }
                         `}
                       </style>
-                      <div key={customer.email} className="customer-card" style={{ border: 'none', borderRadius: '12px', padding: '24px', background: 'white', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', borderTop: '4px solid #f73194' }}>
+                      <div className="customer-card" style={{ border: 'none', borderRadius: '12px', padding: '24px', background: 'white', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', borderTop: '4px solid #f73194' }}>
                       <div className="customer-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px', paddingBottom: '15px', borderBottom: '2px solid #f5f5f5' }}>
                         <h3 style={{ margin: 0, fontSize: '20px', color: '#333', fontWeight: '600' }}>{customer.name}</h3>
                         <button 
@@ -247,7 +247,7 @@ export default function Customers() {
                         )}
                       </div>
                       </div>
-                    </>
+                    </React.Fragment>
                   ))
                 )}
               </div>

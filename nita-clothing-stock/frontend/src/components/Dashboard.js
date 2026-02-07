@@ -16,7 +16,7 @@ const Dashboard = () => {
     monthlyRevenue: 0,
     monthlySales: 0
   });
-  const [topProducts, setTopProducts] = useState([]);
+  const [topCategories, setTopCategories] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -27,18 +27,18 @@ const Dashboard = () => {
     try {
       setLoading(true);
       
-      // Cargar productos, valor del inventario, estadísticas de ventas y productos más vendidos
-      const [productsResponse, inventoryValueResponse, monthlyStatsResponse, topProductsResponse] = await Promise.all([
+      // Cargar productos, valor del inventario, estadísticas de ventas y categorías más vendidas
+      const [productsResponse, inventoryValueResponse, monthlyStatsResponse, topCategoriesResponse] = await Promise.all([
         productService.getAll(),
         reportsService.getInventoryValue(),
         reportsService.getMonthlyStats(),
-        reportsService.getTopProducts(5)
+        reportsService.getTopCategories(3)
       ]);
 
       const products = productsResponse.data || [];
       const inventoryData = inventoryValueResponse.data || {};
       const monthlyStats = monthlyStatsResponse.data || {};
-      const topProductsData = topProductsResponse.data || [];
+      const topCategoriesData = topCategoriesResponse.data || [];
 
       setStats({
         totalProducts: products.length,
@@ -47,7 +47,7 @@ const Dashboard = () => {
         monthlySales: monthlyStats.total_sales || 0
       });
 
-      setTopProducts(topProductsData);
+      setTopCategories(topCategoriesData);
 
     } catch (error) {
       toast.error('Error cargando datos del dashboard: ' + error.message);
@@ -235,13 +235,13 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Productos más vendidos del mes */}
-      {topProducts.length > 0 && (
-        <div className="top-products-section" style={{ background: 'white', borderRadius: '12px', padding: '30px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', marginBottom: '30px' }}>
+      {/* Categorías más vendidas del mes */}
+      {topCategories.length > 0 && (
+        <div className="top-categories-section" style={{ background: 'white', borderRadius: '12px', padding: '30px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', marginBottom: '30px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px', paddingBottom: '15px', borderBottom: '2px solid #f0f0f0' }}>
             <h2 style={{ margin: 0, fontSize: '24px', fontWeight: '600', color: '#333', display: 'flex', alignItems: 'center', gap: '10px' }}>
               <FaTrophy style={{ color: '#f73194', fontSize: '28px' }} />
-              Productos Más Vendidos del Mes
+              Categorías Más Vendidas del Mes
             </h2>
             <Link 
               to="/reports" 
@@ -254,10 +254,10 @@ const Dashboard = () => {
           </div>
           
           <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-            {topProducts.map((product, index) => (
+            {topCategories.map((category, index) => (
               <div 
-                key={product.product_id} 
-                className="product-item"
+                key={category.category_id} 
+                className="category-item"
                 style={{ 
                   display: 'flex', 
                   alignItems: 'center', 
@@ -285,39 +285,34 @@ const Dashboard = () => {
                   </div>
                 </div>
 
-                {/* Producto Info */}
+                {/* Categoría Info */}
                 <div style={{ flex: 1 }}>
-                  <h4 style={{ margin: '0 0 8px 0', fontSize: '18px', fontWeight: '600', color: '#333' }}>{product.product_name}</h4>
+                  <h4 style={{ margin: '0 0 8px 0', fontSize: '18px', fontWeight: '600', color: '#333' }}>{category.category_name}</h4>
                   <p style={{ margin: '0 0 10px 0', fontSize: '14px', color: '#666', display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
                     <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                      <FaPalette style={{ color: '#f73194' }} />
-                      {product.color}
-                    </span>
-                    <span style={{ color: '#ddd' }}>|</span>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                      <FaTag style={{ color: '#f73194' }} />
-                      {product.category_name}
+                      <FaTshirt style={{ color: '#f73194' }} />
+                      {category.products_count} productos
                     </span>
                   </p>
                   <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
                     <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 12px', background: '#e3f2fd', color: '#2196F3', borderRadius: '6px', fontSize: '13px', fontWeight: '600' }}>
                       <FaBox />
-                      {product.total_quantity} vendidos
+                      {category.total_quantity} vendidos
                     </span>
                     <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 12px', background: '#f3e5f5', color: '#f73194', borderRadius: '6px', fontSize: '13px', fontWeight: '600' }}>
                       <FaMoneyBillWave />
-                      ${parseFloat(product.total_revenue).toFixed(2)} generados
+                      ${parseFloat(category.total_revenue).toFixed(2)} generados
                     </span>
                   </div>
                 </div>
 
                 {/* Acción */}
                 <Link 
-                  to="/products" 
+                  to="/categories" 
                   className="btn-pink"
                   style={{ padding: '10px 20px', color: 'white', border: 'none', borderRadius: '8px', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', fontWeight: '500', whiteSpace: 'nowrap' }}
                 >
-                  Ver Producto
+                  Ver Categoría
                   <FaArrowRight />
                 </Link>
               </div>

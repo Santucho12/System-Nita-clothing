@@ -128,6 +128,24 @@ class ReportController {
         }
     }
 
+    static async getTopCategoriesThisMonth(req, res) {
+        try {
+            const limit = parseInt(req.query.limit) || 3;
+            const topCategories = await Sale.getTopCategoriesThisMonth(limit);
+            res.status(200).json({
+                success: true,
+                message: 'Categorías más vendidas del mes actual',
+                data: topCategories
+            });
+        } catch (error) {
+            res.status(500).json({
+                success: false,
+                message: 'Error interno del servidor',
+                error: error.message
+            });
+        }
+    }
+
     static async getSalesByPaymentMethod(req, res) {
         // Implementación básica de ejemplo
         res.status(501).json({ success: false, message: 'No implementado' });
@@ -183,9 +201,9 @@ class ReportController {
                     COUNT(*) as totalTransactions,
                     COALESCE(SUM(total), 0) as totalSales,
                     COALESCE(AVG(total), 0) as avgTicket,
-                    COALESCE(SUM(items_total), 0) as totalProducts
+                    COALESCE(SUM(subtotal), 0) as totalProducts
                 FROM sales
-                WHERE status = 'completada'
+                WHERE status = 'completed'
                 ${startDate ? 'AND DATE(created_at) >= ?' : ''}
                 ${endDate ? 'AND DATE(created_at) <= ?' : ''}
             `, [startDate, endDate].filter(Boolean));
@@ -193,12 +211,11 @@ class ReportController {
             // Ganancias netas
             const [profitStats] = await db.query(`
                 SELECT 
-                    COALESCE(SUM(si.quantity * (si.unit_price - p.cost_price)), 0) as netProfit,
-                    COALESCE(SUM(si.quantity * p.cost_price), 0) as totalCost
+                    COALESCE(SUM(si.quantity * (si.unit_price - si.unit_cost)), 0) as netProfit,
+                    COALESCE(SUM(si.quantity * si.unit_cost), 0) as totalCost
                 FROM sale_items si
-                JOIN products p ON si.product_id = p.id
                 JOIN sales s ON si.sale_id = s.id
-                WHERE s.status = 'completada'
+                WHERE s.status = 'completed'
                 ${startDate ? 'AND DATE(s.created_at) >= ?' : ''}
                 ${endDate ? 'AND DATE(s.created_at) <= ?' : ''}
             `, [startDate, endDate].filter(Boolean));
@@ -213,10 +230,10 @@ class ReportController {
             // Valor de inventario
             const [inventoryValue] = await db.query(`
                 SELECT 
-                    COALESCE(SUM(stock_quantity * cost_price), 0) as inventoryValue,
+                    COALESCE(SUM(stock * costo), 0) as inventoryValue,
                     COUNT(*) as totalSKUs
-                FROM products
-                WHERE stock_quantity > 0
+                FROM productos
+                WHERE stock > 0
             `);
 
             res.json({
@@ -249,34 +266,46 @@ class ReportController {
             const { startDate, endDate, period } = req.query;
             const db = require('../config/database');
             
-            let groupBy = 'DATE(created_at)';
-            let dateFormat = '%Y-%m-%d';
+            let groupByClause = 'DATE(created_at)';
+            let selectDateExpression = 'DATE(created_at)';
             
             if (period === 'week') {
-                groupBy = 'YEARWEEK(created_at, 1)';
-                dateFormat = 'Semana %v';
+                groupByClause = 'YEARWEEK(created_at, 1)';
+                selectDateExpression = 'CONCAT("Semana ", WEEK(created_at, 1))';
             } else if (period === 'month') {
-                groupBy = 'DATE_FORMAT(created_at, "%Y-%m")';
-                dateFormat = '%Y-%m';
+                groupByClause = 'DATE_FORMAT(created_at, "%Y-%m")';
+                selectDateExpression = 'DATE_FORMAT(created_at, "%Y-%m")';
             }
 
-            const [trends] = await db.query(`
+            // Construir WHERE dinámicamente
+            let whereClauses = ['status = ?'];
+            let params = ['completed'];
+            
+            if (startDate) {
+                whereClauses.push('DATE(created_at) >= ?');
+                params.push(startDate);
+            }
+            if (endDate) {
+                whereClauses.push('DATE(created_at) <= ?');
+                params.push(endDate);
+            }
+
+            const sql = `
                 SELECT 
-                    DATE_FORMAT(created_at, ?) as date,
+                    ${selectDateExpression} as date,
                     COUNT(*) as transactions,
                     COALESCE(SUM(total), 0) as revenue,
-                    COALESCE(SUM(total - (SELECT SUM(si.quantity * p.cost_price) 
-                                          FROM sale_items si 
-                                          JOIN products p ON si.product_id = p.id 
-                                          WHERE si.sale_id = sales.id)), 0) as profit
+                    COALESCE(SUM((SELECT SUM(si.quantity * (si.unit_price - si.unit_cost)) 
+                                  FROM sale_items si 
+                                  WHERE si.sale_id = sales.id)), 0) as profit
                 FROM sales
-                WHERE status = 'completada'
-                ${startDate ? 'AND DATE(created_at) >= ?' : ''}
-                ${endDate ? 'AND DATE(created_at) <= ?' : ''}
-                GROUP BY ${groupBy}
-                ORDER BY created_at ASC
+                WHERE ${whereClauses.join(' AND ')}
+                GROUP BY ${groupByClause}
+                ORDER BY ${groupByClause} ASC
                 LIMIT 30
-            `, [dateFormat, startDate, endDate].filter((v, i) => i === 0 || v));
+            `;
+
+            const [trends] = await db.query(sql, params);
 
             res.json({
                 success: true,
@@ -300,15 +329,15 @@ class ReportController {
             
             const [margins] = await db.query(`
                 SELECT 
-                    p.name as product,
-                    p.sale_price,
-                    p.cost_price,
-                    ((p.sale_price - p.cost_price) / p.sale_price * 100) as margin,
+                    p.nombre as product,
+                    p.precio as sale_price,
+                    p.costo as cost_price,
+                    ((p.precio - p.costo) / NULLIF(p.precio, 0) * 100) as margin,
                     COALESCE(SUM(si.quantity), 0) as units_sold,
-                    COALESCE(SUM(si.quantity * (si.unit_price - p.cost_price)), 0) as profit
-                FROM products p
+                    COALESCE(SUM(si.quantity * (si.unit_price - si.unit_cost)), 0) as profit
+                FROM productos p
                 LEFT JOIN sale_items si ON p.id = si.product_id
-                LEFT JOIN sales s ON si.sale_id = s.id AND s.status = 'completada'
+                LEFT JOIN sales s ON si.sale_id = s.id AND s.status = 'completed'
                 ${startDate ? 'AND DATE(s.created_at) >= ?' : ''}
                 ${endDate ? 'AND DATE(s.created_at) <= ?' : ''}
                 GROUP BY p.id
@@ -340,13 +369,13 @@ class ReportController {
             
             const [health] = await db.query(`
                 SELECT 
-                    COALESCE(SUM(stock_quantity * cost_price), 0) as totalValue,
-                    COALESCE(SUM(stock_quantity), 0) as totalUnits,
+                    COALESCE(SUM(stock * costo), 0) as totalValue,
+                    COALESCE(SUM(stock), 0) as totalUnits,
                     COUNT(*) as activeProducts,
-                    SUM(CASE WHEN stock_quantity = 0 THEN 1 ELSE 0 END) as outOfStock,
-                    SUM(CASE WHEN stock_quantity > 0 AND stock_quantity <= min_stock THEN 1 ELSE 0 END) as lowStock,
-                    SUM(CASE WHEN stock_quantity > min_stock THEN 1 ELSE 0 END) as healthyStock
-                FROM products
+                    SUM(CASE WHEN stock = 0 THEN 1 ELSE 0 END) as outOfStock,
+                    SUM(CASE WHEN stock > 0 AND stock <= 5 THEN 1 ELSE 0 END) as lowStock,
+                    SUM(CASE WHEN stock > 5 THEN 1 ELSE 0 END) as healthyStock
+                FROM productos
             `);
 
             res.json({
@@ -376,12 +405,12 @@ class ReportController {
             
             const result = await database.get(`
                 SELECT 
-                    IFNULL(SUM(sale_price * quantity), 0) as total_value,
-                    IFNULL(SUM(cost_price * quantity), 0) as total_cost,
+                    IFNULL(SUM(precio * stock), 0) as total_value,
+                    IFNULL(SUM(costo * stock), 0) as total_cost,
                     COUNT(*) as total_products,
-                    SUM(quantity) as total_units
-                FROM products
-                WHERE status = 'activo'
+                    SUM(stock) as total_units
+                FROM productos
+                WHERE estado = 'disponible'
             `);
 
             res.status(200).json({

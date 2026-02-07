@@ -6,7 +6,7 @@ const database = require('./config/database');
 
 const path = require('path');
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 5000;
 
 // Rutas de autenticación
 const authRoutes = require('./routes/auth');
@@ -43,8 +43,8 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// Middleware para Content Security Policy que permita fuentes externas
-const cspHeader = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data:; connect-src 'self';";
+// Middleware para Content Security Policy que permita fuentes externas y conexiones al frontend
+const cspHeader = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data:; connect-src 'self' http://localhost:3000 http://localhost:3001 http://localhost:5000 ws://localhost:5000;";
 app.use((req, res, next) => {
     res.setHeader('Content-Security-Policy', cspHeader);
     next();

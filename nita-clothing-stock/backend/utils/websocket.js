@@ -20,7 +20,7 @@ const initWebSocket = (server) => {
     }
 
     try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'nita-clothing-secret-key-2024');
+      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'nita-secret-key');
       ws.userId = decoded.id;
       ws.userRole = decoded.role;
       

@@ -8,9 +8,9 @@ class Sale {
     static async getBestDaysOfMonth(year, month) {
         try {
             const sql = `
-                SELECT date(sale_date) as day, COUNT(*) as total_sales, SUM(total) as total_amount
+                SELECT DATE(created_at) as day, COUNT(*) as total_sales, SUM(total) as total_amount
                 FROM sales
-                WHERE strftime('%Y', sale_date) = ? AND strftime('%m', sale_date) = ?
+                WHERE YEAR(created_at) = ? AND MONTH(created_at) = ?
                 GROUP BY day
                 ORDER BY total_amount DESC
             `;
@@ -26,13 +26,13 @@ class Sale {
                 let where = [];
                 let params = [];
                 if (filters.start_date && filters.end_date) {
-                    where.push('date(s.sale_date) BETWEEN date(?) AND date(?)');
+                    where.push('DATE(s.created_at) BETWEEN DATE(?) AND DATE(?)');
                     params.push(filters.start_date, filters.end_date);
                 } else if (filters.month && filters.year) {
-                    where.push(`strftime('%Y-%m', s.sale_date) = ?`);
+                    where.push('DATE_FORMAT(s.created_at, "%Y-%m") = ?');
                     params.push(`${filters.year}-${String(filters.month).padStart(2, '0')}`);
                 } else if (filters.year) {
-                    where.push(`strftime('%Y', s.sale_date) = ?`);
+                    where.push('YEAR(s.created_at) = ?');
                     params.push(filters.year);
                 }
                 if (filters.payment_method) {
@@ -62,15 +62,15 @@ class Sale {
                 // Consulta principal
                 const sql = `
                     SELECT s.*, (
-                        SELECT GROUP_CONCAT(product_name || ' x' || quantity, ', ')
+                        SELECT GROUP_CONCAT(CONCAT(si.product_name, ' x', si.quantity) SEPARATOR ', ')
                         FROM sale_items si WHERE si.sale_id = s.id
                     ) as items
                     FROM sales s
                     ${whereClause}
-                    ORDER BY s.sale_date DESC
-                    LIMIT ? OFFSET ?
+                    ORDER BY s.created_at DESC
+                    LIMIT ${parseInt(pageSize)} OFFSET ${parseInt(offset)}
                 `;
-                const sales = await database.all(sql, [...params, pageSize, offset]);
+                const sales = await database.all(sql, params);
                 // Total para paginación
                 const countSql = `SELECT COUNT(*) as total FROM sales s ${whereClause}`;
                 const totalRow = await database.get(countSql, params);
@@ -87,7 +87,7 @@ class Sale {
     // Actualizar estado de la venta
     static async updateStatus(id, status) {
         try {
-            const sql = `UPDATE sales SET status = ?, updated_at = datetime('now') WHERE id = ?`;
+            const sql = `UPDATE sales SET status = ?, updated_at = NOW() WHERE id = ?`;
             await database.run(sql, [status, id]);
             return true;
         } catch (error) {
@@ -95,23 +95,23 @@ class Sale {
         }
     }
 
-                        // Obtener ventas por rango de fechas
-                        static async getSalesByDateRange(startDate, endDate) {
-                            try {
-                                const sql = `
-                                    SELECT s.*, (
-                                        SELECT GROUP_CONCAT(product_name || ' x' || quantity, ', ')
-                                        FROM sale_items si WHERE si.sale_id = s.id
-                                    ) as items
-                                    FROM sales s
-                                    WHERE date(sale_date) BETWEEN date(?) AND date(?)
-                                    ORDER BY s.sale_date DESC
-                                `;
-                                return await database.all(sql, [startDate, endDate]);
-                            } catch (error) {
-                                throw new Error(`Error obteniendo ventas por rango: ${error.message}`);
-                            }
-                        }
+    // Obtener ventas por rango de fechas
+    static async getSalesByDateRange(startDate, endDate) {
+        try {
+            const sql = `
+                SELECT s.*, (
+                    SELECT GROUP_CONCAT(CONCAT(si.product_name, ' x', si.quantity) SEPARATOR ', ')
+                    FROM sale_items si WHERE si.sale_id = s.id
+                ) as items
+                FROM sales s
+                WHERE DATE(s.created_at) BETWEEN DATE(?) AND DATE(?)
+                ORDER BY s.created_at DESC
+            `;
+            return await database.all(sql, [startDate, endDate]);
+        } catch (error) {
+            throw new Error(`Error obteniendo ventas por rango: ${error.message}`);
+        }
+    }
                     // Crear una nueva venta con múltiples items (carrito)
                     static async createWithItems(saleData, items, customerEmail = null) {
                         const database = require('../config/database');
@@ -134,8 +134,8 @@ class Sale {
 
                                 // Insertar venta principal
                                 const sql = `
-                                    INSERT INTO sales (subtotal, discount_percent, discount_amount, total, customer_name, customer_email, payment_method, sale_date, created_at)
-                                    VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
+                                    INSERT INTO sales (subtotal, discount_percent, discount_amount, total, customer_name, customer_email, payment_method, created_at)
+                                    VALUES (?, ?, ?, ?, ?, ?, ?, NOW())
                                 `;
                                 const result = await database.run(sql, [
                                     saleData.subtotal,
@@ -166,7 +166,7 @@ class Sale {
                                         profit
                                     });
                                     // Actualizar stock
-                                    await database.run('UPDATE products SET quantity = quantity - ?, updated_at = datetime("now") WHERE id = ?', [item.quantity, item.product_id]);
+                                    await database.run('UPDATE products SET quantity = quantity - ?, updated_at = NOW() WHERE id = ?', [item.quantity, item.product_id]);
                                 }
                                 await database.run('COMMIT');
                                 return { id: sale_id, ...saleData, items };
@@ -181,17 +181,22 @@ class Sale {
                 // Rotación de categorías
                 static async getCategoryRotation() {
                     const sql = `
-                        SELECT c.name as category,
+                        SELECT c.nombre as category,
                                COUNT(p.id) as products_count,
                                IFNULL(SUM(si.quantity), 0) as total_sold,
-                               CASE WHEN AVG(p.quantity) > 0 THEN IFNULL(SUM(si.quantity), 0) / AVG(p.quantity) ELSE 0 END as rotation_rate,
-                               CASE WHEN IFNULL(SUM(si.quantity), 0) > 0 THEN AVG(p.quantity) / (IFNULL(SUM(si.quantity), 0) / 30.0) ELSE NULL END as days_to_sell
-                        FROM categories c
-                        LEFT JOIN products p ON p.category_id = c.id
+                               CASE WHEN AVG(p.stock) > 0 
+                                    THEN IFNULL(SUM(si.quantity), 0) / AVG(p.stock) 
+                                    ELSE 0 END as rotation_rate,
+                               CASE WHEN IFNULL(SUM(si.quantity), 0) > 0 
+                                    THEN AVG(p.stock) / (IFNULL(SUM(si.quantity), 0) / 30.0) 
+                                    ELSE NULL END as days_to_sell
+                        FROM categorias c
+                        LEFT JOIN productos p ON p.categoria_id = c.id
                         LEFT JOIN sale_items si ON si.product_id = p.id
-                        GROUP BY c.name
+                        GROUP BY c.nombre
                     `;
-                    return await database.all(sql);
+                    const [rows] = await database.query(sql);
+                    return rows;
                 }
 
                 // Alertas de reposición (productos bajo mínimo)
@@ -237,16 +242,24 @@ class Sale {
             static async getGeneralProfits() {
                 const sql = `
                     SELECT 
-                        SUM(si.profit) as ganancia_total,
-                        SUM(CASE WHEN strftime('%Y-%m', s.sale_date) = strftime('%Y-%m', 'now') THEN si.profit ELSE 0 END) as ganancia_mensual,
-                        SUM(CASE WHEN strftime('%Y', s.sale_date) = strftime('%Y', 'now') THEN si.profit ELSE 0 END) as ganancia_anual,
-                        AVG((si.profit * 1.0) / NULLIF(si.subtotal, 0)) as margen_promedio,
+                        SUM((si.unit_price - si.unit_cost) * si.quantity) as ganancia_total,
+                        SUM(CASE WHEN DATE_FORMAT(s.created_at, '%Y-%m') = DATE_FORMAT(NOW(), '%Y-%m') 
+                                 THEN (si.unit_price - si.unit_cost) * si.quantity 
+                                 ELSE 0 END) as ganancia_mensual,
+                        SUM(CASE WHEN YEAR(s.created_at) = YEAR(NOW()) 
+                                 THEN (si.unit_price - si.unit_cost) * si.quantity 
+                                 ELSE 0 END) as ganancia_anual,
+                        AVG((si.unit_price - si.unit_cost) / NULLIF(si.unit_price, 0)) * 100 as margen_promedio,
                         SUM(si.unit_cost * si.quantity) as costo_total,
-                        CASE WHEN SUM(si.unit_cost * si.quantity) > 0 THEN SUM(si.profit) / SUM(si.unit_cost * si.quantity) ELSE 0 END as roi
+                        CASE WHEN SUM(si.unit_cost * si.quantity) > 0 
+                             THEN (SUM((si.unit_price - si.unit_cost) * si.quantity) / SUM(si.unit_cost * si.quantity)) * 100 
+                             ELSE 0 END as roi
                     FROM sale_items si
                     JOIN sales s ON si.sale_id = s.id
+                    WHERE s.status = 'completed'
                 `;
-                return await database.get(sql);
+                const [rows] = await database.query(sql);
+                return rows[0];
             }
 
             // Ganancia por producto
@@ -254,88 +267,100 @@ class Sale {
                 const sql = `
                     SELECT 
                         p.id as product_id,
-                        p.name as product_name,
+                        p.nombre as product_name,
                         SUM(si.quantity) as units_sold,
-                        SUM(si.subtotal) as total_revenue,
+                        SUM(si.quantity * si.unit_price) as total_revenue,
                         SUM(si.unit_cost * si.quantity) as total_cost,
-                        SUM(si.profit) as total_profit,
-                        CASE WHEN SUM(si.subtotal) > 0 THEN SUM(si.profit) / SUM(si.subtotal) ELSE 0 END as profit_margin
+                        SUM((si.unit_price - si.unit_cost) * si.quantity) as total_profit,
+                        CASE WHEN SUM(si.quantity * si.unit_price) > 0 
+                             THEN (SUM((si.unit_price - si.unit_cost) * si.quantity) / SUM(si.quantity * si.unit_price)) * 100 
+                             ELSE 0 END as profit_margin
                     FROM sale_items si
-                    JOIN products p ON si.product_id = p.id
-                    GROUP BY p.id, p.name
+                    JOIN productos p ON si.product_id = p.id
+                    GROUP BY p.id, p.nombre
                     ORDER BY total_profit DESC
                 `;
-                return await database.all(sql);
+                const [rows] = await database.query(sql);
+                return rows;
             }
 
             // Ganancia por categoría
             static async getProfitByCategory() {
                 const sql = `
                     SELECT 
-                        c.name as category,
-                        SUM(si.subtotal) as total_revenue,
+                        c.nombre as category,
+                        SUM(si.quantity * si.unit_price) as total_revenue,
                         SUM(si.unit_cost * si.quantity) as total_cost,
-                        SUM(si.profit) as total_profit,
-                        CASE WHEN SUM(si.subtotal) > 0 THEN SUM(si.profit) / SUM(si.subtotal) ELSE 0 END as profit_margin
+                        SUM((si.unit_price - si.unit_cost) * si.quantity) as total_profit,
+                        CASE WHEN SUM(si.quantity * si.unit_price) > 0 
+                             THEN (SUM((si.unit_price - si.unit_cost) * si.quantity) / SUM(si.quantity * si.unit_price)) * 100 
+                             ELSE 0 END as profit_margin
                     FROM sale_items si
-                    JOIN products p ON si.product_id = p.id
-                    JOIN categories c ON p.category_id = c.id
-                    GROUP BY c.name
+                    JOIN productos p ON si.product_id = p.id
+                    JOIN categorias c ON p.categoria_id = c.id
+                    GROUP BY c.nombre
                     ORDER BY total_profit DESC
                 `;
-                return await database.all(sql);
+                const [rows] = await database.query(sql);
+                return rows;
             }
         // Productos más vendidos (por cantidad y monto)
         static async getTopSellingProducts({ limit = 10, days = 30 } = {}) {
             const sql = `
-                SELECT p.id as product_id, p.name as product_name, c.name as category, 
+                SELECT p.id as product_id, p.nombre as product_name, c.nombre as category, 
                        SUM(si.quantity) as quantity_sold, 
-                       SUM(si.subtotal) as total_revenue, 
-                       SUM(si.profit) as total_profit
+                       SUM(si.quantity * si.unit_price) as total_revenue, 
+                       SUM((si.unit_price - si.unit_cost) * si.quantity) as total_profit
                 FROM sale_items si
-                JOIN products p ON si.product_id = p.id
-                JOIN categories c ON p.category_id = c.id
+                JOIN productos p ON si.product_id = p.id
+                JOIN categorias c ON p.categoria_id = c.id
                 JOIN sales s ON si.sale_id = s.id
-                WHERE s.sale_date >= datetime('now', ?)
-                GROUP BY p.id, p.name, c.name
+                WHERE s.created_at >= DATE_SUB(NOW(), INTERVAL ? DAY)
+                  AND s.status = 'completed'
+                GROUP BY p.id, p.nombre, c.nombre
                 ORDER BY quantity_sold DESC
-                LIMIT ?
+                LIMIT ${parseInt(limit)}
             `;
-            // days negativo para SQLite, ej: '-30 days'
-            return await database.all(sql, [`-${days} days`, limit]);
+            const [rows] = await database.query(sql, [days]);
+            return rows;
         }
 
         // Productos menos vendidos (por cantidad, últimos X días)
         static async getLeastSellingProducts({ limit = 10, days = 30 } = {}) {
             const sql = `
-                SELECT p.id as product_id, p.name as product_name, c.name as category,
+                SELECT p.id as product_id, p.nombre as product_name, c.nombre as category,
                        IFNULL(SUM(si.quantity), 0) as quantity_sold,
-                       IFNULL(SUM(si.subtotal), 0) as total_revenue
-                FROM products p
+                       IFNULL(SUM(si.quantity * si.unit_price), 0) as total_revenue
+                FROM productos p
                 LEFT JOIN sale_items si ON si.product_id = p.id
-                LEFT JOIN sales s ON si.sale_id = s.id AND s.sale_date >= datetime('now', ?)
-                JOIN categories c ON p.category_id = c.id
-                GROUP BY p.id, p.name, c.name
-                ORDER BY quantity_sold ASC, p.name ASC
-                LIMIT ?
+                LEFT JOIN sales s ON si.sale_id = s.id 
+                         AND s.created_at >= DATE_SUB(NOW(), INTERVAL ? DAY)
+                         AND s.status = 'completed'
+                JOIN categorias c ON p.categoria_id = c.id
+                GROUP BY p.id, p.nombre, c.nombre
+                ORDER BY quantity_sold ASC, p.nombre ASC
+                LIMIT ${parseInt(limit)}
             `;
-            return await database.all(sql, [`-${days} days`, limit]);
+            const [rows] = await database.query(sql, [days]);
+            return rows;
         }
 
         // Productos sin movimiento (sin ventas en X días)
         static async getProductsWithoutSales({ days = 90 } = {}) {
             const sql = `
-                SELECT p.id as product_id, p.name as product_name, c.name as category
-                FROM products p
-                JOIN categories c ON p.category_id = c.id
+                SELECT p.id as product_id, p.nombre as product_name, c.nombre as category
+                FROM productos p
+                JOIN categorias c ON p.categoria_id = c.id
                 WHERE p.id NOT IN (
                     SELECT DISTINCT si.product_id
                     FROM sale_items si
                     JOIN sales s ON si.sale_id = s.id
-                    WHERE s.sale_date >= datetime('now', ?)
+                    WHERE s.created_at >= DATE_SUB(NOW(), INTERVAL ? DAY)
+                      AND s.status = 'completed'
                 )
             `;
-            return await database.all(sql, [`-${days} days`]);
+            const [rows] = await database.query(sql, [days]);
+            return rows;
         }
 
         // Stock inmovilizado (valor de stock sin vender)
@@ -387,13 +412,13 @@ class Sale {
             try {
                 // Registrar la venta
                 const sql = `
-                    INSERT INTO sales (product_id, quantity, price_per_unit, total_amount, customer_name, payment_method, sale_date, created_at)
-                    VALUES (?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
+                    INSERT INTO sales (product_id, quantity, price_per_unit, total_amount, customer_name, payment_method, created_at)
+                    VALUES (?, ?, ?, ?, ?, ?, NOW())
                 `;
                 const result = await database.run(sql, [product_id, quantity, price_per_unit, total_amount, customer_name, payment_method]);
                 // Actualizar stock del producto
                 await database.run(
-                    'UPDATE products SET quantity = quantity - ?, updated_at = datetime("now") WHERE id = ?',
+                    'UPDATE products SET quantity = quantity - ?, updated_at = NOW() WHERE id = ?',
                     [quantity, product_id]
                 );
                 // Confirmar transacción
@@ -420,17 +445,53 @@ class Sale {
     static async getTopProductsThisMonth(limit = 5) {
         try {
             const sql = `
-                SELECT p.id, p.name, SUM(s.quantity) as total_sold
-                FROM sales s
-                JOIN products p ON s.product_id = p.id
-                WHERE strftime('%Y-%m', s.sale_date) = strftime('%Y-%m', 'now')
-                GROUP BY p.id, p.name
-                ORDER BY total_sold DESC
-                LIMIT ?
+                SELECT 
+                    p.id as product_id, 
+                    p.nombre as product_name, 
+                    p.colores as color,
+                    c.nombre as category_name,
+                    SUM(si.quantity) as total_quantity,
+                    SUM(si.quantity * si.unit_price) as total_revenue
+                FROM sale_items si
+                JOIN productos p ON si.product_id = p.id
+                LEFT JOIN categorias c ON p.categoria_id = c.id
+                JOIN sales s ON si.sale_id = s.id
+                WHERE DATE_FORMAT(s.created_at, '%Y-%m') = DATE_FORMAT(NOW(), '%Y-%m')
+                  AND s.status = 'completed'
+                GROUP BY p.id, p.nombre, p.colores, c.nombre
+                ORDER BY total_quantity DESC
+                LIMIT ${parseInt(limit)}
             `;
-            return await database.all(sql, [limit]);
+            return await database.all(sql);
         } catch (error) {
             throw new Error(`Error obteniendo productos más vendidos: ${error.message}`);
+        }
+    }
+
+    // Obtener las categorías más vendidas del mes actual
+    static async getTopCategoriesThisMonth(limit = 3) {
+        try {
+            const sql = `
+                SELECT 
+                    c.id as category_id, 
+                    c.nombre as category_name,
+                    c.descripcion as category_description,
+                    COUNT(DISTINCT si.product_id) as products_count,
+                    SUM(si.quantity) as total_quantity,
+                    SUM(si.quantity * si.unit_price) as total_revenue
+                FROM sale_items si
+                JOIN productos p ON si.product_id = p.id
+                JOIN categorias c ON p.categoria_id = c.id
+                JOIN sales s ON si.sale_id = s.id
+                WHERE DATE_FORMAT(s.created_at, '%Y-%m') = DATE_FORMAT(NOW(), '%Y-%m')
+                  AND s.status = 'completed'
+                GROUP BY c.id, c.nombre, c.descripcion
+                ORDER BY total_quantity DESC
+                LIMIT ${parseInt(limit)}
+            `;
+            return await database.all(sql);
+        } catch (error) {
+            throw new Error(`Error obteniendo categorías más vendidas: ${error.message}`);
         }
     }
 
@@ -441,9 +502,10 @@ class Sale {
             const stats = await database.get(`
                 SELECT 
                     COUNT(*) as total_sales,
-                    SUM(total_amount) as total_amount
+                    IFNULL(SUM(total), 0) as total_amount
                 FROM sales
-                WHERE strftime('%Y-%m', sale_date) = strftime('%Y-%m', 'now')
+                WHERE DATE_FORMAT(created_at, '%Y-%m') = DATE_FORMAT(NOW(), '%Y-%m')
+                  AND status = 'completed'
             `);
             return stats;
         } catch (error) {
@@ -510,12 +572,13 @@ class Sale {
     // Obtener estadísticas de ventas del día
     static async getSalesOfDay() {
         try {
-            const stats = await database.get(`
-                SELECT COUNT(*) as total_sales, SUM(total_amount) as total_amount
+            const [rows] = await database.query(`
+                SELECT COUNT(*) as total_sales, COALESCE(SUM(total), 0) as total_amount
                 FROM sales
-                WHERE date(sale_date) = date('now')
+                WHERE DATE(created_at) = CURDATE()
+                  AND status = 'completed'
             `);
-            return stats;
+            return rows[0];
         } catch (error) {
             throw new Error(`Error obteniendo ventas del día: ${error.message}`);
         }
@@ -524,12 +587,14 @@ class Sale {
     // Obtener estadísticas de ventas del mes
     static async getSalesOfMonth() {
         try {
-            const stats = await database.get(`
-                SELECT COUNT(*) as total_sales, SUM(total_amount) as total_amount
+            const [rows] = await database.query(`
+                SELECT COUNT(*) as total_sales, COALESCE(SUM(total), 0) as total_amount
                 FROM sales
-                WHERE strftime('%Y-%m', sale_date) = strftime('%Y-%m', 'now')
+                WHERE YEAR(created_at) = YEAR(NOW())
+                  AND MONTH(created_at) = MONTH(NOW())
+                  AND status = 'completed'
             `);
-            return stats;
+            return rows[0];
         } catch (error) {
             throw new Error(`Error obteniendo ventas del mes: ${error.message}`);
         }
@@ -538,12 +603,13 @@ class Sale {
     // Obtener estadísticas de ventas del año
     static async getSalesOfYear() {
         try {
-            const stats = await database.get(`
-                SELECT COUNT(*) as total_sales, SUM(total_amount) as total_amount
+            const [rows] = await database.query(`
+                SELECT COUNT(*) as total_sales, COALESCE(SUM(total), 0) as total_amount
                 FROM sales
-                WHERE strftime('%Y', sale_date) = strftime('%Y', 'now')
+                WHERE YEAR(created_at) = YEAR(NOW())
+                  AND status = 'completed'
             `);
-            return stats;
+            return rows[0];
         } catch (error) {
             throw new Error(`Error obteniendo ventas del año: ${error.message}`);
         }

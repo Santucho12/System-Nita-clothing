@@ -94,11 +94,9 @@ class Supplier {
     query += ' GROUP BY s.id ORDER BY s.name ASC';
 
     if (filters.limit) {
-      query += ' LIMIT ?';
-      params.push(parseInt(filters.limit));
+      query += ` LIMIT ${parseInt(filters.limit)}`;
       if (filters.offset) {
-        query += ' OFFSET ?';
-        params.push(parseInt(filters.offset));
+        query += ` OFFSET ${parseInt(filters.offset)}`;
       }
     }
 
@@ -221,8 +219,7 @@ class Supplier {
     query += ' GROUP BY po.id ORDER BY po.order_date DESC';
 
     if (filters.limit) {
-      query += ' LIMIT ?';
-      params.push(parseInt(filters.limit));
+      query += ` LIMIT ${parseInt(filters.limit)}`;
     }
 
     return await database.all(query, params);
@@ -252,8 +249,7 @@ class Supplier {
     query += ' ORDER BY p.nombre ASC';
 
     if (filters.limit) {
-      query += ' LIMIT ?';
-      params.push(parseInt(filters.limit));
+      query += ` LIMIT ${parseInt(filters.limit)}`;
     }
 
     return await database.all(query, params);
