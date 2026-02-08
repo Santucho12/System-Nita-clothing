@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import api from '../services/api';
+import { formatCurrency } from '../utils/formatters';
 import './Reservations.css';
 
 const initialReservation = {
@@ -156,7 +157,7 @@ export default function Reservations() {
                       <td>{r.reservation_number}</td>
                       <td>{r.customer_name}</td>
                       <td>{r.expiration_date?.slice(0, 10)}</td>
-                      <td>${r.total_amount?.toFixed(2)}</td>
+                      <td>{formatCurrency(r.total_amount || 0)}</td>
                       <td>
                         <button onClick={() => handleComplete(r.id)}>Completar</button>
                         <button onClick={() => handleCancel(r.id)}>Cancelar</button>
@@ -177,8 +178,8 @@ export default function Reservations() {
                   <td>{r.reservation_number}</td>
                   <td>{r.customer_name}</td>
                   <td>{r.items}</td>
-                  <td>${r.total_amount?.toFixed(2)}</td>
-                  <td>${r.deposit_amount?.toFixed(2)}</td>
+                  <td>{formatCurrency(r.total_amount || 0)}</td>
+                  <td>{formatCurrency(r.deposit_amount || 0)}</td>
                   <td>{r.expiration_date?.slice(0, 10)}</td>
                   <td>
                     <button onClick={() => handleComplete(r.id)}>Completar</button>
@@ -198,7 +199,7 @@ export default function Reservations() {
                   <td>{r.reservation_number}</td>
                   <td>{r.customer_name}</td>
                   <td><span className={`status ${r.status}`}>{r.status}</span></td>
-                  <td>${r.total_amount?.toFixed(2)}</td>
+                  <td>{formatCurrency(r.total_amount || 0)}</td>
                   <td>{r.reservation_date?.slice(0, 10)}</td>
                 </tr>
               ))}

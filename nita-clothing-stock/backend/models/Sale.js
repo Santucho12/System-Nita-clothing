@@ -462,7 +462,8 @@ class Sale {
                 ORDER BY total_quantity DESC
                 LIMIT ${parseInt(limit)}
             `;
-            return await database.all(sql);
+            const [rows] = await database.query(sql);
+            return rows;
         } catch (error) {
             throw new Error(`Error obteniendo productos más vendidos: ${error.message}`);
         }
@@ -489,7 +490,8 @@ class Sale {
                 ORDER BY total_quantity DESC
                 LIMIT ${parseInt(limit)}
             `;
-            return await database.all(sql);
+            const [rows] = await database.query(sql);
+            return rows;
         } catch (error) {
             throw new Error(`Error obteniendo categorías más vendidas: ${error.message}`);
         }
@@ -499,15 +501,15 @@ class Sale {
     static async getMonthlyStats() {
         try {
             // Ventas totales y monto total del mes actual
-            const stats = await database.get(`
+            const [rows] = await database.query(`
                 SELECT 
                     COUNT(*) as total_sales,
-                    IFNULL(SUM(total), 0) as total_amount
+                    IFNULL(SUM(total), 0) as total_revenue
                 FROM sales
                 WHERE DATE_FORMAT(created_at, '%Y-%m') = DATE_FORMAT(NOW(), '%Y-%m')
                   AND status = 'completed'
             `);
-            return stats;
+            return rows[0];
         } catch (error) {
             throw new Error(`Error obteniendo estadísticas mensuales: ${error.message}`);
         }

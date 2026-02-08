@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import { formatCurrency, formatNumber } from '../utils/formatters';
 import { 
   FaChartBar, 
   FaArrowUp, 
@@ -385,7 +386,7 @@ function AdvancedReports() {
             <div style={{ animationDelay: '0.3s' }}>
               <KPICard
                 title="Ventas Totales"
-                value={`$${(kpis.totalSales || 0).toLocaleString()}`}
+                value={formatCurrency(kpis.totalSales || 0)}
                 subtitle={`${kpis.totalTransactions || 0} transacciones`}
                 icon={FaShoppingCart}
                 color="#f73194"
@@ -395,8 +396,8 @@ function AdvancedReports() {
             <div style={{ animationDelay: '0.4s' }}>
               <KPICard
                 title="Ganancia Neta"
-                value={`$${(kpis.netProfit || 0).toLocaleString()}`}
-                subtitle={`Margen: ${(kpis.profitMargin || 0).toFixed(1)}%`}
+                value={formatCurrency(kpis.netProfit || 0)}
+                subtitle={`Margen: ${formatNumber(kpis.profitMargin || 0, 1)}%`}
                 icon={FaChartLine}
                 color="#2196F3"
                 trend={kpis.profitGrowth || 0}
@@ -405,7 +406,7 @@ function AdvancedReports() {
             <div style={{ animationDelay: '0.5s' }}>
               <KPICard
                 title="Ticket Promedio"
-                value={`$${(kpis.avgTicket || 0).toLocaleString()}`}
+                value={formatCurrency(kpis.avgTicket || 0)}
                 subtitle="Por transacción"
                 icon={FaReceipt}
                 color="#FF9800"

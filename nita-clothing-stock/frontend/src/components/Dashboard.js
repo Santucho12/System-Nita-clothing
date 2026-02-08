@@ -3,6 +3,7 @@ import { productService, categoryService } from '../services/api';
 import { reportsService } from '../services/salesService';
 import { toast } from 'react-toastify';
 import { Link } from 'react-router-dom';
+import { formatCurrency, formatInteger, formatNumber } from '../utils/formatters';
 import { 
   FaHome, FaTshirt, FaDollarSign, FaShoppingCart, FaChartLine, 
   FaTrophy, FaStar, FaPlus, FaSync, FaBox, FaMoneyBillWave,
@@ -180,7 +181,7 @@ const Dashboard = () => {
             <div style={{ background: 'linear-gradient(135deg, #f73194 0%, #ff6b9d 100%)', width: '50px', height: '50px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '10px' }}>
               <FaStore style={{ fontSize: '24px', color: 'white' }} />
             </div>
-            <h3 style={{ margin: '0 0 4px 0', fontSize: '28px', fontWeight: '700', color: '#f73194' }}>${parseFloat(stats.inventoryValue || 0).toFixed(2)}</h3>
+            <h3 style={{ margin: '0 0 4px 0', fontSize: '22px', fontWeight: '700', color: '#f73194' }}>{formatCurrency(stats.inventoryValue || 0)}</h3>
             <p style={{ margin: 0, fontSize: '13px', color: '#666', fontWeight: '500', minHeight: '32px', display: 'flex', alignItems: 'center' }}>Capital en Ropa</p>
           </div>
           <Link 
@@ -200,11 +201,11 @@ const Dashboard = () => {
             <div style={{ background: 'linear-gradient(135deg, #f73194 0%, #ff6b9d 100%)', width: '50px', height: '50px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '10px' }}>
               <FaShoppingCart style={{ fontSize: '24px', color: 'white' }} />
             </div>
-            <h3 style={{ margin: '0 0 4px 0', fontSize: '28px', fontWeight: '700', color: '#f73194' }}>{stats.monthlySales}</h3>
+            <h3 style={{ margin: '0 0 4px 0', fontSize: '22px', fontWeight: '700', color: '#f73194' }}>{formatInteger(stats.monthlySales)}</h3>
             <p style={{ margin: 0, fontSize: '13px', color: '#666', fontWeight: '500', minHeight: '32px', display: 'flex', alignItems: 'center' }}>Ventas del Mes</p>
           </div>
           <Link 
-            to="/reports" 
+            to="/sales/history" 
             style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 10px', background: 'rgba(108, 117, 125, 0.14)', borderRadius: '6px', textDecoration: 'none', color: '#f73194', fontWeight: '500', fontSize: '11px', transition: 'all 0.3s' }}
             onMouseOver={(e) => e.currentTarget.style.background = 'rgba(108, 117, 125, 0.25)'}
             onMouseOut={(e) => e.currentTarget.style.background = 'rgba(108, 117, 125, 0.14)'}
@@ -220,11 +221,11 @@ const Dashboard = () => {
             <div style={{ background: 'linear-gradient(135deg, #f73194 0%, #ff6b9d 100%)', width: '50px', height: '50px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '10px' }}>
               <FaDollarSign style={{ fontSize: '24px', color: 'white' }} />
             </div>
-            <h3 style={{ margin: '0 0 4px 0', fontSize: '28px', fontWeight: '700', color: '#f73194' }}>${parseFloat(stats.monthlyRevenue || 0).toFixed(2)}</h3>
+            <h3 style={{ margin: '0 0 4px 0', fontSize: '22px', fontWeight: '700', color: '#f73194' }}>{formatCurrency(stats.monthlyRevenue || 0)}</h3>
             <p style={{ margin: 0, fontSize: '13px', color: '#666', fontWeight: '500', minHeight: '32px', display: 'flex', alignItems: 'center' }}>Facturación del Mes</p>
           </div>
           <Link 
-            to="/reports" 
+            to="/reports/advanced" 
             style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 10px', background: 'rgba(108, 117, 125, 0.14)', borderRadius: '6px', textDecoration: 'none', color: '#f73194', fontWeight: '500', fontSize: '11px', transition: 'all 0.3s' }}
             onMouseOver={(e) => e.currentTarget.style.background = 'rgba(108, 117, 125, 0.25)'}
             onMouseOut={(e) => e.currentTarget.style.background = 'rgba(108, 117, 125, 0.14)'}
@@ -244,7 +245,7 @@ const Dashboard = () => {
               Categorías Más Vendidas del Mes
             </h2>
             <Link 
-              to="/reports" 
+              to="/reports/advanced" 
               className="btn-gray"
               style={{ padding: '10px 20px', color: 'white', border: 'none', borderRadius: '8px', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', fontWeight: '500' }}
             >
@@ -297,11 +298,11 @@ const Dashboard = () => {
                   <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
                     <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 12px', background: '#e3f2fd', color: '#2196F3', borderRadius: '6px', fontSize: '13px', fontWeight: '600' }}>
                       <FaBox />
-                      {category.total_quantity} vendidos
+                      {formatInteger(category.total_quantity)} vendidos
                     </span>
                     <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 12px', background: '#f3e5f5', color: '#f73194', borderRadius: '6px', fontSize: '13px', fontWeight: '600' }}>
                       <FaMoneyBillWave />
-                      ${parseFloat(category.total_revenue).toFixed(2)} generados
+                      {formatCurrency(category.total_revenue)} generados
                     </span>
                   </div>
                 </div>
@@ -331,7 +332,7 @@ const Dashboard = () => {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '20px' }}>
           {/* Nueva Venta */}
           <Link 
-            to="/sales" 
+            to="/sales/register" 
             className="action-card"
             style={{ 
               display: 'flex', 

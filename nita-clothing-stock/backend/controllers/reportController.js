@@ -403,15 +403,17 @@ class ReportController {
         try {
             const database = require('../config/database');
             
-            const result = await database.get(`
+            const [rows] = await database.query(`
                 SELECT 
                     IFNULL(SUM(precio * stock), 0) as total_value,
                     IFNULL(SUM(costo * stock), 0) as total_cost,
                     COUNT(*) as total_products,
                     SUM(stock) as total_units
                 FROM productos
-                WHERE estado = 'disponible'
+                WHERE estado = 'activo'
             `);
+            
+            const result = rows[0];
 
             res.status(200).json({
                 success: true,

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import api from '../services/api';
+import { formatCurrency } from '../utils/formatters';
 import { FaHistory, FaCalendarAlt, FaSearch, FaCreditCard, FaDollarSign, FaUser, FaEnvelope, FaFileInvoice, FaPrint, FaFilePdf, FaTimes, FaCheckCircle, FaTimesCircle, FaExchangeAlt, FaChevronLeft, FaChevronRight, FaFilter } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 
@@ -356,7 +357,7 @@ export default function SalesHistory() {
               <div>
                 <p style={{ margin: '0 0 5px 0', fontSize: '14px', color: '#666', fontWeight: '500' }}>Total Recaudado</p>
                 <p style={{ margin: 0, fontSize: '24px', fontWeight: '700', color: '#333' }}>
-                  ${sales.reduce((sum, sale) => sum + (parseFloat(sale.total) || 0), 0).toFixed(2)}
+                  {formatCurrency(sales.reduce((sum, sale) => sum + (parseFloat(sale.total) || 0), 0))}
                 </p>
               </div>
             </div>
@@ -369,7 +370,7 @@ export default function SalesHistory() {
               <div>
                 <p style={{ margin: '0 0 5px 0', fontSize: '14px', color: '#666', fontWeight: '500' }}>Promedio por Venta</p>
                 <p style={{ margin: 0, fontSize: '24px', fontWeight: '700', color: '#333' }}>
-                  ${sales.length > 0 ? (sales.reduce((sum, sale) => sum + (parseFloat(sale.total) || 0), 0) / sales.length).toFixed(2) : '0.00'}
+                  {sales.length > 0 ? formatCurrency(sales.reduce((sum, sale) => sum + (parseFloat(sale.total) || 0), 0) / sales.length) : formatCurrency(0)}
                 </p>
               </div>
             </div>
@@ -462,7 +463,7 @@ export default function SalesHistory() {
                         </span>
                       </td>
                       <td style={{ padding: '16px', fontSize: '16px', fontWeight: '700', color: '#4CAF50', textAlign: 'right' }}>
-                        ${parseFloat(sale.total || 0).toFixed(2)}
+                        {formatCurrency(sale.total || 0)}
                       </td>
                       <td style={{ padding: '16px', textAlign: 'center' }}>
                         {getStatusBadge(sale.status || 'completada')}
@@ -595,7 +596,7 @@ export default function SalesHistory() {
                   <p style={{ margin: '0 0 6px 0', fontSize: '13px', color: '#666', fontWeight: '500', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Total</p>
                   <p style={{ margin: 0, fontSize: '28px', fontWeight: '700', color: '#4CAF50', display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <FaDollarSign />
-                    {parseFloat(selectedSale.total || 0).toFixed(2)}
+                    {formatCurrency(selectedSale.total || 0)}
                   </p>
                 </div>
                 <div style={{ background: '#f8f9fa', padding: '18px', borderRadius: '10px', borderLeft: '4px solid #2196F3' }}>

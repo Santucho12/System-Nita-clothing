@@ -1,408 +1,281 @@
-# GUÍA DE TESTING - SISTEMA NITA CLOTHING
+# Sistema de Manuales Operativos Multinegocio con IA por Voz
 
-## 🧪 LISTA DE PRUEBAS MANUALES
+## 1. Visión General
 
-### PREPARACIÓN
-1. **Backend corriendo**: http://localhost:3000
-2. **Frontend corriendo**: http://localhost:3001
-3. **MySQL activo**: Base de datos 'nita' con datos de prueba
-4. **Usuario de prueba**: admin@nitaclothing.com / admin123
+El sistema es una plataforma centralizada que permite a un dueño con múltiples negocios
+(documentados como restaurantes, locales de ropa u otros rubros)
+crear, organizar y distribuir manuales operativos y de marca de forma estandarizada.
 
----
+El objetivo principal es:
+- Capturar el conocimiento operativo del negocio
+- Estandarizar procesos
+- Reducir errores humanos
+- Facilitar la capacitación de empleados
+- Permitir el crecimiento y la escalabilidad del negocio
 
-## 📋 TESTS POR MÓDULO
-
-### 1. AUTENTICACIÓN
-- [ ] Login exitoso con credenciales correctas
-- [ ] Login fallido con credenciales incorrectas
-- [ ] Token persiste después de refresh
-- [ ] Logout funciona y elimina token
-- [ ] Rutas protegidas redirigen a login sin token
-
-**Resultado esperado**: Sistema de autenticación funcional y seguro
+El sistema está diseñado para funcionar con **múltiples negocios dentro de una sola cuenta**,
+manteniendo separación lógica y control de accesos por rol.
 
 ---
 
-### 2. CATEGORÍAS
-- [ ] Ver lista de categorías
-- [ ] Crear nueva categoría
-- [ ] Editar categoría existente
-- [ ] Eliminar categoría (solo si no tiene productos)
-- [ ] Buscar categorías por nombre
-- [ ] Validación: nombre requerido
+## 2. Conceptos Clave del Sistema
 
-**Resultado esperado**: CRUD completo funcional
-
----
-
-### 3. PRODUCTOS
-- [ ] Ver lista de productos con paginación
-- [ ] Crear producto nuevo con todos los campos
-- [ ] Editar producto existente
-- [ ] Eliminar producto
-- [ ] Buscar por SKU, nombre, categoría
-- [ ] Filtrar por categoría, stock, estado
-- [ ] **Exportar a Excel** - verificar que descarga archivo .xlsx
-- [ ] Validaciones: SKU único, precios positivos
-
-**Resultado esperado**: Gestión completa de productos + exportación
+- **Multinegocio:** un mismo dueño puede gestionar varios negocios independientes.
+- **Estructura jerárquica:** negocio → categorías → manuales.
+- **Creación por audio:** los manuales pueden crearse hablando, sin necesidad de escribir(ES LO MAS IMPORTANTE).
+- **IA de transcripción y estructuración:** el audio se convierte automáticamente en procedimientos paso a paso(SUPER IMPORTANTE).
+- **Roles con permisos diferenciados:** cada usuario ve y hace solo lo que corresponde.
+- **Enfoque operativo real:** pensado para uso cotidiano en locales físicos.
 
 ---
 
-### 4. VENTAS - REGISTRO
-- [ ] Seleccionar producto y agregar al carrito
-- [ ] Modificar cantidad de producto
-- [ ] Eliminar producto del carrito
-- [ ] Aplicar descuento manual
-- [ ] Seleccionar método de pago
-- [ ] Completar venta
-- [ ] Verificar actualización de stock después de venta
-- [ ] Imprimir recibo
+## 3. Tipos de Usuarios y Roles
 
-**Resultado esperado**: Flujo completo de venta funcional
+### 3.1 Administrador / Dueño
 
----
+**Rol de mayor jerarquía.**
 
-### 5. VENTAS - HISTORIAL
-- [ ] Ver lista de todas las ventas
-- [ ] Filtrar por fecha (desde/hasta)
-- [ ] Filtrar por método de pago
-- [ ] Ver detalles de una venta específica
-- [ ] Buscar venta por cliente
+#### Permisos:
+- Crear, editar y eliminar negocios
+- Ver todos los negocios del sistema
+- Ver, crear, editar y eliminar cualquier manual
+- Definir categorías globales o por negocio
+- Modificar configuraciones generales del sistema
 
-**Resultado esperado**: Historial accesible y filtrable
+#### Alcance:
+- Visión completa y centralizada
+- Control total del conocimiento operativo
 
 ---
 
-### 6. CLIENTES
-- [ ] Ver lista de clientes
-- [ ] Crear nuevo cliente
-- [ ] Editar cliente existente
-- [ ] Eliminar cliente
-- [ ] Buscar por nombre/email/teléfono
-- [ ] Ver historial de compras del cliente
-- [ ] Validación: email válido, teléfono formato correcto
+### 3.2 Supervisor  
 
-**Resultado esperado**: Gestión completa de clientes
+**Rol operativo intermedio.**
 
----
+#### Permisos:
+- Acceder únicamente al negocio asignado
+- Crear manuales dentro de su negocio
+- Grabar audios para generar procedimientos
+- Editar manuales existentes
+- Organizar categorías internas
+- Activar o desactivar manuales
 
-### 7. RESERVAS
-- [ ] Crear nueva reserva
-- [ ] Seleccionar cliente existente
-- [ ] Agregar productos a la reserva
-- [ ] Establecer fecha de expiración
-- [ ] Ver lista de reservas con filtros de estado
-- [ ] **Convertir reserva a venta**
-- [ ] Cancelar reserva
-- [ ] Verificar que reservas próximas a vencer aparecen en Alertas
-
-**Resultado esperado**: Sistema de reservas completo con conversión a venta
+#### Restricciones:
+- No puede ver otros negocios
+- No puede crear ni eliminar negocios
+- No puede administrar usuarios globales
 
 ---
 
-### 8. CAMBIOS Y DEVOLUCIONES
-- [ ] Crear cambio/devolución
-- [ ] Seleccionar venta original
-- [ ] Elegir tipo (cambio, devolución, garantía)
-- [ ] Agregar motivo
-- [ ] Calcular reembolso
-- [ ] Aprobar/rechazar cambio
-- [ ] Completar cambio (actualiza stock)
-- [ ] Ver historial con filtros
+### 3.3 Empleado
 
-**Resultado esperado**: Gestión de cambios funcional
+**Rol de ejecución.**
 
----
+#### Permisos:
+- Ver manuales del negocio al que pertenece
+- Acceder solo a las categorías habilitadas
+- Visualizar procedimientos paso a paso
+- Escuchar el audio original del manual
+- Marcar pasos como completados (opcional)
 
-### 9. PROVEEDORES ⭐
-- [ ] Ver lista de proveedores en grid
-- [ ] Crear nuevo proveedor
-- [ ] Editar proveedor
-- [ ] Eliminar proveedor
-- [ ] Buscar por nombre
-- [ ] Cambiar estado (activo/inactivo)
-- [ ] Validación: campos obligatorios
-
-**Resultado esperado**: CRUD completo de proveedores
+#### Restricciones:
+- No puede crear manuales
+- No puede editar contenido
+- No puede ver métricas
+- No puede acceder a otros negocios
 
 ---
 
-### 10. ÓRDENES DE COMPRA ⭐
-- [ ] Crear nueva orden
-- [ ] Seleccionar proveedor
-- [ ] Agregar productos con cantidades y precios
-- [ ] Guardar orden (estado: pendiente)
-- [ ] Ver lista de órdenes con filtros
-- [ ] Ver detalles de orden
-- [ ] **Recibir orden** → verificar actualización de stock
-- [ ] Cancelar orden
-- [ ] Buscar órdenes por proveedor
+## 4. Estructura Multinegocio
 
-**Resultado esperado**: Sistema completo de compras con actualización automática de stock
+El sistema funciona bajo el concepto de **contenedores de negocio**.
 
----
+Ejemplo:
+- Restaurante Centro
+- Restaurante Norte
+- Restaurante Sur
+- Local de Ropa
 
-### 11. REPORTES ⭐
-#### Tab: Ventas
-- [ ] Ver gráfico de línea con ventas diarias del mes
-- [ ] Verificar stats: ventas del día, mes, año
-- [ ] Verificar total de transacciones
-- [ ] Verificar ticket promedio
+Cada negocio:
+- Tiene sus propias categorías
+- Tiene sus propios manuales
+- Tiene usuarios asignados de forma independiente
 
-#### Tab: Productos
-- [ ] Ver gráfico de barras con top 10 productos vendidos
-- [ ] Ver tabla de top 5 con mayor ganancia
-- [ ] Ver productos con bajo stock
-
-#### Tab: Ganancias
-- [ ] Ver estadísticas de márgenes
-- [ ] Verificar ROI
-- [ ] Verificar total de ganancias
-
-#### Tab: Categorías
-- [ ] Ver gráfico de pastel con distribución de ganancias
-- [ ] Ver tasas de rotación por categoría
-
-**Resultado esperado**: Todos los gráficos cargando correctamente con datos reales
+Un usuario puede:
+- Tener distintos roles en distintos negocios
+- No existir en otros negocios
 
 ---
 
-### 12. ALERTAS ⭐
-#### Tab: Stock Bajo
-- [ ] Ver productos con cantidad < stock_mínimo
-- [ ] Click navega al producto
+## 5. Categorías del Sistema(quiero que sean dinamicas, que las pueda crear el dueño o supervisor)
 
-#### Tab: Sin Stock
-- [ ] Ver productos con cantidad = 0
-- [ ] Verificar indicador de cantidad
+Las categorías son agrupadores lógicos de manuales.
+Son **configurables por negocio**.
 
-#### Tab: Reservas por Vencer
-- [ ] Ver reservas que expiran en 48 horas
-- [ ] Verificar countdown de horas
+### Ejemplos para Restaurantes:
+- Recetas
+- Procedimientos de Cocina
+- Apertura del Local
+- Cierre del Local
+- Higiene y Seguridad
+- Atención al Cliente
+- Manejo de Caja
 
-#### Tab: Sin Movimiento
-- [ ] Ver productos sin ventas en 60 días
-- [ ] Verificar días sin movimiento
-
-#### General
-- [ ] Verificar auto-refresh cada 5 minutos
-- [ ] Verificar contador total animado
-- [ ] Verificar badges de cantidad
-
-**Resultado esperado**: Sistema de alertas funcional con auto-refresh
+### Ejemplos para Local de Ropa:
+- Atención al Cliente
+- Ventas y Upselling
+- Apertura
+- Cierre
+- Visual Merchandising
+- Control de Stock
 
 ---
 
-### 13. BÚSQUEDA GLOBAL ⭐
-- [ ] Escribir en buscador (navbar)
-- [ ] Verificar debounce (espera 300ms)
-- [ ] Buscar producto por nombre → debe aparecer en sección "Productos"
-- [ ] Buscar venta por ID → debe aparecer en sección "Ventas"
-- [ ] Buscar cliente por nombre → debe aparecer en sección "Clientes"
-- [ ] Buscar proveedor → debe aparecer en sección "Proveedores"
-- [ ] Click en resultado navega correctamente
-- [ ] Verificar indicador de carga
-- [ ] Verificar contador de resultados
+## 6. Manuales Operativos
 
-**Resultado esperado**: Búsqueda universal funcional con navegación
+Un manual representa **un proceso concreto y ejecutable**.
 
----
+Ejemplos:
+- “Receta de Milanesa Napolitana”
+- “Apertura Turno Mañana”
+- “Cierre de Caja Diario”
+- “Cómo atender una devolución”
 
-### 14. TEMA OSCURO ⭐
-- [ ] Click en botón de toggle (sol/luna)
-- [ ] Verificar cambio de tema inmediato
-- [ ] Verificar que se aplica a TODOS los componentes:
-  - [ ] Navigation
-  - [ ] Dashboard
-  - [ ] Productos
-  - [ ] Ventas
-  - [ ] Clientes
-  - [ ] Reservas
-  - [ ] Cambios
-  - [ ] Proveedores
-  - [ ] Órdenes
-  - [ ] Reportes (incluye gráficos)
-  - [ ] Alertas
-  - [ ] Promociones
-- [ ] Refresh página → tema persiste
-- [ ] Verificar contraste legible en ambos temas
-- [ ] Verificar transiciones suaves
-
-**Resultado esperado**: Dark mode funcional con persistencia
+Cada manual puede incluir:
+- Título
+- Descripción breve
+- Procedimiento paso a paso
+- Audio original
+- Notas adicionales
+- Estado (activo / inactivo)
 
 ---
 
-### 15. EXPORTACIÓN EXCEL ⭐
-- [ ] Ir a Productos
-- [ ] Click en botón "Exportar Excel"
-- [ ] Verificar descarga de archivo .xlsx
-- [ ] Abrir archivo en Excel/LibreOffice
-- [ ] Verificar columnas: SKU, Nombre, Categoría, Talla, Color, Stock, Precios, Estado
-- [ ] Verificar datos correctos
-- [ ] Verificar formato de números y monedas
+## 7. Creación de Manuales por Audio (Funcionalidad Clave)
 
-**Resultado esperado**: Exportación funcional con datos formateados
+### Flujo de Creación:
 
----
+1. El encargado accede a su negocio
+2. Selecciona una categoría
+3. Presiona “Crear Manual”
+4. Graba un audio explicando el procedimiento
+5. La IA procesa el audio
 
-### 16. PROMOCIONES ⭐
-#### Crear Promoción
-- [ ] Click en "Nueva Promoción"
-- [ ] Ingresar nombre y descripción
-- [ ] Seleccionar tipo de descuento (% o fijo)
-- [ ] Ingresar valor del descuento
-- [ ] Seleccionar aplica a (todos/categorías/productos)
-- [ ] Si categorías: seleccionar categorías
-- [ ] Si productos: seleccionar productos
-- [ ] Establecer fechas inicio/fin (opcional)
-- [ ] Guardar promoción
+### Procesamiento por IA:
+- Transcripción del audio a texto
+- Limpieza de muletillas
+- Detección de pasos secuenciales
+- Organización automática del contenido
+- Generación de estructura tipo checklist
 
-#### Gestión
-- [ ] Ver promoción en grid con card
-- [ ] Verificar badge de estado (activa/pausada/finalizada)
-- [ ] Ver descuento formateado (% o $)
-- [ ] Ver aplicación (todos/X categorías/X productos)
-- [ ] Ver fechas de vigencia
+### Ejemplo de Resultado:
 
-#### Edición y Estados
-- [ ] Editar promoción
-- [ ] Pausar promoción activa
-- [ ] Reactivar promoción pausada
-- [ ] Eliminar promoción
-- [ ] Finalizar promoción
-
-#### Filtros
-- [ ] Buscar por nombre
-- [ ] Filtrar por estado (activa/pausada/finalizada)
-
-**Resultado esperado**: Sistema completo de promociones funcional
+**Receta – Milanesa Napolitana**
+1. Sacar la milanesa del freezer.
+2. Freír durante 7 minutos.
+3. Agregar cheddar.
+4. Agregar panceta.
+5. Espolvorear orégano.
 
 ---
 
-## 🎨 TESTS DE UI/UX
+## 8. Edición y Revisión de Manuales
 
-### Responsive
-- [ ] Abrir en Chrome DevTools
-- [ ] Probar en Mobile (375px)
-- [ ] Probar en Tablet (768px)
-- [ ] Probar en Desktop (1024px, 1440px)
-- [ ] Verificar Navigation en móvil
-- [ ] Verificar grids se adaptan
-- [ ] Verificar modales en móvil (95vw)
-- [ ] Verificar tablas con scroll horizontal
-- [ ] Verificar botones touch-friendly
-
-### Cross-Browser
-- [ ] Chrome
-- [ ] Firefox
-- [ ] Edge
-- [ ] Safari (si disponible)
-
-### Accesibilidad
-- [ ] Navegación con Tab
-- [ ] Contraste de colores (WCAG AA)
-- [ ] Tooltips en botones
-- [ ] Aria-labels presentes
+- El encargado puede editar:
+  - texto
+  - orden de pasos
+  - agregar notas
+- La edición es opcional
+- El objetivo es minimizar la fricción
 
 ---
 
-## ⚡ TESTS DE PERFORMANCE
+## 9. Consumo de Manuales por Empleados
 
-### Carga Inicial
-- [ ] Frontend carga en < 3 segundos
-- [ ] Backend responde en < 500ms
-- [ ] No hay errores en consola
+### Experiencia de Usuario (UX):
 
-### Operaciones
-- [ ] Búsqueda responde rápido (< 1s)
-- [ ] Filtros actualizan instantáneamente
-- [ ] Gráficos cargan sin delay visible
-- [ ] Exportar Excel termina en < 2s
-- [ ] Auto-refresh de alertas no interrumpe UX
+- Interfaz simple
+- Navegación por:
+  - negocio
+  - categoría
+  - manual
+- Visualización clara de pasos
+- Opción de escuchar el audio original
+- Posibilidad de marcar pasos como realizados
 
-### Optimización
-- [ ] Verificar Network tab (cargas innecesarias)
-- [ ] Verificar bundle size
-- [ ] Lighthouse score > 80
+Pensado para:
+- Personas con poca experiencia técnica
+- Uso rápido en situaciones reales de trabajo
 
 ---
 
-## 🔒 TESTS DE SEGURIDAD
+## 10. Control de Accesos y Seguridad
 
-### Autenticación
-- [ ] Token expira correctamente
-- [ ] Rutas protegidas sin token redirigen
-- [ ] Headers Authorization presentes
-- [ ] Password hasheada en DB (no plain text)
+El sistema implementa control por:
+- Usuario
+- Rol
+- Negocio
 
-### Validaciones
-- [ ] Validaciones frontend funcionan
-- [ ] Validaciones backend funcionan
-- [ ] SQL injection protegido (prepared statements)
-- [ ] XSS protegido
+Ejemplo:
+- Un encargado no puede acceder a otro negocio ni siquiera por URL directa
+- Un empleado no ve botones de edición
 
----
-
-## 📝 CHECKLIST FINAL
-
-### Funcionalidad
-- [ ] ✅ Todos los CRUDs funcionan
-- [ ] ✅ Flujo de venta completo
-- [ ] ✅ Flujo de reserva a venta
-- [ ] ✅ Flujo de orden de compra
-- [ ] ✅ Aplicación de promociones
-- [ ] ✅ Exportación funcional
-- [ ] ✅ Búsqueda global funcional
-- [ ] ✅ Alertas actualizándose
-- [ ] ✅ Tema persiste
-
-### UI/UX
-- [ ] ✅ Diseño consistente
-- [ ] ✅ Responsive en todos los tamaños
-- [ ] ✅ Sin errores de layout
-- [ ] ✅ Transiciones suaves
-- [ ] ✅ Iconos apropiados
-
-### Datos
-- [ ] ✅ Datos persisten correctamente
-- [ ] ✅ Relaciones DB funcionan
-- [ ] ✅ No hay pérdida de datos
-- [ ] ✅ Cálculos correctos
+Esto garantiza:
+- Seguridad
+- Claridad
+- Orden operativo
 
 ---
 
-## 🎯 CRITERIOS DE ÉXITO
+## 11. Descarga de Manuales a PDF
 
-El sistema está listo para producción cuando:
-1. ✅ Todos los módulos funcionan sin errores críticos
-2. ✅ Responsive funciona en móviles reales
-3. ✅ Performance aceptable (< 3s carga)
-4. ✅ No hay vulnerabilidades críticas
-5. ✅ Datos se guardan correctamente
-6. ✅ UX es fluida y sin bloqueos
+**Funcionalidad importante para distribuir manuales.**
 
----
+El sistema permite descargar los manuales de marca en formato PDF, lo cual es esencial para:
+- Imprimir manuales operativos para uso en locales físicos
+- Distribuir documentación sin necesidad de acceso digital
+- Crear archivos documentales de consulta rápida
+- Facilitar capacitación presencial con material impreso
+- Garantizar disponibilidad de procedimientos sin dependencia de conexión a internet
 
-## 🐛 REPORTE DE BUGS
-
-Si encuentras bugs, documentar:
-- **Módulo**: ¿Dónde ocurrió?
-- **Acción**: ¿Qué estabas haciendo?
-- **Esperado**: ¿Qué debería pasar?
-- **Obtenido**: ¿Qué pasó realmente?
-- **Consola**: Errores en consola del navegador
-- **Reproducible**: ¿Ocurre siempre?
+#### Permisos de descarga:
+- **Administrador:** descarga cualquier manual de cualquier negocio
+- **Supervisor:** descarga manuales de su negocio
+- **Empleado:** puede descargar manuales asignados (según configuración)
 
 ---
 
-## ✅ ESTADO ACTUAL
+## 12. Escalabilidad y Evolución
 
-**Sistema al 95% de completitud**
+El sistema está preparado para crecer hacia:
+- Nuevos negocios
+- Franquicias
+- Auditorías internas
+- Checklists obligatorios
+- Versionado de procedimientos
+- IA que sugiera mejoras operativas
 
-Pendiente:
-- 5% de testing exhaustivo con datos reales
-- Optimizaciones finales
-- Deployment en servidor de producción
+---
 
-**¡Casi terminado! 🚀**
+## 13. Propuesta de Valor
+
+Este sistema transforma:
+- Conocimiento oral → conocimiento estructurado
+- Dependencia de personas → procesos estandarizados
+- Capacitación informal → manuales claros y accesibles
+
+---
+
+## 14. Mensaje Clave para el Dueño
+
+> “Todo lo que hoy está en tu cabeza o en la del chef,
+queda guardado, ordenado y disponible para cualquier empleado,
+en cualquier momento, sin que tengas que explicarlo mil veces.”
+
+---
+
+## 15. Conclusión
+
+Este sistema no es solo una herramienta técnica.
+Es una **base de orden, control y crecimiento** para negocios físicos reales,
+diseñada desde la operación diaria hacia la escalabilidad futura.

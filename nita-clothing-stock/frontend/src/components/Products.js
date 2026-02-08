@@ -122,8 +122,8 @@ const Products = () => {
         filtered = response.data || [];
       }
       // Filtros locales
-      if (selectedSize) filtered = filtered.filter(p => p.size === selectedSize);
-      if (selectedColor) filtered = filtered.filter(p => p.color && p.color.toLowerCase() === selectedColor.toLowerCase());
+      if (selectedSize) filtered = filtered.filter(p => p.tallas === selectedSize);
+      if (selectedColor) filtered = filtered.filter(p => p.colores && p.colores.toLowerCase().includes(selectedColor.toLowerCase()));
       if (selectedStatus) filtered = filtered.filter(p => p.status === selectedStatus);
       setProducts(filtered);
     } catch (error) {
@@ -177,6 +177,8 @@ const Products = () => {
     try {
       const productData = {
         ...formData,
+        colores: formData.color,
+        tallas: formData.size,
         quantity: parseInt(formData.quantity),
         min_stock: parseInt(formData.min_stock),
         sale_price: parseFloat(formData.sale_price),
@@ -185,6 +187,9 @@ const Products = () => {
         supplier_id: formData.supplier_id ? parseInt(formData.supplier_id) : null,
         images: formData.images // array de archivos o urls
       };
+      // Eliminar los campos antiguos
+      delete productData.color;
+      delete productData.size;
       if (editingProduct) {
         await productService.update(editingProduct.id, productData);
         toast.success('Producto actualizado exitosamente');
@@ -215,8 +220,8 @@ const Products = () => {
     setEditingProduct(product);
     setFormData({
       name: product.name,
-      color: product.color,
-      size: product.size || '',
+      color: product.colores || '',
+      size: product.tallas || '',
       sale_price: product.sale_price?.toString() || '',
       cost_price: product.cost_price?.toString() || '',
       quantity: product.quantity?.toString() || '',
@@ -536,12 +541,10 @@ const Products = () => {
               style={{ width: '100%', padding: '10px 14px', border: '2px solid #e0e0e0', borderRadius: '8px', fontSize: '14px', background: '#fafafa', cursor: 'pointer' }}
             >
               <option value="">Todos</option>
-              <option value="S">S</option>
-              <option value="M">M</option>
-              <option value="L">L</option>
-              <option value="XL">XL</option>
-              <option value="XXL">XXL</option>
-              <option value="Único">Único</option>
+              <option value="Talle único">Talle único</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
             </select>
           </div>
 
@@ -661,12 +664,10 @@ const Products = () => {
                     style={{ width: '100%', padding: '10px 14px', border: '2px solid #e0e0e0', borderRadius: '8px', fontSize: '14px', cursor: 'pointer' }}
                   >
                     <option value="">Selecciona</option>
-                    <option value="S">S</option>
-                    <option value="M">M</option>
-                    <option value="L">L</option>
-                    <option value="XL">XL</option>
-                    <option value="XXL">XXL</option>
-                    <option value="Único">Único</option>
+                    <option value="Talle único">Talle único</option>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
                   </select>
                 </div>
               </div>
@@ -960,7 +961,7 @@ const Products = () => {
                     <h3 style={{ margin: '0 0 5px 0', fontSize: '18px', color: '#333', fontWeight: '600' }}>{product.name}</h3>
                     <p style={{ margin: 0, fontSize: '13px', color: '#666', display: 'flex', alignItems: 'center', gap: '6px' }}>
                       <FaPalette style={{ color: '#f73194' }} />
-                      {product.color} • {product.size}
+                      {product.colores} • Talle {product.tallas}
                     </p>
                   </div>
                   <div style={{ display: 'flex', gap: '6px' }}>
@@ -1001,6 +1002,18 @@ const Products = () => {
                     <FaDollarSign style={{ marginRight: '8px', color: '#4CAF50', fontSize: '13px' }} />
                     <strong style={{ marginRight: '6px' }}>Precio:</strong> ${product.sale_price}
                   </p>
+                  {product.tallas && (
+                    <p style={{ margin: '8px 0', display: 'flex', alignItems: 'center', fontSize: '14px', color: '#555' }}>
+                      <FaTshirt style={{ marginRight: '8px', color: '#f73194', fontSize: '13px' }} />
+                      <strong style={{ marginRight: '6px' }}>Talle:</strong> {product.tallas}
+                    </p>
+                  )}
+                  {product.colores && (
+                    <p style={{ margin: '8px 0', display: 'flex', alignItems: 'center', fontSize: '14px', color: '#555' }}>
+                      <FaPalette style={{ marginRight: '8px', color: '#f73194', fontSize: '13px' }} />
+                      <strong style={{ marginRight: '6px' }}>Color:</strong> {product.colores}
+                    </p>
+                  )}
                   {product.sku && (
                     <p style={{ margin: '8px 0', display: 'flex', alignItems: 'center', fontSize: '13px', color: '#777' }}>
                       <FaBarcode style={{ marginRight: '8px', color: '#666', fontSize: '13px' }} />
@@ -1096,13 +1109,13 @@ const Products = () => {
                 <strong style={{ color: '#555', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
                   <FaPalette style={{ color: '#f73194' }} /> Color:
                 </strong>
-                {detailProduct.color}
+                {detailProduct.colores}
               </p>
               <p style={{ margin: '8px 0' }}>
                 <strong style={{ color: '#555', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
                   <FaRulerVertical style={{ color: '#f73194' }} /> Talle:
                 </strong>
-                {detailProduct.size}
+                {detailProduct.tallas}
               </p>
               <p style={{ margin: '8px 0' }}>
                 <strong style={{ color: '#555', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>

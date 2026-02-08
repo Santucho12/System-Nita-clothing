@@ -4,13 +4,13 @@ class Product {
     // Crear producto
     static async create(data) {
         const {
-            name, category_id, size, color, sale_price, cost_price, stock_quantity, min_stock, supplier_id,
+            name, category_id, tallas, colores, sale_price, cost_price, quantity, min_stock, supplier_id,
             images = [], status = 'disponible', sku, barcode, created_at = new Date(), updated_at = new Date()
         } = data;
         const [result] = await db.query(
             `INSERT INTO productos (nombre, categoria_id, tallas, colores, precio, costo, stock, stock_minimo, proveedor_id, imagenes, estado, codigo, barcode, created_at, updated_at)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-            [name, category_id, size, color, sale_price, cost_price, stock_quantity, min_stock, supplier_id, JSON.stringify(images), status, sku, barcode, created_at, updated_at]
+            [name, category_id, tallas, colores, sale_price, cost_price, quantity, min_stock, supplier_id, JSON.stringify(images), status, sku, barcode, created_at, updated_at]
         );
         return { id: result.insertId, ...data };
     }
@@ -69,7 +69,7 @@ class Product {
             }
         }
         values.push(id);
-        await db.query(`UPDATE products SET ${fields.join(', ')}, updated_at = ? WHERE id = ?`, [...values, new Date(), id]);
+        await db.query(`UPDATE productos SET ${fields.join(', ')}, updated_at = ? WHERE id = ?`, [...values, new Date(), id]);
         return this.getById(id);
     }
 
@@ -82,7 +82,7 @@ class Product {
     // Ajustar stock manualmente (positivo o negativo)
     static async adjustStock(id, delta) {
         await db.query(
-            'UPDATE products SET stock_quantity = stock_quantity + ?, updated_at = ? WHERE id = ?',
+            'UPDATE productos SET stock = stock + ?, updated_at = ? WHERE id = ?',
             [delta, new Date(), id]
         );
         return this.getById(id);

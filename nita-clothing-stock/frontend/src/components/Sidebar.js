@@ -8,7 +8,7 @@ const menuItems = [
   { to: '/products', icon: FaTshirt, label: 'Stock de Ropa' },
   { to: '/sales/register', icon: FaShoppingCart, label: 'Registrar Venta' },
   { to: '/sales/history', icon: FaHistory, label: 'Historial Ventas' },
-  { to: '/reports', icon: FaChartBar, label: 'Estadísticas' },
+  { to: '/reports/advanced', icon: FaChartBar, label: 'Estadísticas' },
   { to: '/customers', icon: FaUsers, label: 'Clientes' },
   { to: '/suppliers', icon: FaTruck, label: 'Proveedores' },
   { to: '/reservations', icon: FaBookmark, label: 'Reservas', comingSoon: true },

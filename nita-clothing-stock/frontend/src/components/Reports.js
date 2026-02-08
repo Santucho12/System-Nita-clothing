@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import { formatCurrency, formatNumber } from '../utils/formatters';
 import { 
   FaChartBar, 
   FaChartLine, 
@@ -315,7 +316,7 @@ function Reports() {
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                     <div>
                       <h3 style={{ margin: '0 0 8px 0', fontSize: '14px', color: '#999', fontWeight: '500' }}>Hoy</h3>
-                      <p className="amount" style={{ margin: '0 0 5px 0', fontSize: '28px', fontWeight: 'bold', color: '#333' }}>${parseFloat(salesData.day?.total || 0).toLocaleString()}</p>
+                      <p className="amount" style={{ margin: '0 0 5px 0', fontSize: '28px', fontWeight: 'bold', color: '#333' }}>{formatCurrency(salesData.day?.total || 0)}</p>
                       <span className="stat-detail" style={{ fontSize: '13px', color: '#666' }}>{salesData.day?.count || 0} ventas</span>
                     </div>
                     <div style={{ width: '60px', height: '60px', borderRadius: '12px', background: 'linear-gradient(135deg, #4CAF50 0%, #45a049 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '28px', color: 'white' }}>
@@ -327,7 +328,7 @@ function Reports() {
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                     <div>
                       <h3 style={{ margin: '0 0 8px 0', fontSize: '14px', color: '#999', fontWeight: '500' }}>Este Mes</h3>
-                      <p className="amount" style={{ margin: '0 0 5px 0', fontSize: '28px', fontWeight: 'bold', color: '#333' }}>${parseFloat(salesData.month?.total || 0).toLocaleString()}</p>
+                      <p className="amount" style={{ margin: '0 0 5px 0', fontSize: '28px', fontWeight: 'bold', color: '#333' }}>{formatCurrency(salesData.month?.total || 0)}</p>
                       <span className="stat-detail" style={{ fontSize: '13px', color: '#666' }}>{salesData.month?.count || 0} ventas</span>
                     </div>
                     <div style={{ width: '60px', height: '60px', borderRadius: '12px', background: 'linear-gradient(135deg, #2196F3 0%, #1976D2 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '28px', color: 'white' }}>
@@ -339,7 +340,7 @@ function Reports() {
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                     <div>
                       <h3 style={{ margin: '0 0 8px 0', fontSize: '14px', color: '#999', fontWeight: '500' }}>Este Año</h3>
-                      <p className="amount" style={{ margin: '0 0 5px 0', fontSize: '28px', fontWeight: 'bold', color: '#333' }}>${parseFloat(salesData.year?.total || 0).toLocaleString()}</p>
+                      <p className="amount" style={{ margin: '0 0 5px 0', fontSize: '28px', fontWeight: 'bold', color: '#333' }}>{formatCurrency(salesData.year?.total || 0)}</p>
                       <span className="stat-detail" style={{ fontSize: '13px', color: '#666' }}>{salesData.year?.count || 0} ventas</span>
                     </div>
                     <div style={{ width: '60px', height: '60px', borderRadius: '12px', background: 'linear-gradient(135deg, #FF9800 0%, #F57C00 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '28px', color: 'white' }}>
@@ -387,7 +388,7 @@ function Reports() {
                             <td style={{ padding: '12px', fontSize: '14px', color: '#333' }}>{index + 1}</td>
                             <td style={{ padding: '12px', fontSize: '14px', color: '#333' }}>{product.product_name}</td>
                             <td style={{ padding: '12px', fontSize: '14px', color: '#333' }}>{product.total_quantity}</td>
-                            <td style={{ padding: '12px', fontSize: '14px', color: '#4CAF50', fontWeight: '600' }}>${parseFloat(product.total_revenue).toLocaleString()}</td>
+                            <td style={{ padding: '12px', fontSize: '14px', color: '#4CAF50', fontWeight: '600' }}>{formatCurrency(product.total_revenue)}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -450,7 +451,7 @@ function Reports() {
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                     <div>
                       <h3 style={{ margin: '0 0 8px 0', fontSize: '14px', color: '#999', fontWeight: '500' }}>Ganancia Total</h3>
-                      <p className="amount" style={{ margin: '0', fontSize: '28px', fontWeight: 'bold', color: '#333' }}>${parseFloat(profitData.general?.total_profit || 0).toLocaleString()}</p>
+                      <p className="amount" style={{ margin: '0', fontSize: '28px', fontWeight: 'bold', color: '#333' }}>{formatCurrency(profitData.general?.total_profit || 0)}</p>
                     </div>
                     <div style={{ width: '60px', height: '60px', borderRadius: '12px', background: 'linear-gradient(135deg, #4CAF50 0%, #45a049 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '28px', color: 'white' }}>
                       <FaMoneyBillWave />
@@ -497,7 +498,7 @@ function Reports() {
                         {profitData.byProduct.slice(0, 10).map((product, index) => (
                           <tr key={index} style={{ borderBottom: '1px solid #f0f0f0' }}>
                             <td style={{ padding: '12px', fontSize: '14px', color: '#333' }}>{product.product_name}</td>
-                            <td style={{ padding: '12px', fontSize: '14px', color: '#4CAF50', fontWeight: '600' }}>${parseFloat(product.total_profit).toLocaleString()}</td>
+                            <td style={{ padding: '12px', fontSize: '14px', color: '#4CAF50', fontWeight: '600' }}>{formatCurrency(product.total_profit)}</td>
                             <td style={{ padding: '12px', fontSize: '14px', color: '#2196F3', fontWeight: '600' }}>{parseFloat(product.profit_margin).toFixed(1)}%</td>
                           </tr>
                         ))}
@@ -544,7 +545,7 @@ function Reports() {
                       {categoriesData.map((cat, index) => (
                         <tr key={index} style={{ borderBottom: '1px solid #f0f0f0' }}>
                           <td style={{ padding: '12px', fontSize: '14px', color: '#333', fontWeight: '600' }}>{cat.category_name}</td>
-                          <td style={{ padding: '12px', fontSize: '14px', color: '#4CAF50', fontWeight: '600' }}>${parseFloat(cat.total_sold).toLocaleString()}</td>
+                          <td style={{ padding: '12px', fontSize: '14px', color: '#4CAF50', fontWeight: '600' }}>{formatCurrency(cat.total_sold)}</td>
                           <td style={{ padding: '12px', fontSize: '14px', color: '#333' }}>{cat.current_stock}</td>
                           <td style={{ padding: '12px' }}>
                             <span style={{ 

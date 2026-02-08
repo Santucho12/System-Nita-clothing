@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -40,6 +40,8 @@ function App() {
 
   const handleLogin = (userData) => {
     setUser(userData);
+    // Redirigir a la página principal
+    window.location.href = '/';
   };
 
   if (!user) {
@@ -56,7 +58,7 @@ function App() {
               <Route path="/" element={<Dashboard />} />
               <Route path="/categories" element={<Categories />} />
               <Route path="/products" element={<Products />} />
-              <Route path="/reports" element={<Reports />} />
+              <Route path="/reports" element={<Navigate to="/reports/advanced" replace />} />
               <Route path="/reports/advanced" element={<AdvancedReports />} />
               <Route path="/sales/register" element={<RegisterSale />} />
               <Route path="/sales/history" element={<SalesHistory />} />
@@ -68,6 +70,8 @@ function App() {
               <Route path="/purchase-orders" element={<PurchaseOrders />} />
               <Route path="/alerts" element={<Alerts />} />
               <Route path="/promotions" element={<Promotions />} />
+              <Route path="/login" element={<Navigate to="/" replace />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </main>
           <ToastContainer

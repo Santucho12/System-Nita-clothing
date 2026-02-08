@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import api from '../services/api';
+import { formatCurrency } from '../utils/formatters';
 import { FaUsers, FaSearch, FaChartPie, FaUser, FaEnvelope, FaPhone, FaMapMarkerAlt, FaShoppingBag, FaDollarSign, FaCalendarAlt } from 'react-icons/fa';
 import './Customers.css';
 
@@ -275,7 +276,7 @@ export default function Customers() {
                         <td style={{ padding: '12px', fontSize: '14px' }}>{c.email}</td>
                         <td style={{ padding: '12px', fontSize: '14px', fontWeight: '500' }}>{c.name}</td>
                         <td style={{ padding: '12px', fontSize: '14px' }}>{c.purchase_count || 0}</td>
-                        <td style={{ padding: '12px', fontSize: '14px', fontWeight: '600', color: '#f73194' }}>${c.total_spent?.toFixed(2) || '0.00'}</td>
+                        <td style={{ padding: '12px', fontSize: '14px', fontWeight: '600', color: '#f73194' }}>{formatCurrency(c.total_spent || 0)}</td>
                         <td style={{ padding: '12px', fontSize: '14px' }}>{c.last_purchase?.slice(0, 10) || 'N/A'}</td>
                         <td style={{ padding: '12px' }}>
                           <span style={{ 
@@ -425,7 +426,7 @@ export default function Customers() {
 
                       <div style={{ padding: '24px', background: 'linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%)', borderRadius: '12px', textAlign: 'center' }}>
                         <FaDollarSign style={{ fontSize: '36px', color: '#155724', marginBottom: '12px' }} />
-                        <p style={{ margin: '0 0 8px 0', fontSize: '32px', fontWeight: '600', color: '#155724' }}>${customerStats?.total_spent?.toFixed(2) || '0.00'}</p>
+                        <p style={{ margin: '0 0 8px 0', fontSize: '32px', fontWeight: '600', color: '#155724' }}>{formatCurrency(customerStats?.total_spent || 0)}</p>
                         <p style={{ margin: 0, fontSize: '14px', color: '#666', fontWeight: '500' }}>Total Gastado</p>
                       </div>
 
@@ -451,7 +452,7 @@ export default function Customers() {
                             <tr key={s.id} style={{ borderBottom: '1px solid #f0f0f0' }}>
                               <td style={{ padding: '12px', fontSize: '14px' }}>{s.sale_date?.slice(0, 10)}</td>
                               <td style={{ padding: '12px', fontSize: '14px' }}>{s.items}</td>
-                              <td style={{ padding: '12px', fontSize: '14px', fontWeight: '600', color: '#f73194', textAlign: 'right' }}>${s.total?.toFixed(2)}</td>
+                              <td style={{ padding: '12px', fontSize: '14px', fontWeight: '600', color: '#f73194', textAlign: 'right' }}>{formatCurrency(s.total || 0)}</td>
                             </tr>
                           ))}
                         </tbody>

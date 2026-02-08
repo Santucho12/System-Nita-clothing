@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api';
 import { productService, categoryService } from '../services/api';
+import { formatCurrency, formatNumber } from '../utils/formatters';
 import { FaShoppingCart, FaPlus, FaTrash, FaBox, FaHashtag, FaDollarSign, FaEnvelope, FaCreditCard, FaPercent, FaCheckCircle, FaTimesCircle, FaBarcode, FaTshirt, FaPalette, FaRulerVertical, FaTag } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 
@@ -522,7 +523,7 @@ export default function RegisterSale() {
                     <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '10px' }}>
                       <span style={{ fontSize: '14px', color: '#666', fontWeight: '500' }}>Subtotal:</span>
                       <span style={{ fontSize: '20px', fontWeight: '700', color: '#4CAF50' }}>
-                        ${(Number(item.quantity) * Number(item.unit_price)).toFixed(2)}
+                        {formatCurrency(Number(item.quantity) * Number(item.unit_price))}
                       </span>
                     </div>
                   </div>
@@ -651,16 +652,16 @@ export default function RegisterSale() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', background: '#f8f9fa', borderRadius: '8px', marginBottom: '10px' }}>
               <span style={{ fontSize: '14px', color: '#666' }}>Subtotal:</span>
               <span style={{ fontSize: '16px', fontWeight: '600', color: '#333' }}>
-                ${items.reduce((sum, item) => sum + (Number(item.quantity) * Number(item.unit_price)), 0).toFixed(2)}
+                {formatCurrency(items.reduce((sum, item) => sum + (Number(item.quantity) * Number(item.unit_price)), 0))}
               </span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', background: '#ffe0f0', borderRadius: '8px', marginBottom: '10px' }}>
               <span style={{ fontSize: '14px', color: '#f73194' }}>Descuento:</span>
               <span style={{ fontSize: '16px', fontWeight: '600', color: '#f73194' }}>
-                -${(
+                -{formatCurrency(
                   items.reduce((sum, item) => sum + (Number(item.quantity) * Number(item.unit_price)), 0) * (Number(discountPercent) / 100) + 
                   Number(discountAmount)
-                ).toFixed(2)}
+                )}
               </span>
             </div>
           </div>
@@ -669,7 +670,7 @@ export default function RegisterSale() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '18px', background: 'linear-gradient(135deg, #ffeef8 0%, #ffe0f0 100%)', borderRadius: '10px' }}>
               <span style={{ fontSize: '18px', fontWeight: '600', color: '#333' }}>Total:</span>
               <span style={{ fontSize: '32px', fontWeight: '700', color: '#f73194' }}>
-                ${calculateTotal().toFixed(2)}
+                {formatCurrency(calculateTotal())}
               </span>
             </div>
           </div>
