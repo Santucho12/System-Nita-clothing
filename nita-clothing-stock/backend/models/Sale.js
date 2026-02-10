@@ -22,6 +22,9 @@ class Sale {
 
         // Historial de ventas con filtros avanzados y paginación
         static async getSalesHistory(filters) {
+                            // LOG TEMPORAL PARA DEBUG
+                            // eslint-disable-next-line no-console
+
             try {
                 let where = [];
                 let params = [];
@@ -47,9 +50,13 @@ class Sale {
                     where.push('s.seller_id = ?');
                     params.push(filters.seller_id);
                 }
-                if (filters.customer_email) {
-                    where.push('s.customer_email = ?');
-                    params.push(filters.customer_email);
+                if (filters.customer_email && typeof filters.customer_email === 'string' && filters.customer_email.trim() !== '') {
+                    where.push('LOWER(s.customer_email) LIKE ? AND s.customer_email IS NOT NULL AND s.customer_email != ""');
+                    params.push(`%${filters.customer_email.toLowerCase().trim()}%`);
+                }
+                if (filters.customer_name) {
+                    where.push('s.customer_name LIKE ?');
+                    params.push(`%${filters.customer_name}%`);
                 }
                 if (filters.sale_number) {
                     where.push('s.sale_number LIKE ?');
@@ -70,6 +77,8 @@ class Sale {
                     ORDER BY s.created_at DESC
                     LIMIT ${parseInt(pageSize)} OFFSET ${parseInt(offset)}
                 `;
+                console.log('SQL HISTORIAL:', sql);
+                console.log('PARAMS HISTORIAL:', params);
                 const sales = await database.all(sql, params);
                 // Total para paginación
                 const countSql = `SELECT COUNT(*) as total FROM sales s ${whereClause}`;

@@ -268,13 +268,16 @@ class ReportController {
             
             let groupByClause = 'DATE(created_at)';
             let selectDateExpression = 'DATE(created_at)';
-            
+            let dateLabel = selectDateExpression;
+
             if (period === 'week') {
                 groupByClause = 'YEARWEEK(created_at, 1)';
-                selectDateExpression = 'CONCAT("Semana ", WEEK(created_at, 1))';
+                selectDateExpression = 'YEARWEEK(created_at, 1)';
+                dateLabel = selectDateExpression;
             } else if (period === 'month') {
                 groupByClause = 'DATE_FORMAT(created_at, "%Y-%m")';
                 selectDateExpression = 'DATE_FORMAT(created_at, "%Y-%m")';
+                dateLabel = selectDateExpression;
             }
 
             // Construir WHERE dinámicamente

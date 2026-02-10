@@ -75,19 +75,16 @@ class SaleController {
                 page = 1,
                 page_size = 20
             } = req.query;
-            const filters = {
-                start_date,
-                end_date,
-                month,
-                year,
-                payment_method,
-                status,
-                seller_id,
-                customer_email,
-                sale_number,
-                page: parseInt(page),
-                page_size: parseInt(page_size)
-            };
+            // Only include filters that are actually provided and valid
+            const filters = {};
+            if (start_date) filters.start_date = start_date;
+            if (end_date) filters.end_date = end_date;
+            if (payment_method) filters.payment_method = payment_method;
+            if (sale_number) filters.sale_number = sale_number;
+            if (customer_email) filters.customer_email = customer_email;
+            if (req.query.customer_name) filters.customer_name = req.query.customer_name;
+            filters.page = parseInt(page) || 1;
+            filters.page_size = parseInt(page_size) || 20;
             const result = await Sale.getSalesHistory(filters);
             res.status(200).json({ success: true, ...result });
         } catch (error) {

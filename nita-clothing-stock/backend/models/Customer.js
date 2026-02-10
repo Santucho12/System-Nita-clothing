@@ -38,26 +38,26 @@ class Customer {
     // Historial de compras
     static async getPurchaseHistory(email) {
         const sql = `SELECT s.*, (
-            SELECT GROUP_CONCAT(product_name || ' x' || quantity, ', ')
+            SELECT GROUP_CONCAT(CONCAT(product_name, ' x', quantity) SEPARATOR ', ')
             FROM sale_items si WHERE si.sale_id = s.id
         ) as items
-        FROM sales s WHERE s.customer_email = ? ORDER BY s.sale_date DESC`;
+        FROM sales s WHERE s.customer_email = ? ORDER BY s.created_at DESC`;
         return await database.all(sql, [email]);
     }
 
     // Estadísticas del cliente
     static async getStats(email) {
-        const sql = `SELECT COUNT(*) as purchase_count, SUM(total) as total_spent, MAX(sale_date) as last_purchase
+        const sql = `SELECT COUNT(*) as purchase_count, SUM(total) as total_spent, MAX(created_at) as last_purchase
                      FROM sales WHERE customer_email = ?`;
         return await database.get(sql, [email]);
     }
 
     // Segmentación de clientes
     static async getSegmentation() {
-        const sql = `SELECT email, name, COUNT(*) as purchase_count, SUM(total) as total_spent,
-                            MAX(sale_date) as last_purchase,
-                            CASE WHEN MAX(sale_date) >= date('now', '-30 days') THEN 'frecuente'
-                                 WHEN MAX(sale_date) < date('now', '-90 days') THEN 'inactivo'
+        const sql = `SELECT c.email, c.name, COUNT(s.id) as purchase_count, SUM(s.total) as total_spent,
+                            MAX(s.created_at) as last_purchase,
+                            CASE WHEN MAX(s.created_at) >= date('now', '-30 days') THEN 'frecuente'
+                                 WHEN MAX(s.created_at) < date('now', '-90 days') THEN 'inactivo'
                                  ELSE 'normal' END as segment
                      FROM customers c
                      LEFT JOIN sales s ON c.email = s.customer_email
