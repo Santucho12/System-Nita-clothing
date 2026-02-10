@@ -8,7 +8,6 @@ const defaultFilters = {
   start_date: '',
   end_date: '',
   payment_method: '',
-  status: '',
   customer_email: '',
   sale_number: '',
   page: 1,
@@ -53,7 +52,16 @@ export default function SalesHistory() {
 
   const handleSearch = e => {
     e.preventDefault();
-    fetchSales({ ...filters, page: 1 });
+    let newFilters = { ...filters, page: 1 };
+    // Si solo hay fecha de inicio, completar fecha fin con hoy
+    if (newFilters.start_date && !newFilters.end_date) {
+      const today = new Date();
+      const yyyy = today.getFullYear();
+      const mm = String(today.getMonth() + 1).padStart(2, '0');
+      const dd = String(today.getDate()).padStart(2, '0');
+      newFilters.end_date = `${yyyy}-${mm}-${dd}`;
+    }
+    fetchSales(newFilters);
   };
 
   const handleClearFilters = () => {
@@ -69,24 +77,21 @@ export default function SalesHistory() {
   const handleShowDetail = sale => setSelectedSale(sale);
   const handleCloseDetail = () => setSelectedSale(null);
 
-  const handlePrintTicket = (sale) => {
-    toast.info('Función de impresión en desarrollo');
+  // (handlers antiguos eliminados, solo queda showComingSoonAlert y los nuevos handlers)
+  
+  // Alerta genérica para funcionalidades próximas
+  const showComingSoonAlert = () => {
+    toast.warn('Funcionalidad Próxima a implementar. Esta sección estará disponible próximamente.', {
+      position: 'top-center',
+      autoClose: 3500,
+      style: { fontWeight: '600', fontSize: '16px', color: '#856404', background: '#fffbe6' }
+    });
   };
 
-  const handleSendEmail = (sale) => {
-    toast.info('Función de envío de email en desarrollo');
-  };
-
-  const handleCancelSale = (sale) => {
-    if (window.confirm('¿Está seguro de cancelar esta venta?')) {
-      toast.info('Función de cancelación en desarrollo');
-    }
-  };
-
-  const handleExportPDF = (sale) => {
-    toast.info('Función de exportación a PDF en desarrollo');
-  };
-
+  const handlePrintTicket = () => showComingSoonAlert();
+  const handleSendEmail = () => showComingSoonAlert();
+  const handleExportPDF = () => showComingSoonAlert();
+  const handleCancelSale = () => showComingSoonAlert();
   const getStatusBadge = (status) => {
     const statusStyles = {
       completada: { bg: '#d4edda', color: '#155724', icon: FaCheckCircle, label: 'Completada' },
@@ -266,7 +271,7 @@ export default function SalesHistory() {
                   Email Cliente
                 </label>
                 <input
-                  type="email"
+                  type="text"
                   name="customer_email"
                   placeholder="cliente@ejemplo.com"
                   value={filters.customer_email}
@@ -292,24 +297,6 @@ export default function SalesHistory() {
                   <option value="tarjeta">💳 Tarjeta</option>
                   <option value="transferencia">🏦 Transferencia</option>
                   <option value="mixto">💰 Mixto</option>
-                </select>
-              </div>
-              <div>
-                <label style={{ display: 'block', marginBottom: '6px', fontSize: '14px', fontWeight: '500', color: '#555' }}>
-                  <FaCheckCircle style={{ marginRight: '6px', color: '#f73194' }} />
-                  Estado
-                </label>
-                <select
-                  name="status"
-                  value={filters.status}
-                  onChange={handleFilterChange}
-                  className="filter-input"
-                  style={{ width: '150px', padding: '10px', border: '2px solid #e0e0e0', borderRadius: '8px', fontSize: '14px', cursor: 'pointer' }}
-                >
-                  <option value="">Todos</option>
-                  <option value="completada">✓ Completada</option>
-                  <option value="cancelada">✗ Cancelada</option>
-                  <option value="devuelta">↻ Devuelta</option>
                 </select>
               </div>
             </div>
@@ -444,7 +431,7 @@ export default function SalesHistory() {
                       </td>
                       <td style={{ padding: '16px', fontSize: '14px', color: '#555' }}>
                         <FaCalendarAlt style={{ marginRight: '8px', color: '#999' }} />
-                        {new Date(sale.sale_date).toLocaleDateString('es-AR', { 
+                        {new Date(sale.created_at).toLocaleDateString('es-AR', { 
                           day: '2-digit', 
                           month: '2-digit', 
                           year: 'numeric',
@@ -583,7 +570,7 @@ export default function SalesHistory() {
                   <p style={{ margin: '0 0 6px 0', fontSize: '13px', color: '#666', fontWeight: '500', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Fecha y Hora</p>
                   <p style={{ margin: 0, fontSize: '16px', fontWeight: '600', color: '#333', display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <FaCalendarAlt style={{ color: '#f73194' }} />
-                    {new Date(selectedSale.sale_date).toLocaleString('es-AR', {
+                    {new Date(selectedSale.created_at).toLocaleString('es-AR', {
                       day: '2-digit',
                       month: 'long',
                       year: 'numeric',

@@ -6,7 +6,7 @@
   width: 100vw;
   height: 100vh;
   background: rgba(0,0,0,0.18);
-  z-index: 2000;
+  z-index: 99999 !important;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -21,6 +21,7 @@
   max-width: 90vw;
   text-align: center;
   animation: sidebarModalIn 0.18s cubic-bezier(.4,1.4,.6,1) both;
+  z-index: 99999 !important;
 }
 
 .sidebar-modal-title {

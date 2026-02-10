@@ -7,8 +7,6 @@ import {
   FaArrowUp, 
   FaArrowDown, 
   FaMinus, 
-  FaFilePdf, 
-  FaFileExcel, 
   FaTachometerAlt, 
   FaShoppingCart, 
   FaBox, 
@@ -312,20 +310,6 @@ function AdvancedReports() {
             ))}
           </div>
           
-          <div className="export-buttons" style={{ display: 'flex', gap: '8px' }}>
-            <button onClick={() => exportReport('pdf')} className="btn-export" style={{ padding: '10px 18px', background: '#f73194', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '13px', fontWeight: '500', display: 'flex', alignItems: 'center', gap: '6px', transition: 'all 0.3s ease' }}
-              onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
-              onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
-            >
-              <FaFilePdf /> PDF
-            </button>
-            <button onClick={() => exportReport('excel')} className="btn-export" style={{ padding: '10px 18px', background: '#f73194', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '13px', fontWeight: '500', display: 'flex', alignItems: 'center', gap: '6px', transition: 'all 0.3s ease' }}
-              onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
-              onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
-            >
-              <FaFileExcel /> Excel
-            </button>
-          </div>
         </div>
       </div>
 

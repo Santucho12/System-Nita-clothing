@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import api from '../services/api';
 import { formatCurrency } from '../utils/formatters';
 import { FaUsers, FaSearch, FaChartPie, FaUser, FaEnvelope, FaPhone, FaMapMarkerAlt, FaShoppingBag, FaDollarSign, FaCalendarAlt } from 'react-icons/fa';
+import '../components/Sidebar.css';
 import './Customers.css';
 
 export default function Customers() {
@@ -13,6 +14,7 @@ export default function Customers() {
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState('list'); // list, segmentation
   const [showModal, setShowModal] = useState(false);
+  const [showComingSoon, setShowComingSoon] = useState(false);
 
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -33,16 +35,19 @@ export default function Customers() {
   };
 
   const fetchSegmentation = async () => {
-    setLoading(true);
-    try {
-      const res = await api.get('/clientes/segmentacion');
-      setSegmentation(res.data.data);
-      setView('segmentation');
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
+    // Mostrar modal de próxima funcionalidad
+    setShowComingSoon(true);
+    // Si en el futuro se habilita, descomentar lo de abajo:
+    // setLoading(true);
+    // try {
+    //   const res = await api.get('/clientes/segmentacion');
+    //   setSegmentation(res.data.data);
+    //   setView('segmentation');
+    // } catch (err) {
+    //   console.error(err);
+    // } finally {
+    //   setLoading(false);
+    // }
   };
 
   const fetchCustomerDetail = async (email) => {
@@ -465,6 +470,16 @@ export default function Customers() {
           )}
         </>
       )}
+    {/* Modal de funcionalidad próxima a implementar */}
+    {showComingSoon && (
+      <div className="sidebar-modal-overlay" onClick={() => setShowComingSoon(false)}>
+        <div className="sidebar-modal" onClick={e => e.stopPropagation()}>
+          <div className="sidebar-modal-title">Funcionalidad Próxima a implementar</div>
+          <div className="sidebar-modal-desc">La sección <b>Segmentación</b> estará disponible próximamente.</div>
+          <button className="sidebar-modal-btn" onClick={() => setShowComingSoon(false)}>Cerrar</button>
+        </div>
+      </div>
+    )}
     </div>
   );
 }
