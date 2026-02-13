@@ -147,6 +147,7 @@ CREATE TABLE sales (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES usuarios(id) ON DELETE SET NULL,
+    FOREIGN KEY (customer_email) REFERENCES customers(email) ON DELETE SET NULL,
     INDEX idx_created_at (created_at),
     INDEX idx_customer_email (customer_email),
     INDEX idx_status (status)
@@ -165,7 +166,7 @@ CREATE TABLE sales (
 
 **Relaciones:**
 - ✅ **1:N con SALE_ITEMS** → Una venta tiene muchos items
-- ⚠️ **DEBERÍA tener N:1 con CUSTOMERS** → Pero NO está implementado
+- ✅ **N:1 con CUSTOMERS** → Cada venta referencia un cliente (customer_email → customers.email)
 - ✅ **Se usa en HISTORIAL DE VENTAS**
 - ✅ **Se usa en ESTADÍSTICAS**
 
@@ -304,17 +305,20 @@ CREATE TABLE customers (
                              │    (sales)     │
                              │                │
                              │ - id (PK)      │
-                             │ - customer_email ◄─┐
-                             │ - payment_method   │
-                             │ - total            │ ⚠️ DEBERÍA
-                             │ - total_profit     │    VINCULAR
-                             │ - status           │
-                             └────────────────────┘
-                                                  │
-                                                  │ 1:N
-                                                  │ (NO IMPLEMENTADO)
-                                                  │
-                                                  ▼
+
+                             │     VENTAS     │
+                             │    (sales)     │
+                             │                │
+                             │ - id (PK)      │
+                             │ - customer_email ◄────────────┐
+                             │ - payment_method   │           │
+                             │ - total            │           │
+                             │ - total_profit     │           │
+                             │ - status           │           │
+                             └────────────────────┘           │
+                                                               │ N:1
+                                                               │
+                                                               ▼
                              ┌────────────────────┐
                              │     CLIENTES       │
                              │   (customers)      │

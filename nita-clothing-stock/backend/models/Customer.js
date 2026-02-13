@@ -4,7 +4,7 @@ class Customer {
     // Crear cliente
     static async create({ email, name, phone, birth_date, address, city, province, postal_code, notes }) {
         const sql = `INSERT INTO customers (email, name, phone, birth_date, address, city, province, postal_code, notes, created_at, updated_at)
-                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))`;
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())`;
         await database.run(sql, [email, name, phone, birth_date, address, city, province, postal_code, notes]);
         return await Customer.getByEmail(email);
     }
@@ -30,7 +30,7 @@ class Customer {
             values.push(data[key]);
         }
         values.push(email);
-        const sql = `UPDATE customers SET ${fields.join(', ')}, updated_at = datetime('now') WHERE email = ?`;
+        const sql = `UPDATE customers SET ${fields.join(', ')}, updated_at = NOW() WHERE email = ?`;
         await database.run(sql, values);
         return await Customer.getByEmail(email);
     }

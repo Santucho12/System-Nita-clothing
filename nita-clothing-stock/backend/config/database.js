@@ -24,10 +24,32 @@ class Database {
         }
     }
 
-    async run(sql, params = []) {
+    async run(sql, params = [], connection = null) {
         const pool = await this.connect();
-        const [result] = await pool.execute(sql, params);
-        return result;
+        if (connection) {
+            const [result] = await connection.execute(sql, params);
+            return result;
+        } else {
+            const [result] = await pool.execute(sql, params);
+            return result;
+        }
+    }
+
+    async beginTransaction() {
+        const pool = await this.connect();
+        const connection = await pool.getConnection();
+        await connection.beginTransaction();
+        return connection;
+    }
+
+    async commit(connection) {
+        await connection.commit();
+        await connection.release();
+    }
+
+    async rollback(connection) {
+        await connection.rollback();
+        await connection.release();
     }
 
     async all(sql, params = []) {

@@ -9,13 +9,18 @@ class Category {
     // Crear una nueva categoría
     static async create(categoryData) {
         try {
-            const { name, description } = categoryData;
+            let { name, description } = categoryData;
+            // Si algún valor es undefined, pasarlo a null para evitar errores de bind
+            if (typeof name === 'undefined') name = null;
+            if (typeof description === 'undefined') description = null;
+            // Log para depuración
+            console.log('[Category.create] name:', name, '| description:', description);
             const sql = `
                 INSERT INTO categorias (nombre, descripcion, created_at, updated_at)
                 VALUES (?, ?, NOW(), NOW())
             `;
             const result = await database.run(sql, [name, description]);
-            return { id: result.lastID, name, description };
+            return { id: result.insertId, name, description };
         } catch (error) {
             throw new Error(`Error creando categoría: ${error.message}`);
         }

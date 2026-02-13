@@ -119,6 +119,7 @@ class SaleController {
         try {
             // Permitir ventas con múltiples items (carrito)
             const { items, customer_name, customer_email, payment_method, discount_percent, discount_amount } = req.body;
+            console.log('DEBUG createSale body:', req.body);
             if (!Array.isArray(items) || items.length === 0) {
                 return res.status(400).json({
                     success: false,
@@ -159,20 +160,27 @@ class SaleController {
                 customer_email: customer_email || null,
                 payment_method: payment_method || 'efectivo',
             };
+            console.log('DEBUG saleData:', saleData);
+            console.log('DEBUG items:', items);
             // Usar método extendido en Sale para ventas con items
             // IMPORTANTE: Pasar customer_email como tercer parámetro para integración automática
-            const newSale = await Sale.createWithItems(saleData, items, customer_email);
-            
+            let newSale;
+            try {
+                newSale = await Sale.createWithItems(saleData, items, customer_email);
+            } catch (err) {
+                console.error('ERROR createWithItems:', err);
+                throw err;
+            }
             // Notificar nueva venta en tiempo real
             notificationHelper.notifyNewSale(newSale);
-            
             res.status(201).json({
                 success: true,
                 message: 'Venta registrada exitosamente',
                 data: newSale
             });
         } catch (error) {
-            if (error.message.includes('Stock insuficiente') || error.message.includes('no existe')) {
+            console.error('ERROR createSale:', error);
+            if (error.message && (error.message.includes('Stock insuficiente') || error.message.includes('no existe'))) {
                 res.status(400).json({
                     success: false,
                     message: error.message

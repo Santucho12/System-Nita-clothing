@@ -127,62 +127,76 @@ class Sale {
                         try {
                             // Validar stock de todos los productos
                             for (const item of items) {
-                                const product = await database.get('SELECT id, name, quantity FROM products WHERE id = ?', [item.product_id]);
+                                const product = await database.get('SELECT id, nombre, stock FROM productos WHERE id = ?', [item.product_id]);
                                 if (!product) throw new Error(`El producto con ID ${item.product_id} no existe`);
-                                if (product.quantity < item.quantity) {
-                                    throw new Error(`Stock insuficiente para ${product.name}. Disponible: ${product.quantity}, Solicitado: ${item.quantity}`);
+                                if (product.stock < item.quantity) {
+                                    throw new Error(`Stock insuficiente para ${product.nombre}. Disponible: ${product.stock}, Solicitado: ${item.quantity}`);
                                 }
                             }
-                            // Iniciar transacción
-                            await database.run('BEGIN TRANSACTION');
-                            try {
-                                // Crear o actualizar cliente si hay email
-                                if (customerEmail) {
-                                    await Sale.createOrUpdateCustomer(customerEmail, saleData.customer_name);
-                                }
+                            // Crear o actualizar cliente si hay email
+                            if (customerEmail) {
+                                await Sale.createOrUpdateCustomer(customerEmail, saleData.customer_name);
+                            }
 
-                                // Insertar venta principal
-                                const sql = `
-                                    INSERT INTO sales (subtotal, discount_percent, discount_amount, total, customer_name, customer_email, payment_method, created_at)
-                                    VALUES (?, ?, ?, ?, ?, ?, ?, NOW())
-                                `;
-                                const result = await database.run(sql, [
-                                    saleData.subtotal,
-                                    saleData.discount_percent,
-                                    saleData.discount_amount,
-                                    saleData.total,
-                                    saleData.customer_name,
-                                    customerEmail || null,
-                                    saleData.payment_method
-                                ]);
-                                const sale_id = result.lastID;
-                                // Insertar items y actualizar stock
-                                for (const item of items) {
-                                    // Obtener info de producto
-                                    const product = await database.get('SELECT * FROM products WHERE id = ?', [item.product_id]);
-                                    const subtotal = parseFloat(item.unit_price) * parseInt(item.quantity);
-                                    const profit = (parseFloat(item.unit_price) - parseFloat(product.cost_price)) * parseInt(item.quantity);
+                            // Insertar venta principal
+                            const sql = `
+                                INSERT INTO sales (subtotal, discount_percent, discount_amount, total, customer_name, customer_email, payment_method, created_at)
+                                VALUES (?, ?, ?, ?, ?, ?, ?, NOW())
+                            `;
+                            const result = await database.run(sql, [
+                                saleData.subtotal,
+                                saleData.discount_percent,
+                                saleData.discount_amount,
+                                saleData.total,
+                                saleData.customer_name,
+                                customerEmail || null,
+                                saleData.payment_method
+                            ]);
+                            const sale_id = result.insertId || result.lastID;
+                            // Insertar items y actualizar stock
+                            for (const item of items) {
+                                // Obtener info de producto
+                                const product = await database.get('SELECT * FROM productos WHERE id = ?', [item.product_id]);
+                                const subtotal = parseFloat(item.unit_price) * parseInt(item.quantity);
+                                const profit = (parseFloat(item.unit_price) - parseFloat(product.costo)) * parseInt(item.quantity);
+                                let productSize = product.tallas;
+                                if (!productSize || productSize === '' || productSize === 'null') {
+                                    productSize = 'Único';
+                                }
+                                // Logging detallado para debug
+                                console.log('[DEBUG] SaleItem.create', {
+                                    sale_id,
+                                    product_id: item.product_id,
+                                    product_name: product.nombre,
+                                    size: productSize,
+                                    color: product.colores || null,
+                                    quantity: item.quantity,
+                                    unit_price: item.unit_price,
+                                    unit_cost: product.costo,
+                                    subtotal,
+                                    profit
+                                });
+                                try {
                                     await SaleItem.create({
                                         sale_id,
                                         product_id: item.product_id,
-                                        product_name: product.name,
-                                        product_size: product.size,
-                                        product_color: product.color,
+                                        product_name: product.nombre,
+                                        product_size: productSize,
+                                        product_color: product.colores || null,
                                         quantity: item.quantity,
                                         unit_price: item.unit_price,
-                                        unit_cost: product.cost_price,
+                                        unit_cost: product.costo,
                                         subtotal,
                                         profit
                                     });
-                                    // Actualizar stock
-                                    await database.run('UPDATE products SET quantity = quantity - ?, updated_at = NOW() WHERE id = ?', [item.quantity, item.product_id]);
+                                } catch (err) {
+                                    console.error('[ERROR] SaleItem.create', err);
+                                    throw err;
                                 }
-                                await database.run('COMMIT');
-                                return { id: sale_id, ...saleData, items };
-                            } catch (err) {
-                                await database.run('ROLLBACK');
-                                throw err;
+                                // Actualizar stock
+                                await database.run('UPDATE productos SET stock = stock - ?, updated_at = NOW() WHERE id = ?', [item.quantity, item.product_id]);
                             }
+                            return { id: sale_id, ...saleData, items };
                         } catch (error) {
                             throw new Error(`Error creando venta: ${error.message}`);
                         }
@@ -417,7 +431,6 @@ class Sale {
                 throw new Error(`Stock insuficiente. Disponible: ${product.quantity}, Solicitado: ${quantity}`);
             }
             // Iniciar transacción
-            await database.run('BEGIN TRANSACTION');
             try {
                 // Registrar la venta
                 const sql = `
@@ -431,7 +444,6 @@ class Sale {
                     [quantity, product_id]
                 );
                 // Confirmar transacción
-                await database.run('COMMIT');
                 return {
                     id: result.lastID,
                     product_id,
@@ -442,7 +454,6 @@ class Sale {
                     payment_method
                 };
             } catch (error) {
-                await database.run('ROLLBACK');
                 throw error;
             }
         } catch (error) {
@@ -560,7 +571,6 @@ class Sale {
             // Obtener la venta para restaurar stock
             const sale = await Sale.getById(id);
             if (!sale) throw new Error('Venta no encontrada');
-            await database.run('BEGIN TRANSACTION');
             try {
                 // Restaurar stock
                 await database.run(
@@ -569,10 +579,8 @@ class Sale {
                 );
                 // Eliminar venta
                 await database.run('DELETE FROM sales WHERE id = ?', [id]);
-                await database.run('COMMIT');
                 return true;
             } catch (error) {
-                await database.run('ROLLBACK');
                 throw error;
             }
         } catch (error) {

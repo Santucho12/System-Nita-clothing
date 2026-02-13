@@ -4,13 +4,44 @@ class Product {
     // Crear producto
     static async create(data) {
         const {
-            name, category_id, tallas, colores, sale_price, cost_price, quantity, min_stock, supplier_id,
-            images = [], status = 'disponible', sku, barcode, created_at = new Date(), updated_at = new Date()
+            nombre,
+            categoria_id,
+            tallas = null,
+            colores = null,
+            precio,
+            costo,
+            stock,
+            stock_minimo = null,
+            proveedor = null,
+            ubicacion = null,
+            estado = 'activo',
+            fecha_ingreso = null,
+            imagen_url = null,
+            notas = null,
+            created_at = null,
+            updated_at = null
         } = data;
         const [result] = await db.query(
-            `INSERT INTO productos (nombre, categoria_id, tallas, colores, precio, costo, stock, stock_minimo, proveedor_id, imagenes, estado, codigo, barcode, created_at, updated_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-            [name, category_id, tallas, colores, sale_price, cost_price, quantity, min_stock, supplier_id, JSON.stringify(images), status, sku, barcode, created_at, updated_at]
+            `INSERT INTO productos (nombre, categoria_id, tallas, colores, precio, costo, stock, stock_minimo, proveedor, ubicacion, estado, fecha_ingreso, imagen_url, notas, created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [
+                nombre,
+                categoria_id,
+                tallas,
+                colores,
+                precio,
+                costo,
+                stock,
+                stock_minimo,
+                proveedor,
+                ubicacion,
+                estado,
+                fecha_ingreso,
+                imagen_url,
+                notas,
+                created_at,
+                updated_at
+            ]
         );
         return { id: result.insertId, ...data };
     }

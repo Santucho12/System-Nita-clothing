@@ -143,6 +143,8 @@
                         const imageUrls = req.files.map(file => `/uploads/${file.filename}`);
                         data = { ...data, images: imageUrls };
                     }
+                    // Log de depuración para ver los datos recibidos
+                    console.log('[createProduct] data recibido:', data);
                     // Parsear campos numéricos
                     if (data.category_id) data.category_id = parseInt(data.category_id);
                     if (data.supplier_id) data.supplier_id = parseInt(data.supplier_id);

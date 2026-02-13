@@ -82,6 +82,7 @@ async function initDatabase() {
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                 updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                 FOREIGN KEY (user_id) REFERENCES usuarios(id) ON DELETE SET NULL,
+                FOREIGN KEY (customer_email) REFERENCES customers(email) ON DELETE SET NULL,
                 INDEX idx_created_at (created_at),
                 INDEX idx_customer_email (customer_email),
                 INDEX idx_status (status)

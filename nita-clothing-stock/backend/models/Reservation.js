@@ -15,7 +15,6 @@ class Reservation {
                 }
             }
 
-            await database.run('BEGIN TRANSACTION');
             
             try {
                 // Calcular total
@@ -60,11 +59,9 @@ class Reservation {
                                       [item.quantity, item.product_id]);
                 }
                 
-                await database.run('COMMIT');
                 
                 return { id: reservation_id, reservation_number, ...data };
             } catch (err) {
-                await database.run('ROLLBACK');
                 throw err;
             }
         } catch (error) {
@@ -114,7 +111,6 @@ class Reservation {
             if (!reservation) throw new Error('Reserva no encontrada');
             if (reservation.status !== 'activa') throw new Error('La reserva no está activa');
             
-            await database.run('BEGIN TRANSACTION');
             
             try {
                 // Crear venta
@@ -147,10 +143,8 @@ class Reservation {
                 // Actualizar reserva
                 await database.run('UPDATE reservations SET status = "completada", updated_at = datetime("now") WHERE id = ?', [id]);
                 
-                await database.run('COMMIT');
                 return { sale_id, reservation_id: id };
             } catch (err) {
-                await database.run('ROLLBACK');
                 throw err;
             }
         } catch (error) {
@@ -164,7 +158,6 @@ class Reservation {
             const reservation = await Reservation.getById(id);
             if (!reservation) throw new Error('Reserva no encontrada');
             
-            await database.run('BEGIN TRANSACTION');
             
             try {
                 // Restaurar stock
@@ -177,10 +170,8 @@ class Reservation {
                 // Actualizar reserva
                 await database.run('UPDATE reservations SET status = "cancelada", updated_at = datetime("now") WHERE id = ?', [id]);
                 
-                await database.run('COMMIT');
                 return true;
             } catch (err) {
-                await database.run('ROLLBACK');
                 throw err;
             }
         } catch (error) {

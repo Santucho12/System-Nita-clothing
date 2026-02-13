@@ -44,8 +44,11 @@ class CategoryController {
 
     static async createCategory(req, res) {
         try {
+            // Log para depuración
+            console.log('[CategoryController.createCategory] req.body:', req.body);
             const { name, description } = req.body;
             const newCategory = await Category.create({ name, description });
+            console.log('[createCategory] newCategory:', newCategory);
             res.status(201).json({
                 success: true,
                 message: 'Categoría creada exitosamente',

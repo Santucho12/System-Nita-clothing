@@ -2,13 +2,21 @@ const database = require('../config/database');
 
 class SaleItem {
     // Crear un nuevo item de venta
-    static async create(itemData) {
+    static async create(itemData, connection = null) {
         const { sale_id, product_id, product_name, product_size, product_color, quantity, unit_price, unit_cost, subtotal, profit } = itemData;
         const sql = `
             INSERT INTO sale_items (sale_id, product_id, product_name, product_size, product_color, quantity, unit_price, unit_cost, subtotal, profit)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `;
-        await database.run(sql, [sale_id, product_id, product_name, product_size, product_color, quantity, unit_price, unit_cost, subtotal, profit]);
+        console.log('[DEBUG] SaleItem.create params:', {
+            sale_id, product_id, product_name, product_size, product_color, quantity, unit_price, unit_cost, subtotal, profit
+        });
+        try {
+            await database.run(sql, [sale_id, product_id, product_name, product_size, product_color, quantity, unit_price, unit_cost, subtotal, profit], connection);
+        } catch (err) {
+            console.error('[ERROR] SaleItem.create SQL:', err);
+            throw err;
+        }
     }
 
     // Obtener items de venta por rango de fechas

@@ -44,7 +44,21 @@ export default function RegisterSale() {
   const loadProducts = async () => {
     try {
       const response = await productService.getAll();
-      setProducts(response.data || []);
+      // Map 'tallas' (plural) to 'talle' (singular) for each product
+      const productsWithTalle = (response.data || []).map(p => {
+        // If 'tallas' is a string, split and use first value as 'talle'
+        let talle = '';
+        if (p.tallas) {
+          if (typeof p.tallas === 'string') {
+            const tallesArr = p.tallas.split(',').map(t => t.trim()).filter(Boolean);
+            talle = tallesArr.length === 1 ? tallesArr[0] : '';
+          } else if (Array.isArray(p.tallas)) {
+            talle = p.tallas.length === 1 ? p.tallas[0] : '';
+          }
+        }
+        return { ...p, talle };
+      });
+      setProducts(productsWithTalle);
     } catch (error) {
       console.error('Error cargando productos:', error);
     }
@@ -76,8 +90,9 @@ export default function RegisterSale() {
       p.nombre === productName && 
       p.colores === color
     );
-    const uniqueSizes = [...new Set(filtered.map(p => p.talle))];
-    return uniqueSizes;
+    const uniqueSizes = [...new Set(filtered.map(p => p.talle).filter(Boolean))];
+    // Si no hay talles, devolver ['Único']
+    return uniqueSizes.length > 0 ? uniqueSizes : ['Único'];
   };
 
   const handleItemChange = (idx, field, value) => {
@@ -114,7 +129,13 @@ export default function RegisterSale() {
     
     // Si cambia el color, resetear talle
     if (field === 'color') {
-      newItems[idx].size = '';
+      // Autocompletar talle con 'Único' si no hay talles disponibles
+      const sizes = getSizesForProductColor(newItems[idx].category_id, newItems[idx].product_name, value);
+      if (sizes.length === 1 && sizes[0] === 'Único') {
+        newItems[idx].size = 'Único';
+      } else {
+        newItems[idx].size = '';
+      }
       newItems[idx].product_id = '';
       newItems[idx].unit_price = 0;
     }
@@ -162,6 +183,12 @@ export default function RegisterSale() {
 
   const handleSubmit = async e => {
     e.preventDefault();
+    // Validación: ningún item debe tener product_id vacío o 0
+    const invalidItem = items.find(i => !i.product_id || Number(i.product_id) === 0);
+    if (invalidItem) {
+      toast.error('Todos los productos deben estar correctamente seleccionados. No se puede registrar venta con items inválidos.');
+      return;
+    }
     setLoading(true);
     try {
       await api.post('/ventas', {
