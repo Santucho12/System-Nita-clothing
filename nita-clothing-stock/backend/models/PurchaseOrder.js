@@ -237,7 +237,7 @@ class PurchaseOrder {
 
         // Actualizar stock y costo usando database directamente
         await database.run(
-          `UPDATE products SET stock_quantity = ?, cost_price = ?, updated_at = ? WHERE id = ?`,
+          `UPDATE productos SET stock = ?, costo = ?, updated_at = ? WHERE id = ?`,
           [newStock, newCost, new Date(), item.product_id]
         );
 
@@ -245,7 +245,7 @@ class PurchaseOrder {
         await ActivityLog.create({
           user_id: userId,
           action: 'receive_purchase_order',
-          table_name: 'products',
+          table_name: 'productos',
           record_id: item.product_id,
           old_value: JSON.stringify({ 
             stock: oldStock, 

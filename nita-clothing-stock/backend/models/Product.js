@@ -121,7 +121,7 @@ class Product {
 
     // Cambiar estado
     static async changeStatus(id, status) {
-        await db.query('UPDATE products SET status = ?, updated_at = ? WHERE id = ?', [status, new Date(), id]);
+        await db.query('UPDATE productos SET estado = ?, updated_at = ? WHERE id = ?', [status, new Date(), id]);
         return this.getById(id);
     }
 
@@ -129,7 +129,7 @@ class Product {
     static async addImages(id, imageUrls) {
         const product = await this.getById(id);
         const images = product.images.concat(imageUrls);
-        await db.query('UPDATE products SET images = ?, updated_at = ? WHERE id = ?', [JSON.stringify(images), new Date(), id]);
+        await db.query('UPDATE productos SET imagen_url = ?, updated_at = ? WHERE id = ?', [JSON.stringify(images), new Date(), id]);
         return this.getById(id);
     }
 
@@ -137,7 +137,7 @@ class Product {
     static async removeImage(id, imageUrl) {
         const product = await this.getById(id);
         const images = product.images.filter(img => img !== imageUrl);
-        await db.query('UPDATE products SET images = ?, updated_at = ? WHERE id = ?', [JSON.stringify(images), new Date(), id]);
+        await db.query('UPDATE productos SET imagen_url = ?, updated_at = ? WHERE id = ?', [JSON.stringify(images), new Date(), id]);
         return this.getById(id);
     }
 

@@ -8,7 +8,7 @@ class Reservation {
         try {
             // Validar stock de productos
             for (const item of items) {
-                const product = await database.get('SELECT id, name, quantity FROM products WHERE id = ?', [item.product_id]);
+                const product = await database.get('SELECT id, nombre, stock FROM productos WHERE id = ?', [item.product_id]);
                 if (!product) throw new Error(`Producto con ID ${item.product_id} no existe`);
                 if (product.quantity < item.quantity) {
                     throw new Error(`Stock insuficiente para ${product.name}. Disponible: ${product.quantity}, Solicitado: ${item.quantity}`);
@@ -20,7 +20,7 @@ class Reservation {
                 // Calcular total
                 let total_amount = 0;
                 for (const item of items) {
-                    const product = await database.get('SELECT sale_price FROM products WHERE id = ?', [item.product_id]);
+                    const product = await database.get('SELECT precio FROM productos WHERE id = ?', [item.product_id]);
                     total_amount += product.sale_price * item.quantity;
                 }
                 
@@ -45,7 +45,7 @@ class Reservation {
                 
                 // Crear items y descontar stock
                 for (const item of items) {
-                    const product = await database.get('SELECT * FROM products WHERE id = ?', [item.product_id]);
+                    const product = await database.get('SELECT * FROM productos WHERE id = ?', [item.product_id]);
                     
                     await database.run(`INSERT INTO reservation_items (reservation_id, product_id, product_name, 
                                         product_size, product_color, quantity, unit_price)
@@ -55,8 +55,8 @@ class Reservation {
                     ]);
                     
                     // Descontar stock
-                    await database.run('UPDATE products SET quantity = quantity - ?, updated_at = datetime("now") WHERE id = ?', 
-                                      [item.quantity, item.product_id]);
+                    await database.run('UPDATE productos SET stock = stock - ?, updated_at = datetime("now") WHERE id = ?', 
+                        [item.quantity, item.product_id]);
                 }
                 
                 
@@ -129,7 +129,7 @@ class Reservation {
                 // Copiar items de reserva a venta
                 const items = await database.all('SELECT * FROM reservation_items WHERE reservation_id = ?', [id]);
                 for (const item of items) {
-                    const product = await database.get('SELECT cost_price FROM products WHERE id = ?', [item.product_id]);
+                    const product = await database.get('SELECT costo FROM productos WHERE id = ?', [item.product_id]);
                     const profit = (item.unit_price - product.cost_price) * item.quantity;
                     
                     await database.run(`INSERT INTO sale_items (sale_id, product_id, product_name, product_size, 
@@ -163,8 +163,8 @@ class Reservation {
                 // Restaurar stock
                 const items = await database.all('SELECT * FROM reservation_items WHERE reservation_id = ?', [id]);
                 for (const item of items) {
-                    await database.run('UPDATE products SET quantity = quantity + ?, updated_at = datetime("now") WHERE id = ?',
-                                      [item.quantity, item.product_id]);
+                    await database.run('UPDATE productos SET stock = stock + ?, updated_at = datetime("now") WHERE id = ?',
+                        [item.quantity, item.product_id]);
                 }
                 
                 // Actualizar reserva

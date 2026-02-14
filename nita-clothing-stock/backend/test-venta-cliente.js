@@ -1,6 +1,5 @@
-// Test: Venta pertenece a Cliente
+// Test: Venta pertenece a Cliente (adaptado a modelo con sale_items)
 // Ejecutar con: node test-venta-cliente.js
-
 
 const { makeRequest, login } = require('./test-helpers');
 
@@ -56,11 +55,15 @@ const { makeRequest, login } = require('./test-helpers');
 	const productoId = res.data.data.id;
 	console.log('✓ Producto creado:', productoId);
 
-	// 3. Registrar venta con ese cliente y producto
+	// 3. Registrar venta con ese cliente y producto (nuevo modelo)
 	const venta = {
 		customer_name: cliente.name,
 		customer_email: cliente.email,
 		payment_method: 'efectivo',
+		subtotal: 300,
+		discount_percent: 0,
+		discount_amount: 0,
+		total: 300,
 		items: [
 			{
 				product_id: productoId,

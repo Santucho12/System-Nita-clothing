@@ -225,21 +225,21 @@ class Sale {
                 // Alertas de reposición (productos bajo mínimo)
                 static async getRestockAlerts() {
                     const sql = `
-                        SELECT p.id as product_id, p.name as product_name, p.quantity as current_stock, p.min_stock,
+                        SELECT p.id as product_id, p.nombre as product_name, p.stock as current_stock, p.stock_min as min_stock,
                                CASE 
-                                   WHEN p.quantity <= 0 OR p.quantity < (p.min_stock * 0.5) THEN 'critical'
-                                   WHEN p.quantity < p.min_stock AND p.quantity > 0 THEN 'low'
+                                   WHEN p.stock <= 0 OR p.stock < (p.stock_min * 0.5) THEN 'critical'
+                                   WHEN p.stock < p.stock_min AND p.stock > 0 THEN 'low'
                                    ELSE 'ok'
                                END as status,
                                (
-                                   SELECT MAX(s.sale_date) FROM sale_items si2
+                                   SELECT MAX(s.created_at) FROM sale_items si2
                                    JOIN sales s ON si2.sale_id = s.id
                                    WHERE si2.product_id = p.id
                                ) as last_sale_date,
-                               s2.name as supplier
-                        FROM products p
-                        LEFT JOIN suppliers s2 ON p.supplier_id = s2.id
-                        WHERE p.quantity < p.min_stock
+                               s2.nombre as supplier
+                        FROM productos p
+                        LEFT JOIN proveedores s2 ON p.proveedor_id = s2.id
+                        WHERE p.stock < p.stock_min
                     `;
                     return await database.all(sql);
                 }
@@ -247,17 +247,17 @@ class Sale {
                 // Productos con stock crítico
                 static async getCriticalStock() {
                     const sql = `
-                        SELECT p.id as product_id, p.name as product_name, p.quantity as current_stock, p.min_stock,
+                        SELECT p.id as product_id, p.nombre as product_name, p.stock as current_stock, p.stock_min as min_stock,
                                'critical' as status,
                                (
-                                   SELECT MAX(s.sale_date) FROM sale_items si2
+                                   SELECT MAX(s.created_at) FROM sale_items si2
                                    JOIN sales s ON si2.sale_id = s.id
                                    WHERE si2.product_id = p.id
                                ) as last_sale_date,
-                               s2.name as supplier
-                        FROM products p
-                        LEFT JOIN suppliers s2 ON p.supplier_id = s2.id
-                        WHERE p.quantity <= 0 OR p.quantity < (p.min_stock * 0.5)
+                               s2.nombre as supplier
+                        FROM productos p
+                        LEFT JOIN proveedores s2 ON p.proveedor_id = s2.id
+                        WHERE p.stock <= 0 OR p.stock < (p.stock_min * 0.5)
                     `;
                     return await database.all(sql);
                 }
@@ -390,75 +390,29 @@ class Sale {
         static async getStockInmovilizado() {
             const sql = `
                 SELECT COUNT(*) as total_products,
-                       SUM(p.quantity * p.cost_price) as total_investment
-                FROM products p
+                       SUM(p.stock * p.costo) as total_investment
+                FROM productos p
             `;
             const byCategorySql = `
-                SELECT c.name as category, 
-                       SUM(p.quantity * p.cost_price) as investment,
-                       100.0 * SUM(p.quantity * p.cost_price) / (SELECT SUM(quantity * cost_price) FROM products) as percentage
-                FROM products p
-                JOIN categories c ON p.category_id = c.id
-                GROUP BY c.name
+                SELECT c.nombre as category, 
+                       SUM(p.stock * p.costo) as investment,
+                       100.0 * SUM(p.stock * p.costo) / (SELECT SUM(stock * costo) FROM productos) as percentage
+                FROM productos p
+                JOIN categorias c ON p.categoria_id = c.id
+                GROUP BY c.nombre
             `;
             const total = await database.get(sql);
             const byCategory = await database.all(byCategorySql);
             return { ...total, by_category: byCategory };
         }
-    constructor(product_id, quantity, price_per_unit, total_amount, customer_name = null, payment_method = 'efectivo') {
-        this.product_id = product_id;
-        this.quantity = quantity;
-        this.price_per_unit = price_per_unit;
-        this.total_amount = total_amount;
-        this.customer_name = customer_name;
-        this.payment_method = payment_method;
-    }
 
-
-    // Crear una nueva venta
+    // Crear una nueva venta (redirigir a createWithItems)
     static async create(saleData) {
-        try {
-            const { product_id, quantity, price_per_unit, total_amount, customer_name, payment_method } = saleData;
-            // Verificar que el producto existe y tiene stock suficiente
-            const product = await database.get(
-                'SELECT id, name, quantity FROM products WHERE id = ?',
-                [product_id]
-            );
-            if (!product) {
-                throw new Error('El producto especificado no existe');
-            }
-            if (product.quantity < quantity) {
-                throw new Error(`Stock insuficiente. Disponible: ${product.quantity}, Solicitado: ${quantity}`);
-            }
-            // Iniciar transacción
-            try {
-                // Registrar la venta
-                const sql = `
-                    INSERT INTO sales (product_id, quantity, price_per_unit, total_amount, customer_name, payment_method, created_at)
-                    VALUES (?, ?, ?, ?, ?, ?, NOW())
-                `;
-                const result = await database.run(sql, [product_id, quantity, price_per_unit, total_amount, customer_name, payment_method]);
-                // Actualizar stock del producto
-                await database.run(
-                    'UPDATE products SET quantity = quantity - ?, updated_at = NOW() WHERE id = ?',
-                    [quantity, product_id]
-                );
-                // Confirmar transacción
-                return {
-                    id: result.lastID,
-                    product_id,
-                    quantity,
-                    price_per_unit,
-                    total_amount,
-                    customer_name,
-                    payment_method
-                };
-            } catch (error) {
-                throw error;
-            }
-        } catch (error) {
-            throw new Error(`Error creando venta: ${error.message}`);
+        // Para compatibilidad, espera saleData: { items: [...], ... }
+        if (!saleData.items || !Array.isArray(saleData.items) || saleData.items.length === 0) {
+            throw new Error('Debe proveer al menos un item para la venta');
         }
+        return await Sale.createWithItems(saleData, saleData.items, saleData.customer_email || null);
     }
 
     // Obtener los productos más vendidos del mes actual
@@ -535,54 +489,49 @@ class Sale {
         }
     }
 
-    // Obtener todas las ventas
+    // Obtener todas las ventas (nuevo modelo, sin JOIN con productos)
     static async getAll() {
         try {
-            const sql = `
-                SELECT s.*, p.name as product_name
-                FROM sales s
-                JOIN products p ON s.product_id = p.id
-                ORDER BY s.sale_date DESC
-            `;
+            const sql = `SELECT * FROM sales ORDER BY created_at DESC`;
             return await database.all(sql);
         } catch (error) {
             throw new Error(`Error obteniendo ventas: ${error.message}`);
         }
     }
 
-    // Obtener detalle de una venta por ID
+    // Obtener detalle de una venta por ID (nuevo modelo: incluye items)
     static async getById(id) {
         try {
-            const sql = `
-                SELECT s.*, p.name as product_name
-                FROM sales s
-                JOIN products p ON s.product_id = p.id
-                WHERE s.id = ?
-            `;
-            return await database.get(sql, [id]);
+            // Obtener la venta principal
+            const saleSql = `SELECT * FROM sales WHERE id = ?`;
+            const sale = await database.get(saleSql, [id]);
+            if (!sale) return null;
+            // Obtener los items asociados a la venta
+            const itemsSql = `SELECT * FROM sale_items WHERE sale_id = ?`;
+            const items = await database.all(itemsSql, [id]);
+            return { ...sale, items };
         } catch (error) {
             throw new Error(`Error obteniendo venta: ${error.message}`);
         }
     }
 
-    // Cancelar o restaurar una venta
+    // Cancelar o restaurar una venta (nuevo modelo: restaura stock de todos los items)
     static async delete(id) {
         try {
-            // Obtener la venta para restaurar stock
+            // Obtener la venta y sus items
             const sale = await Sale.getById(id);
             if (!sale) throw new Error('Venta no encontrada');
-            try {
-                // Restaurar stock
+            // Restaurar stock de cada producto vendido
+            for (const item of sale.items || []) {
                 await database.run(
-                    'UPDATE products SET quantity = quantity + ? WHERE id = ?',
-                    [sale.quantity, sale.product_id]
+                    'UPDATE productos SET stock = stock + ? WHERE id = ?',
+                    [item.quantity, item.product_id]
                 );
-                // Eliminar venta
-                await database.run('DELETE FROM sales WHERE id = ?', [id]);
-                return true;
-            } catch (error) {
-                throw error;
             }
+            // Eliminar items y venta
+            await database.run('DELETE FROM sale_items WHERE sale_id = ?', [id]);
+            await database.run('DELETE FROM sales WHERE id = ?', [id]);
+            return true;
         } catch (error) {
             throw new Error(`Error eliminando venta: ${error.message}`);
         }

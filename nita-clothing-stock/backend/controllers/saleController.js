@@ -207,10 +207,12 @@ class SaleController {
     static async getSaleById(req, res) {
         try {
             const { id } = req.params;
+            // Sale.getById now returns sale + items, no JOIN with productos
             const sale = await Sale.getById(id);
             if (!sale) return res.status(404).json({ success: false, message: 'Venta no encontrada' });
             res.status(200).json({ success: true, data: sale });
         } catch (error) {
+            // Remove any legacy error message mapping
             res.status(500).json({ success: false, message: error.message });
         }
     }
