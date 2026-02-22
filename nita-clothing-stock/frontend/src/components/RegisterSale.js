@@ -603,7 +603,6 @@ export default function RegisterSale() {
                 <option value="efectivo">💵 Efectivo</option>
                 <option value="tarjeta">💳 Tarjeta</option>
                 <option value="transferencia">🏦 Transferencia</option>
-                <option value="mixto">💰 Mixto</option>
               </select>
             </div>
 

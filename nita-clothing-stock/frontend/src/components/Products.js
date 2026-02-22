@@ -9,6 +9,7 @@ import {
 } from 'react-icons/fa';
 
 const Products = () => {
+    const [lastSku, setLastSku] = useState(undefined);
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [suppliers, setSuppliers] = useState([]);
@@ -46,6 +47,17 @@ const Products = () => {
 
   // Cargar datos al montar el componente
   useEffect(() => {
+        // Obtener el último SKU al abrir el formulario
+        if (showForm) {
+          productService.getLastSku().then(res => {
+            setLastSku(res.lastSku);
+            // Solo sugerir el siguiente SKU si no estamos editando
+            setFormData(prev => ({
+              ...prev,
+              sku: editingProduct ? prev.sku : (res.lastSku !== undefined ? String(parseInt(res.lastSku) + 1) : '')
+            }));
+          }).catch(() => setLastSku(undefined));
+        }
     loadInitialData();
   }, []);
 
@@ -141,7 +153,7 @@ const Products = () => {
     } else {
       setFormData(prev => ({
         ...prev,
-        [name]: value
+        [name]: name === 'quantity' && value === '' ? '1' : value
       }));
     }
   };
@@ -153,9 +165,9 @@ const Products = () => {
       toast.error('Nombre, color y categoría son requeridos');
       return;
     }
-    if (formData.quantity === '' || parseInt(formData.quantity) < 0) {
-      toast.error('La cantidad debe ser un número mayor o igual a 0');
-      return;
+    // Si cantidad está vacío, poner 1 por defecto
+    if (!formData.quantity || formData.quantity === '') {
+      formData.quantity = '1';
     }
     if (!formData.size.trim()) {
       toast.error('El talle es requerido');
@@ -169,10 +181,7 @@ const Products = () => {
       toast.error('Precio de costo requerido');
       return;
     }
-    if (!formData.min_stock || isNaN(parseInt(formData.min_stock))) {
-      toast.error('Stock mínimo requerido');
-      return;
-    }
+    // Stock mínimo ya no es obligatorio
     // supplier_id puede ser opcional por ahora
     try {
       const productData = {
@@ -542,9 +551,13 @@ const Products = () => {
             >
               <option value="">Todos</option>
               <option value="Talle único">Talle único</option>
-              <option value="1">1</option>
-              <option value="2">2</option>
-              <option value="3">3</option>
+              <option value="S">S</option>
+              <option value="M">M</option>
+              <option value="L">L</option>
+              <option value="36">36</option>
+              <option value="38">38</option>
+              <option value="40">40</option>
+              <option value="42">42</option>
             </select>
           </div>
 
@@ -616,240 +629,71 @@ const Products = () => {
             </div>
             
             <form onSubmit={handleSubmit}>
-              {/* Fila 1 */}
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '15px', marginBottom: '15px' }}>
+                {/* Fila 1 */}
                 <div>
-                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', fontSize: '14px', color: '#555' }}>
-                    <FaTshirt style={{ marginRight: '6px', color: '#f73194' }} />
-                    Nombre *
-                  </label>
-                  <input
-                    type="text"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleInputChange}
-                    placeholder="Ej: Remera Básica"
-                    required
-                    className="form-input"
-                    style={{ width: '100%', padding: '10px 14px', border: '2px solid #e0e0e0', borderRadius: '8px', fontSize: '14px' }}
-                  />
+                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', fontSize: '14px', color: '#555' }}><FaTshirt style={{ marginRight: '6px', color: '#f73194' }} /> Nombre *</label>
+                  <input type="text" name="name" value={formData.name} onChange={handleInputChange} placeholder="Ej: Remera Básica" required className="form-input" style={{ width: '100%', padding: '10px 14px', border: '2px solid #e0e0e0', borderRadius: '8px', fontSize: '14px' }} />
                 </div>
                 <div>
-                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', fontSize: '14px', color: '#555' }}>
-                    <FaPalette style={{ marginRight: '6px', color: '#f73194' }} />
-                    Color *
-                  </label>
-                  <input
-                    type="text"
-                    name="color"
-                    value={formData.color}
-                    onChange={handleInputChange}
-                    placeholder="Ej: Negro"
-                    required
-                    className="form-input"
-                    style={{ width: '100%', padding: '10px 14px', border: '2px solid #e0e0e0', borderRadius: '8px', fontSize: '14px' }}
-                  />
+                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', fontSize: '14px', color: '#555' }}><FaPalette style={{ marginRight: '6px', color: '#f73194' }} /> Color *</label>
+                  <input type="text" name="color" value={formData.color} onChange={handleInputChange} placeholder="Ej: Negro" required className="form-input" style={{ width: '100%', padding: '10px 14px', border: '2px solid #e0e0e0', borderRadius: '8px', fontSize: '14px' }} />
                 </div>
                 <div>
-                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', fontSize: '14px', color: '#555' }}>
-                    <FaRulerVertical style={{ marginRight: '6px', color: '#f73194' }} />
-                    Talle *
-                  </label>
-                  <select
-                    name="size"
-                    value={formData.size}
-                    onChange={handleInputChange}
-                    required
-                    className="form-input"
-                    style={{ width: '100%', padding: '10px 14px', border: '2px solid #e0e0e0', borderRadius: '8px', fontSize: '14px', cursor: 'pointer' }}
-                  >
+                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', fontSize: '14px', color: '#555' }}><FaRulerVertical style={{ marginRight: '6px', color: '#f73194' }} /> Talle *</label>
+                  <select name="size" value={formData.size} onChange={handleInputChange} required className="form-input" style={{ width: '100%', padding: '10px 14px', border: '2px solid #e0e0e0', borderRadius: '8px', fontSize: '14px', cursor: 'pointer' }}>
                     <option value="">Selecciona</option>
                     <option value="Talle único">Talle único</option>
-                    <option value="1">1</option>
-                    <option value="2">2</option>
-                    <option value="3">3</option>
+                    <option value="S">S</option>
+                    <option value="M">M</option>
+                    <option value="L">L</option>
+                    <option value="36">36</option>
+                    <option value="38">38</option>
+                    <option value="40">40</option>
+                    <option value="42">42</option>
                   </select>
                 </div>
-              </div>
-
-              {/* Fila 2 */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '15px', marginBottom: '15px' }}>
+                {/* Fila 2 */}
                 <div>
-                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', fontSize: '14px', color: '#555' }}>
-                    <FaDollarSign style={{ marginRight: '6px', color: '#f73194' }} />
-                    Precio Venta *
-                  </label>
-                  <input
-                    type="number"
-                    name="sale_price"
-                    value={formData.sale_price}
-                    onChange={handleInputChange}
-                    min="0"
-                    step="0.01"
-                    required
-                    className="form-input"
-                    style={{ width: '100%', padding: '10px 14px', border: '2px solid #e0e0e0', borderRadius: '8px', fontSize: '14px' }}
-                  />
+                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', fontSize: '14px', color: '#555' }}><FaDollarSign style={{ marginRight: '6px', color: '#f73194' }} /> Precio Venta *</label>
+                  <input type="number" name="sale_price" value={formData.sale_price} onChange={handleInputChange} min="0" step="0.01" required className="form-input" style={{ width: '100%', padding: '10px 14px', border: '2px solid #e0e0e0', borderRadius: '8px', fontSize: '14px' }} />
                 </div>
                 <div>
-                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', fontSize: '14px', color: '#555' }}>
-                    <FaDollarSign style={{ marginRight: '6px', color: '#4CAF50' }} />
-                    Precio Costo *
-                  </label>
-                  <input
-                    type="number"
-                    name="cost_price"
-                    value={formData.cost_price}
-                    onChange={handleInputChange}
-                    min="0"
-                    step="0.01"
-                    required
-                    className="form-input"
-                    style={{ width: '100%', padding: '10px 14px', border: '2px solid #e0e0e0', borderRadius: '8px', fontSize: '14px' }}
-                  />
+                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', fontSize: '14px', color: '#555' }}><FaDollarSign style={{ marginRight: '6px', color: '#4CAF50' }} /> Precio Costo *</label>
+                  <input type="number" name="cost_price" value={formData.cost_price} onChange={handleInputChange} min="0" step="0.01" required className="form-input" style={{ width: '100%', padding: '10px 14px', border: '2px solid #e0e0e0', borderRadius: '8px', fontSize: '14px' }} />
                 </div>
                 <div>
-                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', fontSize: '14px', color: '#555' }}>
-                    <FaBoxes style={{ marginRight: '6px', color: '#f73194' }} />
-                    Stock Mínimo *
-                  </label>
-                  <input
-                    type="number"
-                    name="min_stock"
-                    value={formData.min_stock}
-                    onChange={handleInputChange}
-                    min="0"
-                    required
-                    className="form-input"
-                    style={{ width: '100%', padding: '10px 14px', border: '2px solid #e0e0e0', borderRadius: '8px', fontSize: '14px' }}
-                  />
+                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', fontSize: '14px', color: '#555' }}><FaBox style={{ marginRight: '6px', color: '#f73194' }} /> Cantidad</label>
+                  <input type="number" name="quantity" value={formData.quantity} onChange={handleInputChange} min="0" className="form-input" style={{ width: '100%', padding: '10px 14px', border: '2px solid #e0e0e0', borderRadius: '8px', fontSize: '14px' }} placeholder="Por defecto 1" />
                 </div>
-              </div>
-
-              {/* Fila 3 */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '15px', marginBottom: '15px' }}>
+                {/* Fila 3 */}
                 <div>
-                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', fontSize: '14px', color: '#555' }}>
-                    <FaBox style={{ marginRight: '6px', color: '#f73194' }} />
-                    Cantidad *
-                  </label>
-                  <input
-                    type="number"
-                    name="quantity"
-                    value={formData.quantity}
-                    onChange={handleInputChange}
-                    min="0"
-                    required
-                    className="form-input"
-                    style={{ width: '100%', padding: '10px 14px', border: '2px solid #e0e0e0', borderRadius: '8px', fontSize: '14px' }}
-                  />
-                </div>
-                <div>
-                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', fontSize: '14px', color: '#555' }}>
-                    <FaTag style={{ marginRight: '6px', color: '#f73194' }} />
-                    Categoría *
-                  </label>
-                  <select
-                    name="category_id"
-                    value={formData.category_id}
-                    onChange={handleInputChange}
-                    required
-                    className="form-input"
-                    style={{ width: '100%', padding: '10px 14px', border: '2px solid #e0e0e0', borderRadius: '8px', fontSize: '14px', cursor: 'pointer' }}
-                  >
+                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', fontSize: '14px', color: '#555' }}><FaTag style={{ marginRight: '6px', color: '#f73194' }} /> Categoría *</label>
+                  <select name="category_id" value={formData.category_id} onChange={handleInputChange} required className="form-input" style={{ width: '100%', padding: '10px 14px', border: '2px solid #e0e0e0', borderRadius: '8px', fontSize: '14px', cursor: 'pointer' }}>
                     <option value="">Selecciona</option>
-                    {categories.map(category => (
-                      <option key={category.id} value={category.id}>
-                        {category.name}
-                      </option>
-                    ))}
+                    {categories.map(category => (<option key={category.id} value={category.id}>{category.name}</option>))}
                   </select>
                 </div>
                 <div>
                   <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', fontSize: '14px', color: '#555' }}>Proveedor</label>
-                  <select
-                    name="supplier_id"
-                    value={formData.supplier_id}
-                    onChange={handleInputChange}
-                    className="form-input"
-                    style={{ width: '100%', padding: '10px 14px', border: '2px solid #e0e0e0', borderRadius: '8px', fontSize: '14px', cursor: 'pointer' }}
-                  >
+                  <select name="supplier_id" value={formData.supplier_id} onChange={handleInputChange} className="form-input" style={{ width: '100%', padding: '10px 14px', border: '2px solid #e0e0e0', borderRadius: '8px', fontSize: '14px', cursor: 'pointer' }}>
                     <option value="">Selecciona</option>
-                    {suppliers.map(supplier => (
-                      <option key={supplier.id} value={supplier.id}>
-                        {supplier.name}
-                      </option>
-                    ))}
+                    {suppliers.map(supplier => (<option key={supplier.id} value={supplier.id}>{supplier.name}</option>))}
                   </select>
                 </div>
-              </div>
-
-              {/* Fila 4 */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '15px', marginBottom: '15px' }}>
                 <div>
-                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', fontSize: '14px', color: '#555' }}>
-                    <FaBarcode style={{ marginRight: '6px', color: '#f73194' }} />
-                    SKU
-                  </label>
-                  <input
-                    type="text"
-                    name="sku"
-                    value={formData.sku}
-                    onChange={handleInputChange}
-                    placeholder="Código único"
-                    className="form-input"
-                    style={{ width: '100%', padding: '10px 14px', border: '2px solid #e0e0e0', borderRadius: '8px', fontSize: '14px' }}
-                  />
-                </div>
-                <div>
-                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', fontSize: '14px', color: '#555' }}>
-                    <FaBarcode style={{ marginRight: '6px', color: '#666' }} />
-                    Código Barras
-                  </label>
-                  <input
-                    type="text"
-                    name="barcode"
-                    value={formData.barcode}
-                    onChange={handleInputChange}
-                    placeholder="Opcional"
-                    className="form-input"
-                    style={{ width: '100%', padding: '10px 14px', border: '2px solid #e0e0e0', borderRadius: '8px', fontSize: '14px' }}
-                  />
-                </div>
-                <div>
-                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', fontSize: '14px', color: '#555' }}>
-                    <FaCheckCircle style={{ marginRight: '6px', color: '#f73194' }} />
-                    Estado
-                  </label>
-                  <select
-                    name="status"
-                    value={formData.status}
-                    onChange={handleInputChange}
-                    className="form-input"
-                    style={{ width: '100%', padding: '10px 14px', border: '2px solid #e0e0e0', borderRadius: '8px', fontSize: '14px', cursor: 'pointer' }}
-                  >
-                    <option value="disponible">Disponible</option>
-                    <option value="sin_stock">Sin stock</option>
-                    <option value="descontinuado">Descontinuado</option>
-                  </select>
+                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', fontSize: '14px', color: '#555' }}><FaBarcode style={{ marginRight: '6px', color: '#f73194' }} /> SKU *</label>
+                  <input type="number" name="sku" value={formData.sku} onChange={handleInputChange} min={lastSku !== undefined && lastSku !== null ? parseInt(lastSku) + 1 : 1} step="1" required className="form-input" style={{ width: '100%', padding: '10px 14px', border: '2px solid #e0e0e0', borderRadius: '8px', fontSize: '14px' }} placeholder={lastSku !== undefined ? `Ej: ${parseInt(lastSku) + 1}` : '1'} />
+                  {lastSku !== undefined && (<div style={{ fontSize: '12px', color: '#888', marginTop: '4px' }}>Siguiente sugerido: <b>{parseInt(lastSku) + 1}</b></div>)}
                 </div>
               </div>
-
               {/* Imágenes */}
               <div style={{ marginBottom: '20px' }}>
                 <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', fontSize: '14px', color: '#555' }}>Imágenes</label>
-                <input
-                  type="file"
-                  name="images"
-                  accept="image/jpeg,image/png,image/webp"
-                  multiple
-                  onChange={handleInputChange}
-                  className="form-input"
-                  style={{ width: '100%', padding: '10px 14px', border: '2px solid #e0e0e0', borderRadius: '8px', fontSize: '14px' }}
-                />
+                <input type="file" name="images" accept="image/jpeg,image/png,image/webp" multiple onChange={handleInputChange} className="form-input" style={{ width: '100%', padding: '10px 14px', border: '2px solid #e0e0e0', borderRadius: '8px', fontSize: '14px' }} />
                 {formData.images && formData.images.length > 0 && (
                   <div style={{ display: 'flex', gap: '8px', marginTop: '12px', flexWrap: 'wrap' }}>
-                    {Array.from(formData.images).map((img, idx) => (
+                    {formData.images.map((img, idx) => (
                       <img
                         key={idx}
                         src={img instanceof File ? URL.createObjectURL(img) : img}
@@ -860,26 +704,10 @@ const Products = () => {
                   </div>
                 )}
               </div>
-
               {/* Botones */}
               <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', paddingTop: '20px', borderTop: '2px solid #f0f0f0' }}>
-                <button 
-                  type="button" 
-                  className="btn-gray" 
-                  onClick={resetForm}
-                  style={{ padding: '12px 24px', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '15px', fontWeight: '500' }}
-                >
-                  <FaTimes />
-                  Cancelar
-                </button>
-                <button 
-                  type="submit" 
-                  className="btn-pink"
-                  style={{ padding: '12px 24px', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '15px', fontWeight: '500' }}
-                >
-                  <FaSave />
-                  {editingProduct ? 'Actualizar' : 'Crear'}
-                </button>
+                <button type="button" className="btn-gray" onClick={resetForm} style={{ padding: '12px 24px', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '15px', fontWeight: '500' }}><FaTimes /> Cancelar</button>
+                <button type="submit" className="btn-pink" style={{ padding: '12px 24px', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '15px', fontWeight: '500' }}><FaSave /> {editingProduct ? 'Actualizar' : 'Crear'}</button>
               </div>
             </form>
           </div>

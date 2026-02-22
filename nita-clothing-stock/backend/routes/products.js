@@ -24,6 +24,9 @@ router.put('/:id', authorizeRoles('admin', 'supervisor'), upload.array('images',
 router.patch('/:id/stock', authorizeRoles('admin', 'supervisor'), ProductController.updateStock);
 router.delete('/:id', authorizeRoles('admin', 'supervisor'), ProductController.deleteProduct);
 
+// Obtener el último SKU
+router.get('/ultimo-sku', authorizeRoles('admin', 'supervisor'), ProductController.getLastSku);
+
 // Cambiar estado del producto
 router.patch('/:id/status', authorizeRoles('admin', 'supervisor'), ProductController.changeStatus);
 

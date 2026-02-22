@@ -1,6 +1,11 @@
 const db = require('../config/database');
 
 class Product {
+        // Obtener el último SKU numérico
+        static async getLastSku() {
+            const [rows] = await db.query('SELECT MAX(CAST(sku AS UNSIGNED)) AS lastSku FROM productos WHERE sku REGEXP "^[0-9]+$"');
+            return rows[0]?.lastSku || 0;
+        }
     // Crear producto
     static async create(data) {
         const {
@@ -11,37 +16,40 @@ class Product {
             precio,
             costo,
             stock,
-            stock_minimo = null,
-            proveedor = null,
-            ubicacion = null,
+            stock_minimo,
+            proveedor,
+            ubicacion,
             estado = 'activo',
-            fecha_ingreso = null,
-            imagen_url = null,
-            notas = null,
-            created_at = null,
-            updated_at = null
+            fecha_ingreso,
+            imagen_url,
+            notas,
+            created_at,
+            updated_at
         } = data;
+        // Asegurar que los campos opcionales sean null si están undefined
+        const safe = v => v === undefined ? null : v;
+        const values = [
+            nombre,
+            categoria_id,
+            tallas,
+            colores,
+            precio,
+            costo,
+            stock,
+            safe(stock_minimo),
+            safe(proveedor),
+            safe(ubicacion),
+            estado,
+            safe(fecha_ingreso),
+            safe(imagen_url),
+            safe(notas),
+            safe(created_at),
+            safe(updated_at)
+        ];
         const [result] = await db.query(
             `INSERT INTO productos (nombre, categoria_id, tallas, colores, precio, costo, stock, stock_minimo, proveedor, ubicacion, estado, fecha_ingreso, imagen_url, notas, created_at, updated_at)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-            [
-                nombre,
-                categoria_id,
-                tallas,
-                colores,
-                precio,
-                costo,
-                stock,
-                stock_minimo,
-                proveedor,
-                ubicacion,
-                estado,
-                fecha_ingreso,
-                imagen_url,
-                notas,
-                created_at,
-                updated_at
-            ]
+            values
         );
         return { id: result.insertId, ...data };
     }

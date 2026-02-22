@@ -7,8 +7,6 @@ class Supplier {
   static async create(data) {
     const {
       name,
-      contact_name,
-      email,
       phone,
       address,
       city,
@@ -16,8 +14,7 @@ class Supplier {
       postal_code,
       country,
       website,
-      tax_id,
-      payment_terms,
+      min_purchase,
       notes
     } = data;
 
@@ -29,15 +26,19 @@ class Supplier {
     try {
       const result = await database.run(
         `INSERT INTO suppliers (
-          name, contact_name, email, phone, address, city, state, 
-          postal_code, country, website, tax_id, payment_terms, notes,
-          status, created_at, updated_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'active', NOW(), NOW())`,
+          name, phone, address, city, state, postal_code, country, website, min_purchase, notes, status, created_at, updated_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'active', NOW(), NOW())`,
         [
-          name, contact_name || null, email || null, phone || null,
-          address || null, city || null, state || null, postal_code || null,
-          country || null, website || null, tax_id || null,
-          payment_terms || 'net_30', notes || null
+          name,
+          phone || null,
+          address || null,
+          city || null,
+          state || null,
+          postal_code || null,
+          country || null,
+          website || null,
+          min_purchase || null,
+          notes || null
         ]
       );
 
@@ -128,9 +129,9 @@ class Supplier {
    */
   static async update(id, data) {
     const allowedFields = [
-      'name', 'contact_name', 'email', 'phone', 'address',
+      'name', 'phone', 'address',
       'city', 'state', 'postal_code', 'country', 'website',
-      'tax_id', 'payment_terms', 'notes', 'status'
+      'min_purchase', 'notes', 'status'
     ];
 
     const updates = [];

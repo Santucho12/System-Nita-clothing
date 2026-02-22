@@ -122,8 +122,7 @@ export default function SalesHistory() {
     const icons = {
       efectivo: '💵',
       tarjeta: '💳',
-      transferencia: '🏦',
-      mixto: '💰'
+      transferencia: '🏦'
     };
     return icons[method] || '💳';
   };
@@ -296,7 +295,6 @@ export default function SalesHistory() {
                   <option value="efectivo">💵 Efectivo</option>
                   <option value="tarjeta">💳 Tarjeta</option>
                   <option value="transferencia">🏦 Transferencia</option>
-                  <option value="mixto">💰 Mixto</option>
                 </select>
               </div>
             </div>

@@ -102,6 +102,15 @@ export const categoryService = {
 
 // Servicios de Productos
 export const productService = {
+    // Obtener el último SKU
+    getLastSku: async () => {
+      try {
+        const response = await api.get('/productos/ultimo-sku');
+        return response.data;
+      } catch (error) {
+        throw new Error(error.response?.data?.message || 'Error obteniendo último SKU');
+      }
+    },
   // Obtener todos los productos
   getAll: async () => {
     try {

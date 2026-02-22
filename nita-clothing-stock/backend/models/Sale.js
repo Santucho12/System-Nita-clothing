@@ -160,8 +160,9 @@ class Sale {
                                 const subtotal = parseFloat(item.unit_price) * parseInt(item.quantity);
                                 const profit = (parseFloat(item.unit_price) - parseFloat(product.costo)) * parseInt(item.quantity);
                                 let productSize = product.tallas;
-                                if (!productSize || productSize === '' || productSize === 'null') {
-                                    productSize = 'Único';
+                                const allowedSizes = ['Talle único', 'S', 'M', 'L', '36', '38', '40', '42'];
+                                if (!productSize || productSize === '' || productSize === 'null' || !allowedSizes.includes(productSize)) {
+                                    productSize = 'Talle único';
                                 }
                                 // Logging detallado para debug
                                 console.log('[DEBUG] SaleItem.create', {

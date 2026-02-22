@@ -128,6 +128,45 @@ class MasterSeeder {
     
     const products = [
       // Remeras (categoría 1)
+      { nombre: 'Remera Básica Blanca', codigo: 'REM-001', categoria_id: 1, costo: 2500, precio: 5000, stock: 45, stock_minimo: 10, tallas: 'S', colores: 'Blanco' },
+      { nombre: 'Remera Básica Negra', codigo: 'REM-002', categoria_id: 1, costo: 2500, precio: 5000, stock: 38, stock_minimo: 10, tallas: 'M', colores: 'Negro' },
+      { nombre: 'Remera Estampada Flores', codigo: 'REM-003', categoria_id: 1, costo: 3000, precio: 6500, stock: 25, stock_minimo: 8, tallas: 'L', colores: 'Multicolores' },
+      { nombre: 'Remera Overtallas Gris', codigo: 'REM-004', categoria_id: 1, costo: 3500, precio: 7000, stock: 30, stock_minimo: 10, tallas: 'Talle único', colores: 'Gris' },
+      { nombre: 'Remera Crop Top', codigo: 'REM-005', categoria_id: 1, costo: 2800, precio: 6000, stock: 20, stock_minimo: 8, tallas: 'S', colores: 'Rosa' },
+      // Pantalones (categoría 2)
+      { nombre: 'Jean Mom Fit Azul', codigo: 'PAN-001', categoria_id: 2, costo: 8000, precio: 15000, stock: 15, stock_minimo: 5, tallas: '36', colores: 'Azul' },
+      { nombre: 'Jean Skinny Negro', codigo: 'PAN-002', categoria_id: 2, costo: 7500, precio: 14000, stock: 18, stock_minimo: 5, tallas: '38', colores: 'Negro' },
+      { nombre: 'Pantalón Jogger Beige', codigo: 'PAN-003', categoria_id: 2, costo: 6000, precio: 12000, stock: 22, stock_minimo: 8, tallas: '40', colores: 'Beige' },
+      { nombre: 'Jean Wide Leg', codigo: 'PAN-004', categoria_id: 2, costo: 9000, precio: 17000, stock: 12, stock_minimo: 5, tallas: '42', colores: 'Celeste' },
+      { nombre: 'Calza Deportiva', codigo: 'PAN-005', categoria_id: 2, costo: 4000, precio: 8000, stock: 35, stock_minimo: 10, tallas: 'Talle único', colores: 'Negro' },
+      // Vestidos (categoría 3)
+      { nombre: 'Vestido Largo Floreado', codigo: 'VES-001', categoria_id: 3, costo: 10000, precio: 22000, stock: 8, stock_minimo: 3, tallas: 'S', colores: 'Multicolores' },
+      { nombre: 'Vestido Midi Liso', codigo: 'VES-002', categoria_id: 3, costo: 8500, precio: 18000, stock: 10, stock_minimo: 4, tallas: 'M', colores: 'Verde' },
+      { nombre: 'Vestido Corto Noche', codigo: 'VES-003', categoria_id: 3, costo: 12000, precio: 25000, stock: 6, stock_minimo: 2, tallas: 'L', colores: 'Negro' },
+      { nombre: 'Vestido Casual Rayas', codigo: 'VES-004', categoria_id: 3, costo: 7000, precio: 15000, stock: 12, stock_minimo: 4, tallas: 'Talle único', colores: 'Azul/Blanco' },
+      // Buzos (categoría 4)
+      { nombre: 'Buzo Canguro Overtallas', codigo: 'BUZ-001', categoria_id: 4, costo: 7000, precio: 14000, stock: 20, stock_minimo: 8, tallas: 'Talle único', colores: 'Gris' },
+      { nombre: 'Buzo Básico Negro', codigo: 'BUZ-002', categoria_id: 4, costo: 6000, precio: 12000, stock: 25, stock_minimo: 10, tallas: 'S', colores: 'Negro' },
+      { nombre: 'Buzo Estampado', codigo: 'BUZ-003', categoria_id: 4, costo: 7500, precio: 15000, stock: 15, stock_minimo: 6, tallas: 'M', colores: 'Beige' },
+      // Camperas (categoría 5)
+      { nombre: 'Campera Jean Clásica', codigo: 'CAM-001', categoria_id: 5, costo: 12000, precio: 25000, stock: 10, stock_minimo: 4, tallas: '36', colores: 'Azul' },
+      { nombre: 'Campera Cuero Ecológico', codigo: 'CAM-002', categoria_id: 5, costo: 15000, precio: 32000, stock: 7, stock_minimo: 3, tallas: '38', colores: 'Negro' },
+      { nombre: 'Campera Inflable', codigo: 'CAM-003', categoria_id: 5, costo: 10000, precio: 22000, stock: 12, stock_minimo: 5, tallas: '40', colores: 'Rosa' },
+      { nombre: 'Campera Bomber', codigo: 'CAM-004', categoria_id: 5, costo: 11000, precio: 24000, stock: 8, stock_minimo: 3, tallas: '42', colores: 'Verde' },
+      // Faldas (categoría 6)
+      { nombre: 'Falda Midi Plisada', codigo: 'FAL-001', categoria_id: 6, costo: 5000, precio: 11000, stock: 14, stock_minimo: 5, tallas: 'S', colores: 'Negro' },
+      { nombre: 'Falda Mini Jean', codigo: 'FAL-002', categoria_id: 6, costo: 4500, precio: 9500, stock: 18, stock_minimo: 6, tallas: 'M', colores: 'Azul' },
+      { nombre: 'Falda Larga Bohemia', codigo: 'FAL-003', categoria_id: 6, costo: 6000, precio: 13000, stock: 10, stock_minimo: 4, tallas: 'L', colores: 'Floreado' },
+      // Shorts (categoría 7)
+      { nombre: 'Short Jean Roturas', codigo: 'SHO-001', categoria_id: 7, costo: 4000, precio: 8500, stock: 22, stock_minimo: 8, tallas: 'S', colores: 'Azul' },
+      { nombre: 'Short Deportivo', codigo: 'SHO-002', categoria_id: 7, costo: 3000, precio: 6500, stock: 28, stock_minimo: 10, tallas: 'M', colores: 'Negro' },
+      { nombre: 'Short Cargo', codigo: 'SHO-003', categoria_id: 7, costo: 4500, precio: 9000, stock: 15, stock_minimo: 6, tallas: 'L', colores: 'Beige' },
+      // Accesorios (categoría 8)
+      { nombre: 'Cartera Bandolera', codigo: 'ACC-001', categoria_id: 8, costo: 6000, precio: 13000, stock: 12, stock_minimo: 4, tallas: 'Talle único', colores: 'Negro' },
+      { nombre: 'Cinturón Cuero', codigo: 'ACC-002', categoria_id: 8, costo: 2500, precio: 5500, stock: 20, stock_minimo: 8, tallas: 'Talle único', colores: 'Marrón' },
+      { nombre: 'Gorro Beanie', codigo: 'ACC-003', categoria_id: 8, costo: 1500, precio: 3500, stock: 30, stock_minimo: 10, tallas: 'Talle único', colores: 'Negro' },
+      { nombre: 'Bufanda Tejida', codigo: 'ACC-004', categoria_id: 8, costo: 2000, precio: 4500, stock: 25, stock_minimo: 8, tallas: 'Talle único', colores: 'Gris' }
+      // Remeras (categoría 1)
       { nombre: 'Remera Básica Blanca', codigo: 'REM-001', categoria_id: 1, costo: 2500, precio: 5000, stock: 45, stock_minimo: 10, tallas: '2', colores: 'Blanco' },
       { nombre: 'Remera Básica Negra', codigo: 'REM-002', categoria_id: 1, costo: 2500, precio: 5000, stock: 38, stock_minimo: 10, tallas: '2', colores: 'Negro' },
       { nombre: 'Remera Estampada Flores', codigo: 'REM-003', categoria_id: 1, costo: 3000, precio: 6500, stock: 25, stock_minimo: 8, tallas: '3', colores: 'Multicolores' },

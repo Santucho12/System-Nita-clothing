@@ -13,13 +13,10 @@ const Suppliers = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [formData, setFormData] = useState({
     name: '',
-    contact_name: '',
-    email: '',
     phone: '',
     address: '',
     website: '',
-    tax_id: '',
-    payment_terms: 'net_30',
+    min_purchase: '',
     notes: ''
   });
 
@@ -83,13 +80,10 @@ const Suppliers = () => {
     setEditingSupplier(supplier);
     setFormData({
       name: supplier.name || '',
-      contact_name: supplier.contact_name || '',
-      email: supplier.email || '',
       phone: supplier.phone || '',
       address: supplier.address || '',
       website: supplier.website || '',
-      tax_id: supplier.tax_id || '',
-      payment_terms: supplier.payment_terms || 'net_30',
+      min_purchase: supplier.min_purchase || '',
       notes: supplier.notes || ''
     });
     setShowForm(true);
@@ -275,44 +269,11 @@ const Suppliers = () => {
                 </div>
 
                 <div>
-                  <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Persona de Contacto</label>
-                  <input
-                    type="text"
-                    name="contact_name"
-                    value={formData.contact_name}
-                    onChange={handleInputChange}
-                    style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '4px' }}
-                  />
-                </div>
-
-                <div>
-                  <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Email</label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '4px' }}
-                  />
-                </div>
-
-                <div>
                   <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Teléfono</label>
                   <input
                     type="text"
                     name="phone"
                     value={formData.phone}
-                    onChange={handleInputChange}
-                    style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '4px' }}
-                  />
-                </div>
-
-                <div>
-                  <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>CUIT/Tax ID</label>
-                  <input
-                    type="text"
-                    name="tax_id"
-                    value={formData.tax_id}
                     onChange={handleInputChange}
                     style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '4px' }}
                   />
@@ -342,20 +303,15 @@ const Suppliers = () => {
                 </div>
 
                 <div>
-                  <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Términos de Pago</label>
-                  <select
-                    name="payment_terms"
-                    value={formData.payment_terms}
+                  <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Mínimo de Compra</label>
+                  <input
+                    type="number"
+                    name="min_purchase"
+                    value={formData.min_purchase}
                     onChange={handleInputChange}
+                    min="0"
                     style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '4px' }}
-                  >
-                    <option value="immediate">Inmediato</option>
-                    <option value="net_15">15 días</option>
-                    <option value="net_30">30 días</option>
-                    <option value="net_45">45 días</option>
-                    <option value="net_60">60 días</option>
-                    <option value="other">Otro</option>
-                  </select>
+                  />
                 </div>
 
                 <div style={{ gridColumn: '1 / -1' }}>

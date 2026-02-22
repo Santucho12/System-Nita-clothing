@@ -3,6 +3,15 @@
         const fs = require('fs');
 
         class ProductController {
+                        // Obtener el último SKU numérico
+                        static async getLastSku(req, res) {
+                            try {
+                                const lastSku = await Product.getLastSku();
+                                res.status(200).json({ success: true, lastSku });
+                            } catch (error) {
+                                res.status(500).json({ success: false, message: error.message });
+                            }
+                        }
             // Cambiar estado del producto
             static async changeStatus(req, res) {
                 try {
@@ -143,11 +152,20 @@
                         const imageUrls = req.files.map(file => `/uploads/${file.filename}`);
                         data = { ...data, images: imageUrls };
                     }
+                    // Validar talles permitidos
+                    const allowedSizes = ['Talle único', 'S', 'M', 'L', '36', '38', '40', '42'];
+                    if (data.tallas && !allowedSizes.includes(data.tallas)) {
+                        return res.status(400).json({ success: false, message: 'Talle inválido. Los valores permitidos son: ' + allowedSizes.join(', ') });
+                    }
                     // Log de depuración para ver los datos recibidos
                     console.log('[createProduct] data recibido:', data);
                     // Parsear campos numéricos
                     if (data.category_id) data.category_id = parseInt(data.category_id);
                     if (data.supplier_id) data.supplier_id = parseInt(data.supplier_id);
+                    // Si cantidad no está presente o es vacío, poner 1
+                    if (!('quantity' in data) || data.quantity === '' || data.quantity === undefined || data.quantity === null) {
+                        data.quantity = 1;
+                    }
                     if (data.quantity) data.quantity = parseInt(data.quantity);
                     if (data.min_stock) data.min_stock = parseInt(data.min_stock);
                     if (data.sale_price) data.sale_price = parseFloat(data.sale_price);
