@@ -5,7 +5,7 @@ import {
   FaTshirt, FaPlus, FaEdit, FaTrash, FaCopy, FaSearch, FaFilter, 
   FaFileExcel, FaTimes, FaBox, FaDollarSign, FaBarcode, FaTag,
   FaPalette, FaRulerVertical, FaCalendarAlt, FaCheckCircle, FaExclamationTriangle,
-  FaTimesCircle, FaEye, FaSave, FaBoxes
+  FaTimesCircle, FaEye, FaSave, FaBoxes, FaUser
 } from 'react-icons/fa';
 
 const Products = () => {
@@ -27,7 +27,7 @@ const Products = () => {
     size: '',
     sale_price: '',
     cost_price: '',
-    quantity: '',
+    quantity: '1',
     min_stock: '',
     supplier_id: '',
     images: [], // array de archivos o urls
@@ -45,7 +45,24 @@ const Products = () => {
     description: ''
   });
 
-  // Cargar datos al montar el componente
+  // Guardar y recuperar el último SKU usando localStorage
+  useEffect(() => {
+    // Al abrir el formulario, recuperar el último SKU guardado en localStorage
+    if (showForm && !editingProduct) {
+      const storedSku = localStorage.getItem('lastSKU');
+      if (storedSku) {
+        setFormData(prev => ({
+          ...prev,
+          sku: String(parseInt(storedSku) + 1)
+        }));
+      } else if (lastSku !== undefined && lastSku !== null) {
+        setFormData(prev => ({
+          ...prev,
+          sku: String(parseInt(lastSku) + 1)
+        }));
+      }
+    }
+  }, [lastSku, showForm, editingProduct]);
   useEffect(() => {
         // Obtener el último SKU al abrir el formulario
         if (showForm) {
@@ -136,7 +153,7 @@ const Products = () => {
       // Filtros locales
       if (selectedSize) filtered = filtered.filter(p => p.tallas === selectedSize);
       if (selectedColor) filtered = filtered.filter(p => p.colores && p.colores.toLowerCase().includes(selectedColor.toLowerCase()));
-      if (selectedStatus) filtered = filtered.filter(p => p.status === selectedStatus);
+      if (selectedStatus) filtered = filtered.filter(p => (p.status === selectedStatus) || (p.estado === selectedStatus));
       setProducts(filtered);
     } catch (error) {
       toast.error('Error filtrando productos: ' + error.message);
@@ -184,27 +201,32 @@ const Products = () => {
     // Stock mínimo ya no es obligatorio
     // supplier_id puede ser opcional por ahora
     try {
+      // Mapeo para backend
       const productData = {
-        ...formData,
-        colores: formData.color,
+        nombre: formData.name,
+        codigo: formData.sku,
+        categoria_id: parseInt(formData.category_id),
+        proveedor: formData.supplier_id ? parseInt(formData.supplier_id) : null,
         tallas: formData.size,
-        quantity: parseInt(formData.quantity),
-        min_stock: parseInt(formData.min_stock),
-        sale_price: parseFloat(formData.sale_price),
-        cost_price: parseFloat(formData.cost_price),
-        category_id: parseInt(formData.category_id),
-        supplier_id: formData.supplier_id ? parseInt(formData.supplier_id) : null,
-        images: formData.images // array de archivos o urls
+        colores: formData.color,
+        ubicacion: formData.ubicacion || '',
+        estado: formData.status,
+        notas: formData.notas || '',
+        imagen_url: JSON.stringify(formData.images.filter(img => typeof img === 'string' && (img.startsWith('/uploads/') || img.startsWith('http')))),
+        stock: parseInt(formData.quantity),
+        stock_minimo: parseInt(formData.min_stock),
+        precio: parseFloat(formData.sale_price),
+        costo: parseFloat(formData.cost_price)
       };
-      // Eliminar los campos antiguos
-      delete productData.color;
-      delete productData.size;
       if (editingProduct) {
         await productService.update(editingProduct.id, productData);
         toast.success('Producto actualizado exitosamente');
       } else {
         await productService.create(productData);
         toast.success('Producto creado exitosamente');
+        if (formData.sku) {
+          localStorage.setItem('lastSKU', formData.sku);
+        }
       }
       resetForm();
       loadProducts();
@@ -228,19 +250,19 @@ const Products = () => {
   const handleEdit = (product) => {
     setEditingProduct(product);
     setFormData({
-      name: product.name,
-      color: product.colores || '',
-      size: product.tallas || '',
-      sale_price: product.sale_price?.toString() || '',
-      cost_price: product.cost_price?.toString() || '',
-      quantity: product.quantity?.toString() || '',
-      min_stock: product.min_stock?.toString() || '',
-      supplier_id: product.supplier_id?.toString() || '',
-      images: product.images || [],
-      status: product.status || 'disponible',
-      sku: product.sku || '',
-      barcode: product.barcode || '',
-      category_id: product.category_id?.toString() || ''
+      name: product?.nombre ?? product?.name ?? '',
+      color: product?.colores ?? product?.color ?? '',
+      size: product?.tallas ?? product?.size ?? '',
+      sale_price: (product?.precio ?? product?.sale_price ?? '').toString(),
+      cost_price: (product?.costo ?? product?.cost_price ?? '').toString(),
+      quantity: (product?.stock ?? product?.quantity ?? '1').toString(),
+      min_stock: (product?.stock_minimo ?? product?.min_stock ?? '').toString(),
+      supplier_id: (product?.proveedor ?? product?.supplier_id ?? '').toString(),
+      images: product?.images ?? [],
+      status: product?.estado ?? product?.status ?? 'disponible',
+      sku: product?.codigo ?? product?.sku ?? '',
+      barcode: product?.barcode ?? '',
+      category_id: (product?.categoria_id ?? product?.category_id ?? '').toString()
     });
     setShowForm(true);
   };
@@ -288,21 +310,21 @@ const Products = () => {
   };
 
   const resetForm = () => {
-    setFormData({
+    setFormData(prev => ({
       name: '',
       color: '',
       size: '',
       sale_price: '',
       cost_price: '',
-      quantity: '',
+      quantity: '1',
       min_stock: '',
       supplier_id: '',
       images: [],
       status: 'disponible',
-      sku: '',
+      sku: (lastSku !== undefined && lastSku !== null) ? String(parseInt(lastSku) + 1) : '1',
       barcode: '',
       category_id: ''
-    });
+    }));
     setShowForm(false);
     setEditingProduct(null);
   };
@@ -636,8 +658,11 @@ const Products = () => {
                   <input type="text" name="name" value={formData.name} onChange={handleInputChange} placeholder="Ej: Remera Básica" required className="form-input" style={{ width: '100%', padding: '10px 14px', border: '2px solid #e0e0e0', borderRadius: '8px', fontSize: '14px' }} />
                 </div>
                 <div>
-                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', fontSize: '14px', color: '#555' }}><FaPalette style={{ marginRight: '6px', color: '#f73194' }} /> Color *</label>
-                  <input type="text" name="color" value={formData.color} onChange={handleInputChange} placeholder="Ej: Negro" required className="form-input" style={{ width: '100%', padding: '10px 14px', border: '2px solid #e0e0e0', borderRadius: '8px', fontSize: '14px' }} />
+                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', fontSize: '14px', color: '#555' }}><FaTag style={{ marginRight: '6px', color: '#f73194' }} /> Categoría *</label>
+                  <select name="category_id" value={formData.category_id} onChange={handleInputChange} required className="form-input" style={{ width: '100%', padding: '10px 14px', border: '2px solid #e0e0e0', borderRadius: '8px', fontSize: '14px', cursor: 'pointer' }}>
+                    <option value="">Selecciona</option>
+                    {categories.map(category => (<option key={category.id} value={category.id}>{category.name}</option>))}
+                  </select>
                 </div>
                 <div>
                   <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', fontSize: '14px', color: '#555' }}><FaRulerVertical style={{ marginRight: '6px', color: '#f73194' }} /> Talle *</label>
@@ -655,24 +680,21 @@ const Products = () => {
                 </div>
                 {/* Fila 2 */}
                 <div>
-                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', fontSize: '14px', color: '#555' }}><FaDollarSign style={{ marginRight: '6px', color: '#f73194' }} /> Precio Venta *</label>
-                  <input type="number" name="sale_price" value={formData.sale_price} onChange={handleInputChange} min="0" step="0.01" required className="form-input" style={{ width: '100%', padding: '10px 14px', border: '2px solid #e0e0e0', borderRadius: '8px', fontSize: '14px' }} />
+                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', fontSize: '14px', color: '#555' }}><FaPalette style={{ marginRight: '6px', color: '#f73194' }} /> Color *</label>
+                  <input type="text" name="color" value={formData.color} onChange={handleInputChange} placeholder="Ej: Negro" required className="form-input" style={{ width: '100%', padding: '10px 14px', border: '2px solid #e0e0e0', borderRadius: '8px', fontSize: '14px' }} />
                 </div>
                 <div>
                   <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', fontSize: '14px', color: '#555' }}><FaDollarSign style={{ marginRight: '6px', color: '#4CAF50' }} /> Precio Costo *</label>
                   <input type="number" name="cost_price" value={formData.cost_price} onChange={handleInputChange} min="0" step="0.01" required className="form-input" style={{ width: '100%', padding: '10px 14px', border: '2px solid #e0e0e0', borderRadius: '8px', fontSize: '14px' }} />
                 </div>
                 <div>
-                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', fontSize: '14px', color: '#555' }}><FaBox style={{ marginRight: '6px', color: '#f73194' }} /> Cantidad</label>
-                  <input type="number" name="quantity" value={formData.quantity} onChange={handleInputChange} min="0" className="form-input" style={{ width: '100%', padding: '10px 14px', border: '2px solid #e0e0e0', borderRadius: '8px', fontSize: '14px' }} placeholder="Por defecto 1" />
+                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', fontSize: '14px', color: '#555' }}><FaDollarSign style={{ marginRight: '6px', color: '#f73194' }} /> Precio Venta *</label>
+                  <input type="number" name="sale_price" value={formData.sale_price} onChange={handleInputChange} min="0" step="0.01" required className="form-input" style={{ width: '100%', padding: '10px 14px', border: '2px solid #e0e0e0', borderRadius: '8px', fontSize: '14px' }} />
                 </div>
                 {/* Fila 3 */}
                 <div>
-                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', fontSize: '14px', color: '#555' }}><FaTag style={{ marginRight: '6px', color: '#f73194' }} /> Categoría *</label>
-                  <select name="category_id" value={formData.category_id} onChange={handleInputChange} required className="form-input" style={{ width: '100%', padding: '10px 14px', border: '2px solid #e0e0e0', borderRadius: '8px', fontSize: '14px', cursor: 'pointer' }}>
-                    <option value="">Selecciona</option>
-                    {categories.map(category => (<option key={category.id} value={category.id}>{category.name}</option>))}
-                  </select>
+                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', fontSize: '14px', color: '#555' }}><FaBox style={{ marginRight: '6px', color: '#f73194' }} /> Cantidad</label>
+                  <input type="number" name="quantity" value={formData.quantity} onChange={handleInputChange} min="0" className="form-input" style={{ width: '100%', padding: '10px 14px', border: '2px solid #e0e0e0', borderRadius: '8px', fontSize: '14px' }} placeholder="Por defecto 1" />
                 </div>
                 <div>
                   <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', fontSize: '14px', color: '#555' }}>Proveedor</label>
@@ -707,7 +729,14 @@ const Products = () => {
               {/* Botones */}
               <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', paddingTop: '20px', borderTop: '2px solid #f0f0f0' }}>
                 <button type="button" className="btn-gray" onClick={resetForm} style={{ padding: '12px 24px', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '15px', fontWeight: '500' }}><FaTimes /> Cancelar</button>
-                <button type="submit" className="btn-pink" style={{ padding: '12px 24px', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '15px', fontWeight: '500' }}><FaSave /> {editingProduct ? 'Actualizar' : 'Crear'}</button>
+                <button
+                  type="submit"
+                  className="btn-pink"
+                  style={{ padding: '12px 24px', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '15px', fontWeight: '500' }}
+                  disabled={!formData.name || formData.name.trim() === '' || !formData.sale_price || isNaN(parseFloat(formData.sale_price)) || !formData.quantity || isNaN(parseInt(formData.quantity))}
+                >
+                  <FaSave /> {editingProduct ? 'Actualizar' : 'Crear'}
+                </button>
               </div>
             </form>
           </div>
@@ -741,7 +770,9 @@ const Products = () => {
           </div>
         ) : (
           products.map((product, index) => {
-            const stockStatus = getStockStatus(product.quantity, product.min_stock);
+            // Usar estado para mostrar sin_stock correctamente
+            const isSinStock = product.status === 'sin_stock' || product.estado === 'sin_stock';
+            const stockStatus = isSinStock ? 'stock-critical' : getStockStatus(product.quantity, product.min_stock);
             const stockColor = stockStatus === 'stock-critical' ? '#dc3545' : stockStatus === 'stock-low' ? '#FF9800' : '#4CAF50';
             const stockIcon = stockStatus === 'stock-critical' ? <FaTimesCircle /> : stockStatus === 'stock-low' ? <FaExclamationTriangle /> : <FaCheckCircle />;
             
@@ -769,9 +800,9 @@ const Products = () => {
                       {product.images.slice(0, 3).map((img, idx) => (
                         <img
                           key={idx}
-                          src={img}
+                          src={`http://localhost:5000${img}`}
                           alt={`img-${idx}`}
-                          style={{ width: '60px', height: '60px', objectFit: 'cover', borderRadius: '6px', border: idx === 0 ? '2px solid #f73194' : '2px solid #e0e0e0' }}
+                          style={{ width: '240px', height: '240px', objectFit: 'cover', borderRadius: '16px', border: idx === 0 ? '3px solid #f73194' : '2px solid #e0e0e0', boxShadow: '0 2px 8px rgba(0,0,0,0.10)' }}
                         />
                       ))}
                       {product.images.length > 3 && (
@@ -789,7 +820,7 @@ const Products = () => {
                     <h3 style={{ margin: '0 0 5px 0', fontSize: '18px', color: '#333', fontWeight: '600' }}>{product.name}</h3>
                     <p style={{ margin: 0, fontSize: '13px', color: '#666', display: 'flex', alignItems: 'center', gap: '6px' }}>
                       <FaPalette style={{ color: '#f73194' }} />
-                      {product.colores} • Talle {product.tallas}
+                      <strong style={{ fontWeight: 'bold', color: '#333' }}>{getCategoryName(product.categoria_id || product.category_id)} {product.nombre || product.name}</strong>
                     </p>
                   </div>
                   <div style={{ display: 'flex', gap: '6px' }}>
@@ -822,32 +853,71 @@ const Products = () => {
 
                 {/* Detalles */}
                 <div style={{ marginBottom: '15px' }}>
-                  <p style={{ margin: '8px 0', display: 'flex', alignItems: 'center', fontSize: '14px', color: '#555' }}>
-                    <FaTag style={{ marginRight: '8px', color: '#f73194', fontSize: '13px' }} />
-                    <strong style={{ marginRight: '6px' }}>Categoría:</strong> {getCategoryName(product.category_id)}
-                  </p>
-                  <p style={{ margin: '8px 0', display: 'flex', alignItems: 'center', fontSize: '14px', color: '#555' }}>
-                    <FaDollarSign style={{ marginRight: '8px', color: '#4CAF50', fontSize: '13px' }} />
-                    <strong style={{ marginRight: '6px' }}>Precio:</strong> ${product.sale_price}
-                  </p>
-                  {product.tallas && (
-                    <p style={{ margin: '8px 0', display: 'flex', alignItems: 'center', fontSize: '14px', color: '#555' }}>
-                      <FaTshirt style={{ marginRight: '8px', color: '#f73194', fontSize: '13px' }} />
-                      <strong style={{ marginRight: '6px' }}>Talle:</strong> {product.tallas}
-                    </p>
-                  )}
-                  {product.colores && (
-                    <p style={{ margin: '8px 0', display: 'flex', alignItems: 'center', fontSize: '14px', color: '#555' }}>
-                      <FaPalette style={{ marginRight: '8px', color: '#f73194', fontSize: '13px' }} />
-                      <strong style={{ marginRight: '6px' }}>Color:</strong> {product.colores}
-                    </p>
-                  )}
-                  {product.sku && (
-                    <p style={{ margin: '8px 0', display: 'flex', alignItems: 'center', fontSize: '13px', color: '#777' }}>
-                      <FaBarcode style={{ marginRight: '8px', color: '#666', fontSize: '13px' }} />
-                      SKU: {product.sku}
-                    </p>
-                  )}
+                                                      {/* Precio Costo */}
+                                                      {product.cost_price !== undefined && (
+                                                        <p style={{ margin: '8px 0', display: 'flex', alignItems: 'center', fontSize: '14px', color: '#555' }}>
+                                                          <FaDollarSign style={{ marginRight: '8px', color: '#f73194', fontSize: '13px' }} />
+                                                          <strong style={{ marginRight: '6px' }}>Precio Costo:</strong> ${product.cost_price}
+                                                        </p>
+                                                      )}
+                                                      {/* Precio Venta */}
+                                                      {product.sale_price !== undefined && (
+                                                        <p style={{ margin: '8px 0', display: 'flex', alignItems: 'center', fontSize: '14px', color: '#555' }}>
+                                                          <FaDollarSign style={{ marginRight: '8px', color: '#4CAF50', fontSize: '13px' }} />
+                                                          <strong style={{ marginRight: '6px' }}>Precio Venta:</strong> ${product.sale_price}
+                                                        </p>
+                                                      )}
+                                                      {/* SKU */}
+                                                      {product.sku && (
+                                                        <p style={{ margin: '8px 0', display: 'flex', alignItems: 'center', fontSize: '13px', color: '#777' }}>
+                                                          <FaBarcode style={{ marginRight: '8px', color: '#666', fontSize: '13px' }} />
+                                                          <strong style={{ marginRight: '6px' }}>SKU:</strong> {product.sku}
+                                                        </p>
+                                                      )}
+                                    {/* Proveedor (mostrar nombre si existe en suppliers) */}
+                                    <p style={{ margin: '8px 0', display: 'flex', alignItems: 'center', fontSize: '14px', color: '#555' }}>
+                                      <FaUser style={{ marginRight: '8px', color: '#f73194', fontSize: '13px' }} />
+                                      <strong style={{ marginRight: '6px' }}>Proveedor:</strong> {suppliers && suppliers.length > 0 ? (suppliers.find(s => String(s.id) === String(product.proveedor))?.name || product.proveedor) : product.proveedor}
+                                    </p>
+                                    {/* Cantidad */}
+                                    <p style={{ margin: '8px 0', display: 'flex', alignItems: 'center', fontSize: '14px', color: '#555' }}>
+                                      <FaBox style={{ marginRight: '8px', color: '#f73194', fontSize: '13px' }} />
+                                      <strong style={{ marginRight: '6px' }}>Cantidad:</strong> {product.stock !== undefined ? product.stock : product.quantity}
+                                    </p>
+                                    {/* Categoría */}
+                                    <p style={{ margin: '8px 0', display: 'flex', alignItems: 'center', fontSize: '14px', color: '#555' }}>
+                                      <FaTag style={{ marginRight: '8px', color: '#f73194', fontSize: '13px' }} />
+                                      <strong style={{ marginRight: '6px' }}>Categoría:</strong> {getCategoryName(product.categoria_id || product.category_id)}
+                                    </p>
+                                    {/* Precio Costo */}
+                                    <p style={{ margin: '8px 0', display: 'flex', alignItems: 'center', fontSize: '14px', color: '#555' }}>
+                                      <FaDollarSign style={{ marginRight: '8px', color: '#f73194', fontSize: '13px' }} />
+                                      <strong style={{ marginRight: '6px' }}>Precio Costo:</strong> ${product.costo !== undefined ? product.costo : product.cost_price}
+                                    </p>
+                                    {/* Precio Venta */}
+                                    <p style={{ margin: '8px 0', display: 'flex', alignItems: 'center', fontSize: '14px', color: '#555' }}>
+                                      <FaDollarSign style={{ marginRight: '8px', color: '#4CAF50', fontSize: '13px' }} />
+                                      <strong style={{ marginRight: '6px' }}>Precio Venta:</strong> ${product.precio !== undefined ? product.precio : product.sale_price}
+                                    </p>
+                                    {/* Talle */}
+                                    {product.tallas && (
+                                      <p style={{ margin: '8px 0', display: 'flex', alignItems: 'center', fontSize: '14px', color: '#555' }}>
+                                        <FaTshirt style={{ marginRight: '8px', color: '#f73194', fontSize: '13px' }} />
+                                        <strong style={{ marginRight: '6px' }}>Talle:</strong> {product.tallas}
+                                      </p>
+                                    )}
+                                    {/* Color */}
+                                    {product.colores && (
+                                      <p style={{ margin: '8px 0', display: 'flex', alignItems: 'center', fontSize: '14px', color: '#555' }}>
+                                        <FaPalette style={{ marginRight: '8px', color: '#f73194', fontSize: '13px' }} />
+                                        <strong style={{ marginRight: '6px' }}>Color:</strong> {product.colores}
+                                      </p>
+                                    )}
+                                    {/* SKU */}
+                                    <p style={{ margin: '8px 0', display: 'flex', alignItems: 'center', fontSize: '13px', color: '#777' }}>
+                                      <FaBarcode style={{ marginRight: '8px', color: '#666', fontSize: '13px' }} />
+                                      <strong style={{ marginRight: '6px' }}>SKU:</strong> {product.codigo !== undefined ? product.codigo : product.sku}
+                                    </p>
                 </div>
 
                 {/* Stock info */}
@@ -870,7 +940,7 @@ const Products = () => {
                 {/* Estado */}
                 <div style={{ marginBottom: '12px' }}>
                   <select
-                    value={product.status}
+                    value={isSinStock ? 'sin_stock' : (product.status || 'disponible')}
                     onChange={e => handleChangeStatus(product, e.target.value)}
                     className="filter-select"
                     style={{ width: '100%', padding: '10px 14px', border: '2px solid #e0e0e0', borderRadius: '8px', fontSize: '13px', background: 'white', cursor: 'pointer', fontWeight: '500' }}

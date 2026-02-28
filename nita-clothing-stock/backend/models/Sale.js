@@ -196,6 +196,11 @@ class Sale {
                                 }
                                 // Actualizar stock
                                 await database.run('UPDATE productos SET stock = stock - ?, updated_at = NOW() WHERE id = ?', [item.quantity, item.product_id]);
+                                // Consultar nuevo stock
+                                const updatedProduct = await database.get('SELECT stock FROM productos WHERE id = ?', [item.product_id]);
+                                if (updatedProduct && Number(updatedProduct.stock) === 0) {
+                                    await database.run("UPDATE productos SET estado = 'sin_stock', updated_at = NOW() WHERE id = ?", [item.product_id]);
+                                }
                             }
                             return { id: sale_id, ...saleData, items };
                         } catch (error) {

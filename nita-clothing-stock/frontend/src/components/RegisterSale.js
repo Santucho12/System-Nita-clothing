@@ -67,7 +67,8 @@ export default function RegisterSale() {
   // Obtener productos únicos filtrados por categoría
   const getProductNamesForCategory = (categoryId) => {
     if (!categoryId) return [];
-    const filtered = products.filter(p => p.categoria_id == categoryId);
+    // Solo productos que no estén en estado 'sin_stock'
+    const filtered = products.filter(p => p.categoria_id == categoryId && p.estado !== 'sin_stock');
     const uniqueNames = [...new Set(filtered.map(p => p.nombre))];
     return uniqueNames;
   };
@@ -75,8 +76,9 @@ export default function RegisterSale() {
   // Obtener colores disponibles para un producto en una categoría
   const getColorsForProduct = (categoryId, productName) => {
     if (!categoryId || !productName) return [];
+    // Solo productos que no estén en estado 'sin_stock'
     const filtered = products.filter(p => 
-      p.categoria_id == categoryId && p.nombre === productName
+      p.categoria_id == categoryId && p.nombre === productName && p.estado !== 'sin_stock'
     );
     const uniqueColors = [...new Set(filtered.map(p => p.colores))];
     return uniqueColors;
@@ -85,10 +87,12 @@ export default function RegisterSale() {
   // Obtener talles disponibles para un producto/color específico
   const getSizesForProductColor = (categoryId, productName, color) => {
     if (!categoryId || !productName || !color) return [];
+    // Solo productos que no estén en estado 'sin_stock'
     const filtered = products.filter(p => 
       p.categoria_id == categoryId && 
       p.nombre === productName && 
-      p.colores === color
+      p.colores === color &&
+      p.estado !== 'sin_stock'
     );
     const uniqueSizes = [...new Set(filtered.map(p => p.talle).filter(Boolean))];
     // Si no hay talles, devolver ['Único']

@@ -1,12 +1,22 @@
 const express = require('express');
 const multer = require('multer');
+const path = require('path');
 const ProductController = require('../controllers/productController');
 const { authMiddleware, authorizeRoles } = require('../middleware/auth');
 
 const router = express.Router();
 
 // Subida y gestión de imágenes
-const upload = multer({ limits: { fileSize: 5 * 1024 * 1024 } }); // 5MB máx por imagen
+const storage = multer.diskStorage({
+	destination: function (req, file, cb) {
+		cb(null, path.join(__dirname, '../../uploads/products'));
+	},
+	filename: function (req, file, cb) {
+		const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+		cb(null, uniqueSuffix + '-' + file.originalname);
+	}
+});
+const upload = multer({ storage, limits: { fileSize: 5 * 1024 * 1024 } }); // 5MB máx por imagen
 
 // Todas requieren autenticación
 router.use(authMiddleware);
@@ -25,7 +35,7 @@ router.patch('/:id/stock', authorizeRoles('admin', 'supervisor'), ProductControl
 router.delete('/:id', authorizeRoles('admin', 'supervisor'), ProductController.deleteProduct);
 
 // Obtener el último SKU
-router.get('/ultimo-sku', authorizeRoles('admin', 'supervisor'), ProductController.getLastSku);
+router.get('/ultimo-sku', ProductController.getLastSku);
 
 // Cambiar estado del producto
 router.patch('/:id/status', authorizeRoles('admin', 'supervisor'), ProductController.changeStatus);

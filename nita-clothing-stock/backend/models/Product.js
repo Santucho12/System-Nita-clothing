@@ -1,15 +1,16 @@
 const db = require('../config/database');
 
 class Product {
-        // Obtener el último SKU numérico
-        static async getLastSku() {
-            const [rows] = await db.query('SELECT MAX(CAST(sku AS UNSIGNED)) AS lastSku FROM productos WHERE sku REGEXP "^[0-9]+$"');
-            return rows[0]?.lastSku || 0;
-        }
+    // Obtener el último SKU numérico
+    static async getLastSku() {
+        const [rows] = await db.query('SELECT MAX(CAST(sku AS UNSIGNED)) AS lastSku FROM productos');
+        return rows[0]?.lastSku || 0;
+    }
     // Crear producto
     static async create(data) {
         const {
             nombre,
+            codigo, // Agregado el código/sku
             categoria_id,
             tallas = null,
             colores = null,
@@ -26,29 +27,28 @@ class Product {
             created_at,
             updated_at
         } = data;
-        // Asegurar que los campos opcionales sean null si están undefined
-        const safe = v => v === undefined ? null : v;
         const values = [
-            nombre,
-            categoria_id,
-            tallas,
-            colores,
-            precio,
-            costo,
-            stock,
-            safe(stock_minimo),
-            safe(proveedor),
-            safe(ubicacion),
-            estado,
-            safe(fecha_ingreso),
-            safe(imagen_url),
-            safe(notas),
-            safe(created_at),
-            safe(updated_at)
+            nombre !== undefined ? nombre : null,
+            codigo !== undefined ? codigo : null,
+            categoria_id !== undefined ? categoria_id : null,
+            tallas !== undefined ? tallas : null,
+            colores !== undefined ? colores : null,
+            precio !== undefined ? precio : null,
+            costo !== undefined ? costo : null,
+            stock !== undefined ? stock : null,
+            stock_minimo !== undefined ? stock_minimo : null,
+            proveedor !== undefined ? proveedor : null,
+            ubicacion !== undefined ? ubicacion : null,
+            estado !== undefined ? estado : 'activo',
+            fecha_ingreso !== undefined ? fecha_ingreso : null,
+            imagen_url !== undefined ? imagen_url : null,
+            notas !== undefined ? notas : null,
+            created_at !== undefined ? created_at : null,
+            updated_at !== undefined ? updated_at : null
         ];
         const [result] = await db.query(
-            `INSERT INTO productos (nombre, categoria_id, tallas, colores, precio, costo, stock, stock_minimo, proveedor, ubicacion, estado, fecha_ingreso, imagen_url, notas, created_at, updated_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            `INSERT INTO productos (nombre, codigo, categoria_id, tallas, colores, precio, costo, stock, stock_minimo, proveedor, ubicacion, estado, fecha_ingreso, imagen_url, notas, created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             values
         );
         return { id: result.insertId, ...data };
@@ -57,14 +57,14 @@ class Product {
     // Obtener todos los productos
     static async getAll() {
         const [rows] = await db.query('SELECT * FROM productos');
-        return rows.map(p => ({ ...p, images: p.imagenes ? JSON.parse(p.imagenes) : [] }));
+        return rows.map(p => ({ ...p, images: p.imagen_url ? JSON.parse(p.imagen_url) : [] }));
     }
 
     // Obtener producto por ID
     static async getById(id) {
         const [rows] = await db.query('SELECT * FROM productos WHERE id = ?', [id]);
         if (!rows[0]) return null;
-        return { ...rows[0], images: rows[0].imagenes ? JSON.parse(rows[0].imagenes) : [] };
+        return { ...rows[0], images: rows[0].imagen_url ? JSON.parse(rows[0].imagen_url) : [] };
     }
 
     // Buscar productos por nombre o SKU
@@ -73,25 +73,25 @@ class Product {
             `SELECT * FROM productos WHERE nombre LIKE ? OR codigo LIKE ?`,
             [`%${query}%`, `%${query}%`]
         );
-        return rows.map(p => ({ ...p, images: p.imagenes ? JSON.parse(p.imagenes) : [] }));
+        return rows.map(p => ({ ...p, images: p.imagen_url ? JSON.parse(p.imagen_url) : [] }));
     }
 
     // Filtrar por categoría
     static async getByCategory(categoryId) {
         const [rows] = await db.query('SELECT * FROM productos WHERE categoria_id = ?', [categoryId]);
-        return rows.map(p => ({ ...p, images: p.imagenes ? JSON.parse(p.imagenes) : [] }));
+        return rows.map(p => ({ ...p, images: p.imagen_url ? JSON.parse(p.imagen_url) : [] }));
     }
 
     // Productos con stock bajo
     static async getLowStock() {
         const [rows] = await db.query('SELECT * FROM productos WHERE stock < stock_minimo AND stock > 0');
-        return rows.map(p => ({ ...p, images: p.imagenes ? JSON.parse(p.imagenes) : [] }));
+        return rows.map(p => ({ ...p, images: p.imagen_url ? JSON.parse(p.imagen_url) : [] }));
     }
 
     // Productos sin stock
     static async getOutOfStock() {
         const [rows] = await db.query('SELECT * FROM productos WHERE stock <= 0');
-        return rows.map(p => ({ ...p, images: p.imagenes ? JSON.parse(p.imagenes) : [] }));
+        return rows.map(p => ({ ...p, images: p.imagen_url ? JSON.parse(p.imagen_url) : [] }));
     }
 
     // Actualizar producto
@@ -99,9 +99,13 @@ class Product {
         const fields = [];
         const values = [];
         for (const key in data) {
-            if (key === 'images') {
-                fields.push('images = ?');
-                values.push(JSON.stringify(data[key]));
+            if (key === 'images' || key === 'imagen_url') {
+                fields.push('imagen_url = ?');
+                if (Array.isArray(data[key])) {
+                    values.push(JSON.stringify(data[key]));
+                } else {
+                    values.push(data[key]);
+                }
             } else {
                 fields.push(`${key} = ?`);
                 values.push(data[key]);
