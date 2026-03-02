@@ -56,15 +56,19 @@ export default function RegisterSale() {
     newItems[index][field] = value;
 
     // Lógica especial para búsqueda por SKU
-    if (field === 'sku' && value.length >= 3) {
-      const product = products.find(p => p.sku === value || p.codigo === value);
+    if (field === 'sku' && value) {
+      const searchValue = value.toString().trim().toLowerCase();
+      const product = products.find(p =>
+        (p.sku && p.sku.toString().trim().toLowerCase() === searchValue) ||
+        (p.codigo && p.codigo.toString().trim().toLowerCase() === searchValue)
+      );
       if (product) {
         newItems[index].product_id = product.id;
-        newItems[index].product_name = product.nombre;
-        newItems[index].unit_price = product.precio_venta || product.sale_price;
-        newItems[index].category_id = product.categoria_id || product.category_id;
-        newItems[index].size = product.talle || product.size;
-        newItems[index].color = product.color;
+        newItems[index].product_name = product.nombre || product.name || '';
+        newItems[index].unit_price = product.precio || product.precio_venta || product.sale_price || 0;
+        newItems[index].category_id = product.categoria_id || product.category_id || '';
+        newItems[index].size = product.tallas || product.talle || product.size || '';
+        newItems[index].color = product.colores || product.color || '';
       }
     }
 
@@ -88,12 +92,12 @@ export default function RegisterSale() {
       const product = products.find(p =>
         (p.categoria_id == newItems[index].category_id || p.category_id == newItems[index].category_id) &&
         (p.nombre === newItems[index].product_name || p.name === newItems[index].product_name) &&
-        p.color === newItems[index].color &&
-        (p.talle === value || p.size === value)
+        (p.colores === newItems[index].color || p.color === newItems[index].color) &&
+        (p.tallas === value || p.talle === value || p.size === value)
       );
       if (product) {
         newItems[index].product_id = product.id;
-        newItems[index].unit_price = product.precio_venta || product.sale_price;
+        newItems[index].unit_price = product.precio || product.precio_venta || product.sale_price || 0;
       }
     }
 
@@ -129,7 +133,7 @@ export default function RegisterSale() {
       (p.categoria_id == categoryId || p.category_id == categoryId) &&
       (p.nombre === productName || p.name === productName)
     );
-    return [...new Set(filtered.map(p => p.color))];
+    return [...new Set(filtered.map(p => p.colores || p.color).filter(Boolean))];
   };
 
   const getSizesForProductColor = (categoryId, productName, color) => {
@@ -137,9 +141,9 @@ export default function RegisterSale() {
     const filtered = products.filter(p =>
       (p.categoria_id == categoryId || p.category_id == categoryId) &&
       (p.nombre === productName || p.name === productName) &&
-      p.color === color
+      (p.colores === color || p.color === color)
     );
-    return [...new Set(filtered.map(p => p.talle || p.size))];
+    return [...new Set(filtered.map(p => p.tallas || p.talle || p.size).filter(Boolean))];
   };
 
   const handleSubmit = async e => {
@@ -330,7 +334,7 @@ export default function RegisterSale() {
                           </label>
                           <input
                             type="text"
-                            placeholder="Ej: PROD-001"
+                            placeholder="1,2,3,etc"
                             value={item.sku}
                             onChange={e => handleItemChange(idx, 'sku', e.target.value)}
                             required
@@ -565,21 +569,7 @@ export default function RegisterSale() {
               Datos del Cliente
             </h3>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
-              <div>
-                <label style={{ display: 'block', marginBottom: '6px', fontSize: '14px', fontWeight: '500', color: '#555' }}>
-                  <FaBox style={{ marginRight: '6px', color: '#f73194' }} />
-                  Nombre del Cliente (Opcional)
-                </label>
-                <input
-                  type="text"
-                  placeholder="Ej: Juan Pérez"
-                  value={customerName}
-                  onChange={e => setCustomerName(e.target.value)}
-                  className="form-input"
-                  style={{ width: '100%', padding: '12px', border: '2px solid #e0e0e0', borderRadius: '8px', fontSize: '14px' }}
-                />
-              </div>
+            <div style={{ marginBottom: '20px' }}>
               <div>
                 <label style={{ display: 'block', marginBottom: '6px', fontSize: '14px', fontWeight: '500', color: '#555' }}>
                   <FaEnvelope style={{ marginRight: '6px', color: '#f73194' }} />
