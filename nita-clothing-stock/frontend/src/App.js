@@ -23,29 +23,32 @@ import Alerts from './components/Alerts';
 import Promotions from './components/Promotions';
 import Login from './components/Login';
 
+import { useAuth } from './context/AuthContext';
+
 import './App.css';
 
 
 function App() {
-  const [user, setUser] = useState(null);
-
-  useEffect(() => {
-    // Intentar cargar usuario desde localStorage/token
-    const token = localStorage.getItem('token');
-    if (token) {
-      // Opcional: decodificar token o pedir /api/auth/me
-      setUser({ token });
-    }
-  }, []);
-
-  const handleLogin = (userData) => {
-    setUser(userData);
-    // Redirigir a la página principal
-    window.location.href = '/';
-  };
+  const { user, login } = useAuth();
 
   if (!user) {
-    return <Login onLogin={handleLogin} />;
+    return (
+      <>
+        <Login onLogin={login} />
+        <ToastContainer
+          position="top-right"
+          autoClose={4000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="light"
+        />
+      </>
+    );
   }
 
   return (

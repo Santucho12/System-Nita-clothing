@@ -1,7 +1,8 @@
 import axios from 'axios';
 
 // Configuración base de Axios
-const API_BASE_URL = 'http://localhost:5000/api';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+export const IMAGE_BASE_URL = process.env.REACT_APP_IMAGE_URL || 'http://localhost:5000';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -102,15 +103,15 @@ export const categoryService = {
 
 // Servicios de Productos
 export const productService = {
-    // Obtener el último SKU
-    getLastSku: async () => {
-      try {
-        const response = await api.get('/productos/ultimo-sku');
-        return response.data;
-      } catch (error) {
-        throw new Error(error.response?.data?.message || 'Error obteniendo último SKU');
-      }
-    },
+  // Obtener el último SKU
+  getLastSku: async () => {
+    try {
+      const response = await api.get('/productos/ultimo-sku');
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response?.data?.message || 'Error obteniendo último SKU');
+    }
+  },
   // Obtener todos los productos
   getAll: async () => {
     try {
@@ -118,6 +119,16 @@ export const productService = {
       return response.data;
     } catch (error) {
       throw new Error(error.response?.data?.message || 'Error obteniendo productos');
+    }
+  },
+
+  // Obtener el conteo de productos
+  getCount: async () => {
+    try {
+      const response = await api.get('/productos/count');
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response?.data?.message || 'Error obteniendo el conteo de productos');
     }
   },
 

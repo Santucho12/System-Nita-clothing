@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
+import { toast } from 'react-toastify';
 import api from '../services/api';
 import { formatCurrency } from '../utils/formatters';
-import { FaUsers, FaSearch, FaChartPie, FaUser, FaEnvelope, FaPhone, FaMapMarkerAlt, FaShoppingBag, FaDollarSign, FaCalendarAlt } from 'react-icons/fa';
+import useSortableData from '../hooks/useSortableData';
+import { FaUsers, FaSearch, FaChartPie, FaUser, FaEnvelope, FaPhone, FaMapMarkerAlt, FaShoppingBag, FaDollarSign, FaCalendarAlt, FaSortAmountDown, FaSortUp, FaSortDown } from 'react-icons/fa';
 import '../components/Sidebar.css';
 import './Customers.css';
 
@@ -17,6 +19,12 @@ export default function Customers() {
   const [showComingSoon, setShowComingSoon] = useState(false);
 
   const [searchTerm, setSearchTerm] = useState('');
+
+  // Hook de ordenado para la lista general
+  const { items: sortedCustomers, requestSort, sortConfig } = useSortableData(customers, { key: 'name', direction: 'ascending' });
+
+  // Hook de ordenado para segmentación
+  const { items: sortedSegmentation, requestSort: requestSortSeg, sortConfig: sortConfigSeg } = useSortableData(segmentation, { key: 'total_spent', direction: 'descending' });
 
   useEffect(() => {
     fetchCustomers();
@@ -35,19 +43,17 @@ export default function Customers() {
   };
 
   const fetchSegmentation = async () => {
-    // Mostrar modal de próxima funcionalidad
-    setShowComingSoon(true);
-    // Si en el futuro se habilita, descomentar lo de abajo:
-    // setLoading(true);
-    // try {
-    //   const res = await api.get('/clientes/segmentacion');
-    //   setSegmentation(res.data.data);
-    //   setView('segmentation');
-    // } catch (err) {
-    //   console.error(err);
-    // } finally {
-    //   setLoading(false);
-    // }
+    setLoading(true);
+    try {
+      const res = await api.get('/clientes/segmentacion');
+      setSegmentation(res.data.data || []);
+      setView('segmentation');
+    } catch (err) {
+      console.error('Error fetching segmentation:', err);
+      toast.error('Error al cargar la segmentación de clientes');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const fetchCustomerDetail = async (email) => {
@@ -79,7 +85,7 @@ export default function Customers() {
     setPurchaseHistory([]);
   };
 
-  const filteredCustomers = customers.filter(customer =>
+  const filteredCustomers = sortedCustomers.filter(customer =>
     customer.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     customer.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     customer.phone?.includes(searchTerm)
@@ -162,7 +168,7 @@ export default function Customers() {
           Gestión de Clientes
         </h1>
         <div style={{ display: 'flex', gap: '10px' }}>
-          <button 
+          <button
             className={view === 'list' ? 'btn-pink' : 'btn-secondary'}
             onClick={() => { setView('list'); fetchCustomers(); }}
             style={{ padding: '12px 24px', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '15px', fontWeight: '500' }}
@@ -170,7 +176,7 @@ export default function Customers() {
             <FaUsers />
             Lista de Clientes
           </button>
-          <button 
+          <button
             className={view === 'segmentation' ? 'btn-pink' : 'btn-secondary'}
             onClick={fetchSegmentation}
             style={{ padding: '12px 24px', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '15px', fontWeight: '500' }}
@@ -190,16 +196,19 @@ export default function Customers() {
         <>
           {view === 'list' && (
             <>
-              <div className="search-bar" style={{ marginBottom: '30px', position: 'relative' }}>
-                <FaSearch style={{ position: 'absolute', left: '15px', top: '50%', transform: 'translateY(-50%)', color: '#999', fontSize: '16px' }} />
-                <input
-                  type="text"
-                  placeholder="Buscar por nombre, email o teléfono..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="search-input"
-                  style={{ width: '100%', padding: '14px 14px 14px 45px', border: '2px solid #e0e0e0', borderRadius: '10px', fontSize: '15px', background: 'white', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}
-                />
+              <div className="search-bar" style={{ marginBottom: '30px', display: 'flex', gap: '15px' }}>
+                <div style={{ position: 'relative', flex: 1 }}>
+                  <FaSearch style={{ position: 'absolute', left: '15px', top: '50%', transform: 'translateY(-50%)', color: '#999', fontSize: '16px' }} />
+                  <input
+                    type="text"
+                    placeholder="Buscar por nombre, email o teléfono..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="search-input"
+                    style={{ width: '100%', padding: '14px 14px 14px 45px', border: '2px solid #e0e0e0', borderRadius: '10px', fontSize: '15px', background: 'white', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}
+                  />
+                </div>
+
               </div>
 
               <div className="customers-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '24px' }}>
@@ -222,36 +231,36 @@ export default function Customers() {
                         `}
                       </style>
                       <div className="customer-card" style={{ border: 'none', borderRadius: '12px', padding: '24px', background: 'white', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', borderTop: '4px solid #f73194' }}>
-                      <div className="customer-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px', paddingBottom: '15px', borderBottom: '2px solid #f5f5f5' }}>
-                        <h3 style={{ margin: 0, fontSize: '20px', color: '#333', fontWeight: '600' }}>{customer.name}</h3>
-                        <button 
-                          onClick={() => fetchCustomerDetail(customer.email)}
-                          style={{ background: '#f73194', border: 'none', color: 'white', cursor: 'pointer', fontSize: '13px', display: 'flex', alignItems: 'center', padding: '8px 16px', borderRadius: '6px', transition: 'all 0.3s ease', fontWeight: '500' }}
-                          onMouseOver={(e) => { e.currentTarget.style.transform = 'scale(1.1)'; }}
-                          onMouseOut={(e) => { e.currentTarget.style.transform = 'scale(1)'; }}
-                        >
-                          Ver Detalle
-                        </button>
-                      </div>
+                        <div className="customer-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px', paddingBottom: '15px', borderBottom: '2px solid #f5f5f5' }}>
+                          <h3 style={{ margin: 0, fontSize: '20px', color: '#333', fontWeight: '600' }}>{customer.name}</h3>
+                          <button
+                            onClick={() => fetchCustomerDetail(customer.email)}
+                            style={{ background: '#f73194', border: 'none', color: 'white', cursor: 'pointer', fontSize: '13px', display: 'flex', alignItems: 'center', padding: '8px 16px', borderRadius: '6px', transition: 'all 0.3s ease', fontWeight: '500' }}
+                            onMouseOver={(e) => { e.currentTarget.style.transform = 'scale(1.1)'; }}
+                            onMouseOut={(e) => { e.currentTarget.style.transform = 'scale(1)'; }}
+                          >
+                            Ver Detalle
+                          </button>
+                        </div>
 
-                      <div className="customer-details" style={{ fontSize: '14px', color: '#555' }}>
-                        <p style={{ margin: '8px 0', display: 'flex', alignItems: 'center' }}>
-                          <FaEnvelope style={{ marginRight: '10px', color: '#f73194', fontSize: '14px', minWidth: '14px' }} />
-                          <span style={{ wordBreak: 'break-all' }}>{customer.email}</span>
-                        </p>
-                        {customer.phone && (
+                        <div className="customer-details" style={{ fontSize: '14px', color: '#555' }}>
                           <p style={{ margin: '8px 0', display: 'flex', alignItems: 'center' }}>
-                            <FaPhone style={{ marginRight: '10px', color: '#f73194', fontSize: '14px', minWidth: '14px' }} />
-                            <span>{customer.phone}</span>
+                            <FaEnvelope style={{ marginRight: '10px', color: '#f73194', fontSize: '14px', minWidth: '14px' }} />
+                            <span style={{ wordBreak: 'break-all' }}>{customer.email}</span>
                           </p>
-                        )}
-                        {customer.address && (
-                          <p style={{ margin: '8px 0', display: 'flex', alignItems: 'center' }}>
-                            <FaMapMarkerAlt style={{ marginRight: '10px', color: '#f73194', fontSize: '14px', minWidth: '14px' }} />
-                            <span>{customer.address}</span>
-                          </p>
-                        )}
-                      </div>
+                          {customer.phone && (
+                            <p style={{ margin: '8px 0', display: 'flex', alignItems: 'center' }}>
+                              <FaPhone style={{ marginRight: '10px', color: '#f73194', fontSize: '14px', minWidth: '14px' }} />
+                              <span>{customer.phone}</span>
+                            </p>
+                          )}
+                          {customer.address && (
+                            <p style={{ margin: '8px 0', display: 'flex', alignItems: 'center' }}>
+                              <FaMapMarkerAlt style={{ marginRight: '10px', color: '#f73194', fontSize: '14px', minWidth: '14px' }} />
+                              <span>{customer.address}</span>
+                            </p>
+                          )}
+                        </div>
                       </div>
                     </React.Fragment>
                   ))
@@ -267,16 +276,28 @@ export default function Customers() {
                 <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                   <thead>
                     <tr style={{ background: '#f8f9fa', borderBottom: '2px solid #f73194' }}>
-                      <th style={{ padding: '12px', textAlign: 'left', fontWeight: '600', color: '#333' }}>Email</th>
-                      <th style={{ padding: '12px', textAlign: 'left', fontWeight: '600', color: '#333' }}>Nombre</th>
-                      <th style={{ padding: '12px', textAlign: 'left', fontWeight: '600', color: '#333' }}>Compras</th>
-                      <th style={{ padding: '12px', textAlign: 'left', fontWeight: '600', color: '#333' }}>Total Gastado</th>
-                      <th style={{ padding: '12px', textAlign: 'left', fontWeight: '600', color: '#333' }}>Última Compra</th>
-                      <th style={{ padding: '12px', textAlign: 'left', fontWeight: '600', color: '#333' }}>Segmento</th>
+                      <th onClick={() => requestSortSeg('email')} style={{ padding: '12px', textAlign: 'left', fontWeight: '600', color: '#333', cursor: 'pointer' }}>
+                        Email {sortConfigSeg?.key === 'email' && (sortConfigSeg.direction === 'ascending' ? <FaSortUp /> : <FaSortDown />)}
+                      </th>
+                      <th onClick={() => requestSortSeg('name')} style={{ padding: '12px', textAlign: 'left', fontWeight: '600', color: '#333', cursor: 'pointer' }}>
+                        Nombre {sortConfigSeg?.key === 'name' && (sortConfigSeg.direction === 'ascending' ? <FaSortUp /> : <FaSortDown />)}
+                      </th>
+                      <th onClick={() => requestSortSeg('purchase_count')} style={{ padding: '12px', textAlign: 'left', fontWeight: '600', color: '#333', cursor: 'pointer' }}>
+                        Compras {sortConfigSeg?.key === 'purchase_count' && (sortConfigSeg.direction === 'ascending' ? <FaSortUp /> : <FaSortDown />)}
+                      </th>
+                      <th onClick={() => requestSortSeg('total_spent')} style={{ padding: '12px', textAlign: 'left', fontWeight: '600', color: '#333', cursor: 'pointer' }}>
+                        Total Gastado {sortConfigSeg?.key === 'total_spent' && (sortConfigSeg.direction === 'ascending' ? <FaSortUp /> : <FaSortDown />)}
+                      </th>
+                      <th onClick={() => requestSortSeg('last_purchase')} style={{ padding: '12px', textAlign: 'left', fontWeight: '600', color: '#333', cursor: 'pointer' }}>
+                        Última Compra {sortConfigSeg?.key === 'last_purchase' && (sortConfigSeg.direction === 'ascending' ? <FaSortUp /> : <FaSortDown />)}
+                      </th>
+                      <th onClick={() => requestSortSeg('segment')} style={{ padding: '12px', textAlign: 'left', fontWeight: '600', color: '#333', cursor: 'pointer' }}>
+                        Segmento {sortConfigSeg?.key === 'segment' && (sortConfigSeg.direction === 'ascending' ? <FaSortUp /> : <FaSortDown />)}
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
-                    {segmentation.map(c => (
+                    {sortedSegmentation.map(c => (
                       <tr key={c.email} style={{ borderBottom: '1px solid #f0f0f0' }}>
                         <td style={{ padding: '12px', fontSize: '14px' }}>{c.email}</td>
                         <td style={{ padding: '12px', fontSize: '14px', fontWeight: '500' }}>{c.name}</td>
@@ -284,11 +305,11 @@ export default function Customers() {
                         <td style={{ padding: '12px', fontSize: '14px', fontWeight: '600', color: '#f73194' }}>{formatCurrency(c.total_spent || 0)}</td>
                         <td style={{ padding: '12px', fontSize: '14px' }}>{c.last_purchase?.slice(0, 10) || 'N/A'}</td>
                         <td style={{ padding: '12px' }}>
-                          <span style={{ 
-                            display: 'inline-block', 
-                            padding: '6px 16px', 
-                            borderRadius: '20px', 
-                            fontSize: '13px', 
+                          <span style={{
+                            display: 'inline-block',
+                            padding: '6px 16px',
+                            borderRadius: '20px',
+                            fontSize: '13px',
                             fontWeight: '600',
                             background: c.segment === 'VIP' ? '#d4edda' : c.segment === 'Regular' ? '#fff3cd' : '#f8d7da',
                             color: c.segment === 'VIP' ? '#155724' : c.segment === 'Regular' ? '#856404' : '#721c24'
@@ -307,7 +328,7 @@ export default function Customers() {
           {showModal && (
             <>
               {/* Overlay */}
-              <div 
+              <div
                 onClick={closeModal}
                 style={{
                   position: 'fixed',
@@ -320,7 +341,7 @@ export default function Customers() {
                   animation: 'fadeIn 0.3s ease-in-out'
                 }}
               />
-              
+
               {/* Modal Content */}
               <div style={{
                 position: 'fixed',
@@ -339,7 +360,7 @@ export default function Customers() {
                 animation: 'fadeIn 0.3s ease-in-out'
               }}>
                 {/* Close Button */}
-                <button 
+                <button
                   onClick={closeModal}
                   style={{
                     position: 'absolute',
@@ -470,16 +491,16 @@ export default function Customers() {
           )}
         </>
       )}
-    {/* Modal de funcionalidad próxima a implementar */}
-    {showComingSoon && (
-      <div className="sidebar-modal-overlay" onClick={() => setShowComingSoon(false)}>
-        <div className="sidebar-modal" onClick={e => e.stopPropagation()}>
-          <div className="sidebar-modal-title">Funcionalidad Próxima a implementar</div>
-          <div className="sidebar-modal-desc">La sección <b>Segmentación</b> estará disponible próximamente.</div>
-          <button className="sidebar-modal-btn" onClick={() => setShowComingSoon(false)}>Cerrar</button>
+      {/* Modal de funcionalidad próxima a implementar */}
+      {showComingSoon && (
+        <div className="sidebar-modal-overlay" onClick={() => setShowComingSoon(false)}>
+          <div className="sidebar-modal" onClick={e => e.stopPropagation()}>
+            <div className="sidebar-modal-title">Funcionalidad Próxima a implementar</div>
+            <div className="sidebar-modal-desc">La sección <b>Segmentación</b> estará disponible próximamente.</div>
+            <button className="sidebar-modal-btn" onClick={() => setShowComingSoon(false)}>Cerrar</button>
+          </div>
         </div>
-      </div>
-    )}
+      )}
     </div>
   );
 }

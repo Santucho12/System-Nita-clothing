@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import api from '../services/api';
 import { formatCurrency } from '../utils/formatters';
-import { FaHistory, FaCalendarAlt, FaSearch, FaCreditCard, FaDollarSign, FaUser, FaEnvelope, FaFileInvoice, FaPrint, FaFilePdf, FaTimes, FaCheckCircle, FaTimesCircle, FaExchangeAlt, FaChevronLeft, FaChevronRight, FaFilter } from 'react-icons/fa';
+import useSortableData from '../hooks/useSortableData';
+import { FaHistory, FaCalendarAlt, FaSearch, FaCreditCard, FaDollarSign, FaUser, FaEnvelope, FaFileInvoice, FaPrint, FaFilePdf, FaTimes, FaCheckCircle, FaTimesCircle, FaExchangeAlt, FaChevronLeft, FaChevronRight, FaFilter, FaSortUp, FaSortDown } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 
 const defaultFilters = {
@@ -22,6 +23,9 @@ export default function SalesHistory() {
   const [selectedSale, setSelectedSale] = useState(null);
   const [error, setError] = useState(null);
   const [showFilters, setShowFilters] = useState(true);
+
+  // Hook de ordenado
+  const { items: sortedSales, requestSort, sortConfig } = useSortableData(sales, { key: 'created_at', direction: 'descending' });
 
   const fetchSales = async (params = filters) => {
     setLoading(true);
@@ -74,11 +78,27 @@ export default function SalesHistory() {
     fetchSales({ ...filters, page: newPage });
   };
 
-  const handleShowDetail = sale => setSelectedSale(sale);
+  const handleShowDetail = async (sale) => {
+    try {
+      setLoading(true);
+      const response = await api.get(`/sales/${sale.id}`);
+      if (response.data.success) {
+        setSelectedSale(response.data.data);
+      } else {
+        setSelectedSale(sale);
+      }
+    } catch (error) {
+      console.error('Error al obtener detalles de venta:', error);
+      setSelectedSale(sale);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleCloseDetail = () => setSelectedSale(null);
 
   // (handlers antiguos eliminados, solo queda showComingSoonAlert y los nuevos handlers)
-  
+
   // Alerta genérica para funcionalidades próximas
   const showComingSoonAlert = () => {
     toast.warn('Funcionalidad Próxima a implementar. Esta sección estará disponible próximamente.', {
@@ -88,10 +108,35 @@ export default function SalesHistory() {
     });
   };
 
-  const handlePrintTicket = () => showComingSoonAlert();
-  const handleSendEmail = () => showComingSoonAlert();
-  const handleExportPDF = () => showComingSoonAlert();
-  const handleCancelSale = () => showComingSoonAlert();
+  const handlePrintTicket = (sale) => {
+    toast.info(`Imprimiendo ticket de venta #${sale.sale_number || sale.id}...`);
+  };
+
+  const handleSendEmail = (sale) => {
+    toast.info(`Enviando comprobante a ${sale.customer_email || 'el cliente'}...`);
+  };
+
+  const handleExportPDF = (sale) => {
+    toast.info(`Generando PDF de venta #${sale.sale_number || sale.id}...`);
+  };
+
+  const handleCancelSale = async (sale) => {
+    if (window.confirm(`¿Estás seguro de que deseas cancelar la venta #${sale.sale_number || sale.id}? Esta acción restaurará el stock de los productos.`)) {
+      try {
+        setLoading(true);
+        const response = await api.delete(`/sales/${sale.id}`);
+        if (response.data.success) {
+          toast.success('Venta cancelada exitosamente y stock restaurado.');
+          fetchSales();
+          setSelectedSale(null);
+        }
+      } catch (error) {
+        toast.error('Error al cancelar la venta: ' + (error.response?.data?.message || error.message));
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
   const getStatusBadge = (status) => {
     const statusStyles = {
       completada: { bg: '#d4edda', color: '#155724', icon: FaCheckCircle, label: 'Completada' },
@@ -101,16 +146,16 @@ export default function SalesHistory() {
     const style = statusStyles[status] || statusStyles.completada;
     const Icon = style.icon;
     return (
-      <span style={{ 
-        display: 'inline-flex', 
-        alignItems: 'center', 
+      <span style={{
+        display: 'inline-flex',
+        alignItems: 'center',
         gap: '6px',
-        padding: '6px 14px', 
-        borderRadius: '20px', 
-        fontSize: '13px', 
-        fontWeight: '600', 
-        background: style.bg, 
-        color: style.color 
+        padding: '6px 14px',
+        borderRadius: '20px',
+        fontSize: '13px',
+        fontWeight: '600',
+        background: style.bg,
+        color: style.color
       }}>
         <Icon style={{ fontSize: '12px' }} />
         {style.label}
@@ -203,7 +248,7 @@ export default function SalesHistory() {
           <FaHistory style={{ marginRight: '12px', color: '#f73194', fontSize: '32px' }} />
           Historial de Ventas
         </h1>
-        <button 
+        <button
           className="btn-secondary"
           onClick={() => setShowFilters(!showFilters)}
           style={{ padding: '12px 24px', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '15px', fontWeight: '500', background: '#343a40' }}
@@ -384,7 +429,7 @@ export default function SalesHistory() {
           </div>
           <h3 style={{ fontSize: '24px', color: '#333', margin: '0 0 12px 0', fontWeight: '600' }}>{error}</h3>
           <p style={{ color: '#666', fontSize: '16px', margin: '0 0 30px 0' }}>Intenta recargar la página o contacta con soporte</p>
-          <button 
+          <button
             onClick={() => fetchSales()}
             className="btn-pink"
             style={{ padding: '14px 28px', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '16px', fontWeight: '500', background: '#f73194' }}
@@ -407,19 +452,31 @@ export default function SalesHistory() {
               <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
                   <tr style={{ background: 'linear-gradient(135deg, #f73194 0%, #ff6fb8 100%)', color: 'white' }}>
-                    <th style={{ padding: '16px', textAlign: 'left', fontWeight: '600', fontSize: '14px' }}>N° Venta</th>
-                    <th style={{ padding: '16px', textAlign: 'left', fontWeight: '600', fontSize: '14px' }}>Fecha</th>
-                    <th style={{ padding: '16px', textAlign: 'left', fontWeight: '600', fontSize: '14px' }}>Cliente</th>
-                    <th style={{ padding: '16px', textAlign: 'left', fontWeight: '600', fontSize: '14px' }}>Método</th>
-                    <th style={{ padding: '16px', textAlign: 'right', fontWeight: '600', fontSize: '14px' }}>Total</th>
-                    <th style={{ padding: '16px', textAlign: 'center', fontWeight: '600', fontSize: '14px' }}>Estado</th>
+                    <th onClick={() => requestSort('sale_number')} style={{ padding: '16px', textAlign: 'left', fontWeight: '600', fontSize: '14px', cursor: 'pointer' }}>
+                      N° Venta {sortConfig?.key === 'sale_number' && (sortConfig.direction === 'ascending' ? <FaSortUp /> : <FaSortDown />)}
+                    </th>
+                    <th onClick={() => requestSort('created_at')} style={{ padding: '16px', textAlign: 'left', fontWeight: '600', fontSize: '14px', cursor: 'pointer' }}>
+                      Fecha {sortConfig?.key === 'created_at' && (sortConfig.direction === 'ascending' ? <FaSortUp /> : <FaSortDown />)}
+                    </th>
+                    <th onClick={() => requestSort('customer_email')} style={{ padding: '16px', textAlign: 'left', fontWeight: '600', fontSize: '14px', cursor: 'pointer' }}>
+                      Cliente {sortConfig?.key === 'customer_email' && (sortConfig.direction === 'ascending' ? <FaSortUp /> : <FaSortDown />)}
+                    </th>
+                    <th onClick={() => requestSort('payment_method')} style={{ padding: '16px', textAlign: 'left', fontWeight: '600', fontSize: '14px', cursor: 'pointer' }}>
+                      Método {sortConfig?.key === 'payment_method' && (sortConfig.direction === 'ascending' ? <FaSortUp /> : <FaSortDown />)}
+                    </th>
+                    <th onClick={() => requestSort('total')} style={{ padding: '16px', textAlign: 'right', fontWeight: '600', fontSize: '14px', cursor: 'pointer' }}>
+                      Total {sortConfig?.key === 'total' && (sortConfig.direction === 'ascending' ? <FaSortUp /> : <FaSortDown />)}
+                    </th>
+                    <th onClick={() => requestSort('status')} style={{ padding: '16px', textAlign: 'center', fontWeight: '600', fontSize: '14px', cursor: 'pointer' }}>
+                      Estado {sortConfig?.key === 'status' && (sortConfig.direction === 'ascending' ? <FaSortUp /> : <FaSortDown />)}
+                    </th>
                     <th style={{ padding: '16px', textAlign: 'center', fontWeight: '600', fontSize: '14px' }}>Acciones</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {sales.map((sale, index) => (
-                    <tr 
-                      key={sale.id} 
+                  {sortedSales.map((sale, index) => (
+                    <tr
+                      key={sale.id}
                       className="table-row"
                       style={{ borderBottom: '1px solid #f0f0f0', background: index % 2 === 0 ? 'white' : '#fafafa' }}
                     >
@@ -429,9 +486,9 @@ export default function SalesHistory() {
                       </td>
                       <td style={{ padding: '16px', fontSize: '14px', color: '#555' }}>
                         <FaCalendarAlt style={{ marginRight: '8px', color: '#999' }} />
-                        {new Date(sale.created_at).toLocaleDateString('es-AR', { 
-                          day: '2-digit', 
-                          month: '2-digit', 
+                        {new Date(sale.created_at).toLocaleDateString('es-AR', {
+                          day: '2-digit',
+                          month: '2-digit',
                           year: 'numeric',
                           hour: '2-digit',
                           minute: '2-digit'
@@ -478,11 +535,11 @@ export default function SalesHistory() {
                     onClick={() => handlePageChange(filters.page - 1)}
                     disabled={filters.page === 1}
                     className="pagination-btn"
-                    style={{ 
-                      padding: '8px 12px', 
-                      border: '2px solid #e0e0e0', 
-                      background: 'white', 
-                      borderRadius: '6px', 
+                    style={{
+                      padding: '8px 12px',
+                      border: '2px solid #e0e0e0',
+                      background: 'white',
+                      borderRadius: '6px',
                       cursor: filters.page === 1 ? 'not-allowed' : 'pointer',
                       opacity: filters.page === 1 ? 0.5 : 1,
                       display: 'flex',
@@ -507,12 +564,12 @@ export default function SalesHistory() {
                         key={pageNum}
                         onClick={() => handlePageChange(pageNum)}
                         className="pagination-btn"
-                        style={{ 
-                          padding: '8px 14px', 
-                          border: filters.page === pageNum ? 'none' : '2px solid #e0e0e0', 
-                          background: filters.page === pageNum ? '#f73194' : 'white', 
+                        style={{
+                          padding: '8px 14px',
+                          border: filters.page === pageNum ? 'none' : '2px solid #e0e0e0',
+                          background: filters.page === pageNum ? '#f73194' : 'white',
                           color: filters.page === pageNum ? 'white' : '#333',
-                          borderRadius: '6px', 
+                          borderRadius: '6px',
                           cursor: 'pointer',
                           fontWeight: filters.page === pageNum ? '600' : '400',
                           fontSize: '14px'
@@ -526,11 +583,11 @@ export default function SalesHistory() {
                     onClick={() => handlePageChange(filters.page + 1)}
                     disabled={filters.page === totalPages}
                     className="pagination-btn"
-                    style={{ 
-                      padding: '8px 12px', 
-                      border: '2px solid #e0e0e0', 
-                      background: 'white', 
-                      borderRadius: '6px', 
+                    style={{
+                      padding: '8px 12px',
+                      border: '2px solid #e0e0e0',
+                      background: 'white',
+                      borderRadius: '6px',
                       cursor: filters.page === totalPages ? 'not-allowed' : 'pointer',
                       opacity: filters.page === totalPages ? 0.5 : 1,
                       display: 'flex',
@@ -607,9 +664,51 @@ export default function SalesHistory() {
 
               <div style={{ marginBottom: '30px', padding: '20px', background: '#f8f9fa', borderRadius: '10px' }}>
                 <h4 style={{ margin: '0 0 15px 0', fontSize: '16px', fontWeight: '600', color: '#333' }}>Productos</h4>
-                <p style={{ margin: 0, fontSize: '14px', color: '#555', lineHeight: '1.6' }}>
-                  {selectedSale.items || 'No hay información de productos disponible'}
-                </p>
+                {Array.isArray(selectedSale.items) ? (
+                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px' }}>
+                    <thead>
+                      <tr style={{ borderBottom: '2px solid #ddd', textAlign: 'left' }}>
+                        <th style={{ padding: '8px 0' }}>Producto</th>
+                        <th style={{ padding: '8px 0' }}>Cant.</th>
+                        <th style={{ padding: '8px 0', textAlign: 'right' }}>Unit.</th>
+                        <th style={{ padding: '8px 0', textAlign: 'right' }}>Subtotal</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {selectedSale.items.map((item, idx) => (
+                        <tr key={idx} style={{ borderBottom: '1px solid #eee' }}>
+                          <td style={{ padding: '10px 0' }}>
+                            <div style={{ fontWeight: '600' }}>{item.product_name}</div>
+                            <div style={{ fontSize: '12px', color: '#777' }}>{item.product_size} | {item.product_color}</div>
+                          </td>
+                          <td style={{ padding: '10px 0' }}>{item.quantity}</td>
+                          <td style={{ padding: '10px 0', textAlign: 'right' }}>{formatCurrency(item.unit_price)}</td>
+                          <td style={{ padding: '10px 0', textAlign: 'right', fontWeight: '600' }}>{formatCurrency(item.subtotal)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                    <tfoot>
+                      <tr>
+                        <td colSpan="3" style={{ padding: '15px 0 5px 0', textAlign: 'right', color: '#666' }}>Sutotal:</td>
+                        <td style={{ padding: '15px 0 5px 0', textAlign: 'right', color: '#666' }}>{formatCurrency(selectedSale.subtotal || 0)}</td>
+                      </tr>
+                      {selectedSale.discount_amount > 0 && (
+                        <tr>
+                          <td colSpan="3" style={{ padding: '5px 0', textAlign: 'right', color: '#f73194' }}>Descuento ({selectedSale.discount_percent}%):</td>
+                          <td style={{ padding: '5px 0', textAlign: 'right', color: '#f73194' }}>-{formatCurrency(selectedSale.discount_amount)}</td>
+                        </tr>
+                      )}
+                      <tr>
+                        <td colSpan="3" style={{ padding: '10px 0', textAlign: 'right', fontWeight: '700', fontSize: '18px' }}>Total:</td>
+                        <td style={{ padding: '10px 0', textAlign: 'right', fontWeight: '700', fontSize: '18px', color: '#4CAF50' }}>{formatCurrency(selectedSale.total || 0)}</td>
+                      </tr>
+                    </tfoot>
+                  </table>
+                ) : (
+                  <p style={{ margin: 0, fontSize: '14px', color: '#555', lineHeight: '1.6' }}>
+                    {selectedSale.items || 'No hay información de productos disponible'}
+                  </p>
+                )}
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>

@@ -1,15 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import { productService, categoryService, supplierService } from '../services/api';
+import React, { useState, useEffect, useMemo } from 'react';
+import { productService, categoryService, supplierService, IMAGE_BASE_URL } from '../services/api';
 import { toast } from 'react-toastify';
-import { 
-  FaTshirt, FaPlus, FaEdit, FaTrash, FaCopy, FaSearch, FaFilter, 
+import useSortableData from '../hooks/useSortableData';
+import {
+  FaTshirt, FaPlus, FaEdit, FaTrash, FaCopy, FaSearch, FaFilter,
   FaFileExcel, FaTimes, FaBox, FaDollarSign, FaBarcode, FaTag,
   FaPalette, FaRulerVertical, FaCalendarAlt, FaCheckCircle, FaExclamationTriangle,
-  FaTimesCircle, FaEye, FaSave, FaBoxes, FaUser
+  FaTimesCircle, FaEye, FaSave, FaBoxes, FaUser, FaSortAmountDown, FaSortAmountUp
 } from 'react-icons/fa';
 
 const Products = () => {
-    const [lastSku, setLastSku] = useState(undefined);
+  const [lastSku, setLastSku] = useState(undefined);
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [suppliers, setSuppliers] = useState([]);
@@ -45,6 +46,9 @@ const Products = () => {
     description: ''
   });
 
+  // Hook de ordenado para los productos
+  const { items: sortedProducts, requestSort, sortConfig } = useSortableData(products, { key: 'id', direction: 'descending' });
+
   // Guardar y recuperar el último SKU usando localStorage
   useEffect(() => {
     // Al abrir el formulario, recuperar el último SKU guardado en localStorage
@@ -64,17 +68,17 @@ const Products = () => {
     }
   }, [lastSku, showForm, editingProduct]);
   useEffect(() => {
-        // Obtener el último SKU al abrir el formulario
-        if (showForm) {
-          productService.getLastSku().then(res => {
-            setLastSku(res.lastSku);
-            // Solo sugerir el siguiente SKU si no estamos editando
-            setFormData(prev => ({
-              ...prev,
-              sku: editingProduct ? prev.sku : (res.lastSku !== undefined ? String(parseInt(res.lastSku) + 1) : '')
-            }));
-          }).catch(() => setLastSku(undefined));
-        }
+    // Obtener el último SKU al abrir el formulario
+    if (showForm) {
+      productService.getLastSku().then(res => {
+        setLastSku(res.lastSku);
+        // Solo sugerir el siguiente SKU si no estamos editando
+        setFormData(prev => ({
+          ...prev,
+          sku: editingProduct ? prev.sku : (res.lastSku !== undefined ? String(parseInt(res.lastSku) + 1) : '')
+        }));
+      }).catch(() => setLastSku(undefined));
+    }
     loadInitialData();
   }, []);
 
@@ -201,23 +205,21 @@ const Products = () => {
     // Stock mínimo ya no es obligatorio
     // supplier_id puede ser opcional por ahora
     try {
-      // Mapeo para backend
+      // Mapeo simplificado para el nuevo controlador
       const productData = {
         nombre: formData.name,
-        codigo: formData.sku,
-        categoria_id: parseInt(formData.category_id),
-        proveedor: formData.supplier_id ? parseInt(formData.supplier_id) : null,
+        sku: formData.sku,
+        categoria_id: formData.category_id,
         tallas: formData.size,
         colores: formData.color,
-        ubicacion: formData.ubicacion || '',
-        estado: formData.status,
-        notas: formData.notas || '',
-        imagen_url: JSON.stringify(formData.images.filter(img => typeof img === 'string' && (img.startsWith('/uploads/') || img.startsWith('http')))),
         stock: parseInt(formData.quantity),
-        stock_minimo: parseInt(formData.min_stock),
         precio: parseFloat(formData.sale_price),
-        costo: parseFloat(formData.cost_price)
+        costo: parseFloat(formData.cost_price),
+        // Pasar imágenes existentes separadas de las nuevas
+        existingImages: JSON.stringify(formData.images.filter(img => typeof img === 'string')),
+        images: formData.images.filter(img => typeof img !== 'string') // Solo archivos nuevos
       };
+
       if (editingProduct) {
         await productService.update(editingProduct.id, productData);
         toast.success('Producto actualizado exitosamente');
@@ -291,7 +293,7 @@ const Products = () => {
 
   const handleUpdateStock = async (productId, currentQuantity) => {
     const newQuantity = prompt(`Stock actual: ${currentQuantity}\nIngresa la nueva cantidad:`, currentQuantity);
-    
+
     if (newQuantity !== null) {
       const quantity = parseInt(newQuantity);
       if (isNaN(quantity) || quantity < 0) {
@@ -485,7 +487,7 @@ const Products = () => {
           Stock de Ropa
         </h1>
         <div style={{ display: 'flex', gap: '10px' }}>
-          <button 
+          <button
             className="btn-green"
             onClick={handleExport}
             style={{ padding: '12px 24px', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '15px', fontWeight: '500' }}
@@ -493,7 +495,7 @@ const Products = () => {
             <FaFileExcel />
             Exportar Excel
           </button>
-          <button 
+          <button
             className="btn-pink"
             onClick={() => setShowForm(true)}
             style={{ padding: '12px 24px', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '15px', fontWeight: '500' }}
@@ -618,9 +620,10 @@ const Products = () => {
             </select>
           </div>
 
+
           {/* Limpiar filtros */}
           {(selectedCategory || searchTerm || selectedSize || selectedColor || selectedStatus) && (
-            <button 
+            <button
               className="btn-gray"
               onClick={() => {
                 setSelectedCategory('');
@@ -649,7 +652,7 @@ const Products = () => {
               </h3>
               <button onClick={resetForm} style={{ background: 'none', border: 'none', fontSize: '28px', cursor: 'pointer', color: '#999', transition: 'color 0.3s' }} onMouseOver={(e) => e.currentTarget.style.color = '#f73194'} onMouseOut={(e) => e.currentTarget.style.color = '#999'}>×</button>
             </div>
-            
+
             <form onSubmit={handleSubmit}>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '15px', marginBottom: '15px' }}>
                 {/* Fila 1 */}
@@ -745,20 +748,20 @@ const Products = () => {
 
       {/* Grid de productos */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '24px' }}>
-        {products.length === 0 ? (
+        {sortedProducts.length === 0 ? (
           <div className="empty-state" style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '80px 40px', background: 'white', borderRadius: '16px', boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }}>
             <div style={{ background: 'linear-gradient(135deg, #ffeef8 0%, #ffe0f0 100%)', width: '120px', height: '120px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 30px' }}>
               <FaTshirt style={{ fontSize: '60px', color: '#f73194' }} />
             </div>
             <h3 style={{ fontSize: '24px', color: '#333', margin: '0 0 12px 0', fontWeight: '600' }}>No hay productos</h3>
             <p style={{ color: '#666', fontSize: '16px', margin: '0 0 30px 0', maxWidth: '400px', marginLeft: 'auto', marginRight: 'auto' }}>
-              {searchTerm || selectedCategory 
+              {searchTerm || selectedCategory
                 ? 'No se encontraron productos con los filtros aplicados'
                 : 'Crea tu primer producto para empezar a gestionar tu inventario'
               }
             </p>
             {!searchTerm && !selectedCategory && (
-              <button 
+              <button
                 className="btn-pink"
                 onClick={() => setShowForm(true)}
                 style={{ padding: '14px 28px', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '10px', fontSize: '16px', fontWeight: '500' }}
@@ -769,30 +772,30 @@ const Products = () => {
             )}
           </div>
         ) : (
-          products.map((product, index) => {
+          sortedProducts.map((product, index) => {
             // Usar estado para mostrar sin_stock correctamente
             const isSinStock = product.status === 'sin_stock' || product.estado === 'sin_stock';
             const stockStatus = isSinStock ? 'stock-critical' : getStockStatus(product.quantity, product.min_stock);
             const stockColor = stockStatus === 'stock-critical' ? '#dc3545' : stockStatus === 'stock-low' ? '#FF9800' : '#4CAF50';
             const stockIcon = stockStatus === 'stock-critical' ? <FaTimesCircle /> : stockStatus === 'stock-low' ? <FaExclamationTriangle /> : <FaCheckCircle />;
-            
+
             return (
               <div
-                key={product.id} 
-                className="product-card" 
-                style={{ 
-                  border: 'none', 
-                  borderRadius: '12px', 
-                  padding: '20px', 
-                  background: 'white', 
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.08)', 
+                key={product.id}
+                className="product-card"
+                style={{
+                  border: 'none',
+                  borderRadius: '12px',
+                  padding: '20px',
+                  background: 'white',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
                   borderTop: '4px solid #f73194',
                   animationDelay: `${0.3 + index * 0.05}s`
                 }}
               >
                 {/* Galería de imágenes */}
-                <div 
-                  onClick={() => handleShowDetail(product)} 
+                <div
+                  onClick={() => handleShowDetail(product)}
                   style={{ cursor: 'pointer', marginBottom: '15px', background: '#f8f9fa', borderRadius: '8px', padding: '12px', minHeight: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                 >
                   {product.images && product.images.length > 0 ? (
@@ -800,7 +803,7 @@ const Products = () => {
                       {product.images.slice(0, 3).map((img, idx) => (
                         <img
                           key={idx}
-                          src={`http://localhost:5000${img}`}
+                          src={`${IMAGE_BASE_URL}${img}`}
                           alt={`img-${idx}`}
                           style={{ width: '240px', height: '240px', objectFit: 'cover', borderRadius: '16px', border: idx === 0 ? '3px solid #f73194' : '2px solid #e0e0e0', boxShadow: '0 2px 8px rgba(0,0,0,0.10)' }}
                         />
@@ -824,7 +827,7 @@ const Products = () => {
                     </p>
                   </div>
                   <div style={{ display: 'flex', gap: '6px' }}>
-                    <button 
+                    <button
                       onClick={() => handleEdit(product)}
                       className="btn-pink"
                       style={{ border: 'none', color: 'white', cursor: 'pointer', fontSize: '14px', display: 'flex', alignItems: 'center', padding: '8px', borderRadius: '6px' }}
@@ -832,7 +835,7 @@ const Products = () => {
                     >
                       <FaEdit />
                     </button>
-                    <button 
+                    <button
                       onClick={() => handleDuplicate(product)}
                       className="btn-gray"
                       style={{ border: 'none', color: 'white', cursor: 'pointer', fontSize: '14px', display: 'flex', alignItems: 'center', padding: '8px', borderRadius: '6px' }}
@@ -840,7 +843,7 @@ const Products = () => {
                     >
                       <FaCopy />
                     </button>
-                    <button 
+                    <button
                       onClick={() => handleDelete(product.id)}
                       className="btn-red"
                       style={{ border: 'none', color: 'white', cursor: 'pointer', fontSize: '14px', display: 'flex', alignItems: 'center', padding: '8px', borderRadius: '6px' }}
@@ -853,71 +856,71 @@ const Products = () => {
 
                 {/* Detalles */}
                 <div style={{ marginBottom: '15px' }}>
-                                                      {/* Precio Costo */}
-                                                      {product.cost_price !== undefined && (
-                                                        <p style={{ margin: '8px 0', display: 'flex', alignItems: 'center', fontSize: '14px', color: '#555' }}>
-                                                          <FaDollarSign style={{ marginRight: '8px', color: '#f73194', fontSize: '13px' }} />
-                                                          <strong style={{ marginRight: '6px' }}>Precio Costo:</strong> ${product.cost_price}
-                                                        </p>
-                                                      )}
-                                                      {/* Precio Venta */}
-                                                      {product.sale_price !== undefined && (
-                                                        <p style={{ margin: '8px 0', display: 'flex', alignItems: 'center', fontSize: '14px', color: '#555' }}>
-                                                          <FaDollarSign style={{ marginRight: '8px', color: '#4CAF50', fontSize: '13px' }} />
-                                                          <strong style={{ marginRight: '6px' }}>Precio Venta:</strong> ${product.sale_price}
-                                                        </p>
-                                                      )}
-                                                      {/* SKU */}
-                                                      {product.sku && (
-                                                        <p style={{ margin: '8px 0', display: 'flex', alignItems: 'center', fontSize: '13px', color: '#777' }}>
-                                                          <FaBarcode style={{ marginRight: '8px', color: '#666', fontSize: '13px' }} />
-                                                          <strong style={{ marginRight: '6px' }}>SKU:</strong> {product.sku}
-                                                        </p>
-                                                      )}
-                                    {/* Proveedor (mostrar nombre si existe en suppliers) */}
-                                    <p style={{ margin: '8px 0', display: 'flex', alignItems: 'center', fontSize: '14px', color: '#555' }}>
-                                      <FaUser style={{ marginRight: '8px', color: '#f73194', fontSize: '13px' }} />
-                                      <strong style={{ marginRight: '6px' }}>Proveedor:</strong> {suppliers && suppliers.length > 0 ? (suppliers.find(s => String(s.id) === String(product.proveedor))?.name || product.proveedor) : product.proveedor}
-                                    </p>
-                                    {/* Cantidad */}
-                                    <p style={{ margin: '8px 0', display: 'flex', alignItems: 'center', fontSize: '14px', color: '#555' }}>
-                                      <FaBox style={{ marginRight: '8px', color: '#f73194', fontSize: '13px' }} />
-                                      <strong style={{ marginRight: '6px' }}>Cantidad:</strong> {product.stock !== undefined ? product.stock : product.quantity}
-                                    </p>
-                                    {/* Categoría */}
-                                    <p style={{ margin: '8px 0', display: 'flex', alignItems: 'center', fontSize: '14px', color: '#555' }}>
-                                      <FaTag style={{ marginRight: '8px', color: '#f73194', fontSize: '13px' }} />
-                                      <strong style={{ marginRight: '6px' }}>Categoría:</strong> {getCategoryName(product.categoria_id || product.category_id)}
-                                    </p>
-                                    {/* Precio Costo */}
-                                    <p style={{ margin: '8px 0', display: 'flex', alignItems: 'center', fontSize: '14px', color: '#555' }}>
-                                      <FaDollarSign style={{ marginRight: '8px', color: '#f73194', fontSize: '13px' }} />
-                                      <strong style={{ marginRight: '6px' }}>Precio Costo:</strong> ${product.costo !== undefined ? product.costo : product.cost_price}
-                                    </p>
-                                    {/* Precio Venta */}
-                                    <p style={{ margin: '8px 0', display: 'flex', alignItems: 'center', fontSize: '14px', color: '#555' }}>
-                                      <FaDollarSign style={{ marginRight: '8px', color: '#4CAF50', fontSize: '13px' }} />
-                                      <strong style={{ marginRight: '6px' }}>Precio Venta:</strong> ${product.precio !== undefined ? product.precio : product.sale_price}
-                                    </p>
-                                    {/* Talle */}
-                                    {product.tallas && (
-                                      <p style={{ margin: '8px 0', display: 'flex', alignItems: 'center', fontSize: '14px', color: '#555' }}>
-                                        <FaTshirt style={{ marginRight: '8px', color: '#f73194', fontSize: '13px' }} />
-                                        <strong style={{ marginRight: '6px' }}>Talle:</strong> {product.tallas}
-                                      </p>
-                                    )}
-                                    {/* Color */}
-                                    {product.colores && (
-                                      <p style={{ margin: '8px 0', display: 'flex', alignItems: 'center', fontSize: '14px', color: '#555' }}>
-                                        <FaPalette style={{ marginRight: '8px', color: '#f73194', fontSize: '13px' }} />
-                                        <strong style={{ marginRight: '6px' }}>Color:</strong> {product.colores}
-                                      </p>
-                                    )}
-                                    {/* SKU */}
-                                    <p style={{ margin: '8px 0', display: 'flex', alignItems: 'center', fontSize: '13px', color: '#777' }}>
-                                      <FaBarcode style={{ marginRight: '8px', color: '#666', fontSize: '13px' }} />
-                                      <strong style={{ marginRight: '6px' }}>SKU:</strong> {product.codigo !== undefined ? product.codigo : product.sku}
-                                    </p>
+                  {/* Precio Costo */}
+                  {product.cost_price !== undefined && (
+                    <p style={{ margin: '8px 0', display: 'flex', alignItems: 'center', fontSize: '14px', color: '#555' }}>
+                      <FaDollarSign style={{ marginRight: '8px', color: '#f73194', fontSize: '13px' }} />
+                      <strong style={{ marginRight: '6px' }}>Precio Costo:</strong> ${product.cost_price}
+                    </p>
+                  )}
+                  {/* Precio Venta */}
+                  {product.sale_price !== undefined && (
+                    <p style={{ margin: '8px 0', display: 'flex', alignItems: 'center', fontSize: '14px', color: '#555' }}>
+                      <FaDollarSign style={{ marginRight: '8px', color: '#4CAF50', fontSize: '13px' }} />
+                      <strong style={{ marginRight: '6px' }}>Precio Venta:</strong> ${product.sale_price}
+                    </p>
+                  )}
+                  {/* SKU */}
+                  {product.sku && (
+                    <p style={{ margin: '8px 0', display: 'flex', alignItems: 'center', fontSize: '13px', color: '#777' }}>
+                      <FaBarcode style={{ marginRight: '8px', color: '#666', fontSize: '13px' }} />
+                      <strong style={{ marginRight: '6px' }}>SKU:</strong> {product.sku}
+                    </p>
+                  )}
+                  {/* Proveedor (mostrar nombre si existe en suppliers) */}
+                  <p style={{ margin: '8px 0', display: 'flex', alignItems: 'center', fontSize: '14px', color: '#555' }}>
+                    <FaUser style={{ marginRight: '8px', color: '#f73194', fontSize: '13px' }} />
+                    <strong style={{ marginRight: '6px' }}>Proveedor:</strong> {suppliers && suppliers.length > 0 ? (suppliers.find(s => String(s.id) === String(product.proveedor))?.name || product.proveedor) : product.proveedor}
+                  </p>
+                  {/* Cantidad */}
+                  <p style={{ margin: '8px 0', display: 'flex', alignItems: 'center', fontSize: '14px', color: '#555' }}>
+                    <FaBox style={{ marginRight: '8px', color: '#f73194', fontSize: '13px' }} />
+                    <strong style={{ marginRight: '6px' }}>Cantidad:</strong> {product.stock !== undefined ? product.stock : product.quantity}
+                  </p>
+                  {/* Categoría */}
+                  <p style={{ margin: '8px 0', display: 'flex', alignItems: 'center', fontSize: '14px', color: '#555' }}>
+                    <FaTag style={{ marginRight: '8px', color: '#f73194', fontSize: '13px' }} />
+                    <strong style={{ marginRight: '6px' }}>Categoría:</strong> {getCategoryName(product.categoria_id || product.category_id)}
+                  </p>
+                  {/* Precio Costo */}
+                  <p style={{ margin: '8px 0', display: 'flex', alignItems: 'center', fontSize: '14px', color: '#555' }}>
+                    <FaDollarSign style={{ marginRight: '8px', color: '#f73194', fontSize: '13px' }} />
+                    <strong style={{ marginRight: '6px' }}>Precio Costo:</strong> ${product.costo !== undefined ? product.costo : product.cost_price}
+                  </p>
+                  {/* Precio Venta */}
+                  <p style={{ margin: '8px 0', display: 'flex', alignItems: 'center', fontSize: '14px', color: '#555' }}>
+                    <FaDollarSign style={{ marginRight: '8px', color: '#4CAF50', fontSize: '13px' }} />
+                    <strong style={{ marginRight: '6px' }}>Precio Venta:</strong> ${product.precio !== undefined ? product.precio : product.sale_price}
+                  </p>
+                  {/* Talle */}
+                  {product.tallas && (
+                    <p style={{ margin: '8px 0', display: 'flex', alignItems: 'center', fontSize: '14px', color: '#555' }}>
+                      <FaTshirt style={{ marginRight: '8px', color: '#f73194', fontSize: '13px' }} />
+                      <strong style={{ marginRight: '6px' }}>Talle:</strong> {product.tallas}
+                    </p>
+                  )}
+                  {/* Color */}
+                  {product.colores && (
+                    <p style={{ margin: '8px 0', display: 'flex', alignItems: 'center', fontSize: '14px', color: '#555' }}>
+                      <FaPalette style={{ marginRight: '8px', color: '#f73194', fontSize: '13px' }} />
+                      <strong style={{ marginRight: '6px' }}>Color:</strong> {product.colores}
+                    </p>
+                  )}
+                  {/* SKU */}
+                  <p style={{ margin: '8px 0', display: 'flex', alignItems: 'center', fontSize: '13px', color: '#777' }}>
+                    <FaBarcode style={{ marginRight: '8px', color: '#666', fontSize: '13px' }} />
+                    <strong style={{ marginRight: '6px' }}>SKU:</strong> {product.codigo !== undefined ? product.codigo : product.sku}
+                  </p>
                 </div>
 
                 {/* Stock info */}
@@ -926,7 +929,7 @@ const Products = () => {
                     {stockIcon}
                     Stock: {product.quantity}
                   </span>
-                  <button 
+                  <button
                     onClick={() => handleUpdateStock(product.id, product.quantity)}
                     className="btn-gray"
                     style={{ padding: '6px 12px', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px', fontSize: '13px', fontWeight: '500' }}
@@ -968,34 +971,34 @@ const Products = () => {
       {showDetail && detailProduct && (
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '20px' }} onClick={handleCloseDetail}>
           <div style={{ background: 'white', borderRadius: '12px', padding: '30px', maxWidth: '600px', width: '100%', maxHeight: '90vh', overflow: 'auto', position: 'relative' }} onClick={e => e.stopPropagation()}>
-            <button 
-              onClick={handleCloseDetail} 
+            <button
+              onClick={handleCloseDetail}
               style={{ position: 'absolute', top: '12px', right: '12px', background: 'none', border: 'none', fontSize: '28px', cursor: 'pointer', color: '#999', transition: 'color 0.3s' }}
               onMouseOver={(e) => e.currentTarget.style.color = '#f73194'}
               onMouseOut={(e) => e.currentTarget.style.color = '#999'}
             >
               ×
             </button>
-            
+
             <h2 style={{ margin: '0 0 20px 0', fontSize: '26px', fontWeight: '600', color: '#333', display: 'flex', alignItems: 'center', gap: '12px' }}>
               <FaEye style={{ color: '#f73194' }} />
               Detalle del Producto
             </h2>
-            
+
             {/* Galería completa */}
             {detailProduct.images && detailProduct.images.length > 0 && (
               <div style={{ display: 'flex', gap: '10px', marginBottom: '20px', flexWrap: 'wrap', padding: '15px', background: '#f8f9fa', borderRadius: '8px' }}>
                 {detailProduct.images.map((img, idx) => (
-                  <img 
-                    key={idx} 
-                    src={img} 
-                    alt={`img-${idx}`} 
-                    style={{ width: '120px', height: '120px', objectFit: 'cover', borderRadius: '8px', border: idx === 0 ? '3px solid #f73194' : '2px solid #e0e0e0' }} 
+                  <img
+                    key={idx}
+                    src={img}
+                    alt={`img-${idx}`}
+                    style={{ width: '120px', height: '120px', objectFit: 'cover', borderRadius: '8px', border: idx === 0 ? '3px solid #f73194' : '2px solid #e0e0e0' }}
                   />
                 ))}
               </div>
             )}
-            
+
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', fontSize: '15px' }}>
               <p style={{ margin: '8px 0' }}>
                 <strong style={{ color: '#555', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
@@ -1099,7 +1102,7 @@ const Products = () => {
               </h3>
               <button onClick={() => setShowCategoryForm(false)} style={{ background: 'none', border: 'none', fontSize: '28px', cursor: 'pointer', color: '#999', lineHeight: 1 }}>×</button>
             </div>
-            
+
             <form onSubmit={handleCategorySubmit}>
               <div style={{ marginBottom: '20px' }}>
                 <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600', color: '#555' }}>
@@ -1135,8 +1138,8 @@ const Products = () => {
               </div>
 
               <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   onClick={() => setShowCategoryForm(false)}
                   style={{ padding: '12px 24px', background: '#6c757d', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '15px', fontWeight: '500', transition: 'all 0.3s' }}
                   onMouseOver={(e) => e.currentTarget.style.background = '#5a6268'}
@@ -1144,7 +1147,7 @@ const Products = () => {
                 >
                   Cancelar
                 </button>
-                <button 
+                <button
                   type="submit"
                   style={{ padding: '12px 24px', background: '#f73194', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '15px', fontWeight: '500', display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.3s' }}
                   onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.05)'}

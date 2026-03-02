@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
-import { FaTruck, FaPlus, FaEdit, FaTrash, FaUser, FaEnvelope, FaPhone, FaIdCard, FaMapMarkerAlt, FaCalendarAlt, FaSearch } from 'react-icons/fa';
+import useSortableData from '../hooks/useSortableData';
+import { FaTruck, FaPlus, FaEdit, FaTrash, FaUser, FaEnvelope, FaPhone, FaIdCard, FaMapMarkerAlt, FaCalendarAlt, FaSearch, FaSortAmountDown } from 'react-icons/fa';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
@@ -11,6 +12,8 @@ const Suppliers = () => {
   const [showForm, setShowForm] = useState(false);
   const [editingSupplier, setEditingSupplier] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
@@ -19,6 +22,9 @@ const Suppliers = () => {
     min_purchase: '',
     notes: ''
   });
+
+  // Hook de ordenado
+  const { items: sortedSuppliers, requestSort, sortConfig } = useSortableData(suppliers, { key: 'name', direction: 'ascending' });
 
   useEffect(() => {
     loadSuppliers();
@@ -49,7 +55,7 @@ const Suppliers = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!formData.name.trim()) {
       toast.error('El nombre del proveedor es requerido');
       return;
@@ -68,7 +74,7 @@ const Suppliers = () => {
         });
         toast.success('Proveedor creado exitosamente');
       }
-      
+
       resetForm();
       loadSuppliers();
     } catch (error) {
@@ -120,11 +126,14 @@ const Suppliers = () => {
     setEditingSupplier(null);
   };
 
-  const filteredSuppliers = suppliers.filter(supplier =>
-    supplier.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (supplier.email && supplier.email.toLowerCase().includes(searchTerm.toLowerCase())) ||
-    (supplier.tax_id && supplier.tax_id.includes(searchTerm))
-  );
+  const filteredSuppliers = sortedSuppliers.filter(supplier => {
+    const matchesSearch = supplier.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (supplier.email && supplier.email.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (supplier.tax_id && supplier.tax_id.includes(searchTerm));
+    const matchesStatus = statusFilter === 'all' || supplier.status === statusFilter;
+    return matchesSearch && matchesStatus;
+  });
+
 
   const getPaymentTermsLabel = (terms) => {
     const labels = {
@@ -206,7 +215,7 @@ const Suppliers = () => {
           <FaTruck style={{ marginRight: '12px', color: '#f73194', fontSize: '32px' }} />
           Proveedores
         </h1>
-        <button 
+        <button
           className="btn-pink"
           onClick={() => setShowForm(true)}
           style={{ padding: '12px 24px', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '15px', fontWeight: '500' }}
@@ -216,17 +225,30 @@ const Suppliers = () => {
         </button>
       </div>
 
-      <div className="search-bar" style={{ marginBottom: '30px', position: 'relative' }}>
-        <FaSearch style={{ position: 'absolute', left: '15px', top: '50%', transform: 'translateY(-50%)', color: '#999', fontSize: '16px' }} />
-        <input
-          type="text"
-          placeholder="Buscar por nombre, email o CUIT..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="search-input"
-          style={{ width: '100%', padding: '14px 14px 14px 45px', border: '2px solid #e0e0e0', borderRadius: '10px', fontSize: '15px', background: 'white', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}
-        />
+      <div className="search-bar" style={{ marginBottom: '30px', display: 'flex', gap: '15px' }}>
+        <div style={{ position: 'relative', flex: 1 }}>
+          <FaSearch style={{ position: 'absolute', left: '15px', top: '50%', transform: 'translateY(-50%)', color: '#999', fontSize: '16px' }} />
+          <input
+            type="text"
+            placeholder="Buscar por nombre, email o CUIT..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="search-input"
+            style={{ width: '100%', padding: '14px 14px 14px 45px', border: '2px solid #e0e0e0', borderRadius: '10px', fontSize: '15px', background: 'white', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}
+          />
+        </div>
+        <select
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+          style={{ padding: '0 20px', borderRadius: '10px', border: '2px solid #e0e0e0', background: 'white', color: '#666', fontSize: '15px', fontWeight: '500', cursor: 'pointer', outline: 'none' }}
+        >
+          <option value="all">Todos los estados</option>
+          <option value="active">Activos</option>
+          <option value="inactive">Inactivos</option>
+        </select>
+
       </div>
+
 
       {showForm && (
         <div className="modal-overlay" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }} onClick={resetForm}>
@@ -253,7 +275,7 @@ const Suppliers = () => {
               <h3>{editingSupplier ? 'Editar Proveedor' : 'Nuevo Proveedor'}</h3>
               <button onClick={resetForm} style={{ background: 'none', border: 'none', fontSize: '24px', cursor: 'pointer' }}>×</button>
             </div>
-            
+
             <form onSubmit={handleSubmit}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
                 <div style={{ gridColumn: '1 / -1' }}>
@@ -347,7 +369,7 @@ const Suppliers = () => {
             </div>
             <h3 style={{ fontSize: '24px', color: '#333', margin: '0 0 12px 0', fontWeight: '600' }}>No hay proveedores</h3>
             <p style={{ color: '#666', fontSize: '16px', margin: '0 0 30px 0', maxWidth: '400px', marginLeft: 'auto', marginRight: 'auto' }}>Crea tu primer proveedor para empezar a gestionar compras y mantener un registro completo</p>
-            <button 
+            <button
               className="btn-pink"
               onClick={() => setShowForm(true)}
               style={{ padding: '14px 28px', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '10px', fontSize: '16px', fontWeight: '500' }}
@@ -359,14 +381,14 @@ const Suppliers = () => {
         ) : (
           filteredSuppliers.map((supplier, index) => (
             <div
-              key={supplier.id} 
-              className="supplier-card" 
-              style={{ 
-                border: 'none', 
-                borderRadius: '12px', 
-                padding: '24px', 
-                background: 'white', 
-                boxShadow: '0 2px 8px rgba(0,0,0,0.08)', 
+              key={supplier.id}
+              className="supplier-card"
+              style={{
+                border: 'none',
+                borderRadius: '12px',
+                padding: '24px',
+                background: 'white',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
                 borderTop: '4px solid #f73194'
               }}
             >
@@ -380,7 +402,7 @@ const Suppliers = () => {
               <div className="supplier-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px', paddingBottom: '15px', borderBottom: '2px solid #f5f5f5' }}>
                 <h3 style={{ margin: 0, fontSize: '20px', color: '#333', fontWeight: '600' }}>{supplier.name}</h3>
                 <div className="supplier-actions" style={{ display: 'flex', gap: '10px' }}>
-                  <button 
+                  <button
                     onClick={() => handleEdit(supplier)}
                     style={{ background: '#f73194', border: 'none', color: 'white', cursor: 'pointer', fontSize: '14px', display: 'flex', alignItems: 'center', padding: '8px 12px', borderRadius: '6px', transition: 'all 0.3s ease' }}
                     title="Editar"
@@ -389,7 +411,7 @@ const Suppliers = () => {
                   >
                     <FaEdit />
                   </button>
-                  <button 
+                  <button
                     onClick={() => handleDelete(supplier.id)}
                     style={{ background: '#dc3545', border: 'none', color: 'white', cursor: 'pointer', fontSize: '14px', display: 'flex', alignItems: 'center', padding: '8px 12px', borderRadius: '6px', transition: 'all 0.3s ease' }}
                     title="Eliminar"

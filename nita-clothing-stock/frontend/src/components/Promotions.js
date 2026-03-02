@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './Promotions.css';
 
-const API_URL = 'http://localhost:5000/api';
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
 const Promotions = () => {
   const [promotions, setPromotions] = useState([]);
@@ -13,7 +13,7 @@ const Promotions = () => {
   const [editingPromotion, setEditingPromotion] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('');
-  
+
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -76,7 +76,7 @@ const Promotions = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!formData.name || !formData.discount_value) {
       alert('Por favor complete los campos requeridos');
       return;
@@ -153,7 +153,7 @@ const Promotions = () => {
   const handleStatusChange = async (id, newStatus) => {
     try {
       const token = localStorage.getItem('token');
-      await axios.patch(`${API_URL}/promociones/${id}/status`, 
+      await axios.patch(`${API_URL}/promociones/${id}/status`,
         { status: newStatus },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -260,8 +260,8 @@ const Promotions = () => {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
-        <select 
-          value={filterStatus} 
+        <select
+          value={filterStatus}
           onChange={(e) => setFilterStatus(e.target.value)}
           className="filter-select"
         >
@@ -290,7 +290,7 @@ const Promotions = () => {
                   <h3>{promo.name}</h3>
                   {getStatusBadge(promo.status)}
                 </div>
-                
+
                 {promo.description && (
                   <p className="promotion-description">{promo.description}</p>
                 )}
@@ -326,34 +326,34 @@ const Promotions = () => {
                 </div>
 
                 <div className="promotion-actions">
-                  <button 
-                    className="btn-icon btn-edit" 
+                  <button
+                    className="btn-icon btn-edit"
                     onClick={() => handleEdit(promo)}
                     title="Editar"
                   >
                     <i className="fas fa-edit"></i>
                   </button>
-                  
+
                   {promo.status === 'activa' ? (
-                    <button 
-                      className="btn-icon btn-pause" 
+                    <button
+                      className="btn-icon btn-pause"
                       onClick={() => handleStatusChange(promo.id, 'pausada')}
                       title="Pausar"
                     >
                       <i className="fas fa-pause"></i>
                     </button>
                   ) : promo.status === 'pausada' ? (
-                    <button 
-                      className="btn-icon btn-play" 
+                    <button
+                      className="btn-icon btn-play"
                       onClick={() => handleStatusChange(promo.id, 'activa')}
                       title="Activar"
                     >
                       <i className="fas fa-play"></i>
                     </button>
                   ) : null}
-                  
-                  <button 
-                    className="btn-icon btn-delete" 
+
+                  <button
+                    className="btn-icon btn-delete"
                     onClick={() => handleDelete(promo.id)}
                     title="Eliminar"
                   >
@@ -431,8 +431,8 @@ const Promotions = () => {
                   <label>Aplica a *</label>
                   <select
                     value={formData.applies_to}
-                    onChange={(e) => setFormData({ 
-                      ...formData, 
+                    onChange={(e) => setFormData({
+                      ...formData,
                       applies_to: e.target.value,
                       category_ids: [],
                       product_ids: []

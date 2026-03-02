@@ -5,16 +5,16 @@ import { formatCurrency, formatNumber } from '../utils/formatters';
 import { FaShoppingCart, FaPlus, FaTrash, FaBox, FaHashtag, FaDollarSign, FaEnvelope, FaCreditCard, FaPercent, FaCheckCircle, FaTimesCircle, FaBarcode, FaTshirt, FaPalette, FaRulerVertical, FaTag } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 
-const initialItem = { 
+const initialItem = {
   searchMethod: 'sku', // 'sku' o 'details'
   sku: '',
   category_id: '',
   product_name: '',
   color: '',
   size: '',
-  product_id: '', 
-  quantity: 1, 
-  unit_price: 0 
+  product_id: '',
+  quantity: 1,
+  unit_price: 0
 };
 
 export default function RegisterSale() {
@@ -22,6 +22,7 @@ export default function RegisterSale() {
   const [categories, setCategories] = useState([]);
   const [products, setProducts] = useState([]);
   const [customerEmail, setCustomerEmail] = useState('');
+  const [customerName, setCustomerName] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('efectivo');
   const [discountPercent, setDiscountPercent] = useState(0);
   const [discountAmount, setDiscountAmount] = useState(0);
@@ -34,155 +35,111 @@ export default function RegisterSale() {
 
   const loadCategories = async () => {
     try {
-      const response = await categoryService.getAll();
-      setCategories(response.data || []);
-    } catch (error) {
-      console.error('Error cargando categorías:', error);
+      const data = await categoryService.getAll();
+      setCategories(data.data || data);
+    } catch (err) {
+      toast.error('Error al cargar categorías');
     }
   };
 
   const loadProducts = async () => {
     try {
-      const response = await productService.getAll();
-      // Map 'tallas' (plural) to 'talle' (singular) for each product
-      const productsWithTalle = (response.data || []).map(p => {
-        // If 'tallas' is a string, split and use first value as 'talle'
-        let talle = '';
-        if (p.tallas) {
-          if (typeof p.tallas === 'string') {
-            const tallesArr = p.tallas.split(',').map(t => t.trim()).filter(Boolean);
-            talle = tallesArr.length === 1 ? tallesArr[0] : '';
-          } else if (Array.isArray(p.tallas)) {
-            talle = p.tallas.length === 1 ? p.tallas[0] : '';
-          }
-        }
-        return { ...p, talle };
-      });
-      setProducts(productsWithTalle);
-    } catch (error) {
-      console.error('Error cargando productos:', error);
+      const data = await productService.getAll();
+      setProducts(data.data || data);
+    } catch (err) {
+      toast.error('Error al cargar productos');
     }
   };
 
-  // Obtener productos únicos filtrados por categoría
-  const getProductNamesForCategory = (categoryId) => {
-    if (!categoryId) return [];
-    // Solo productos que no estén en estado 'sin_stock'
-    const filtered = products.filter(p => p.categoria_id == categoryId && p.estado !== 'sin_stock');
-    const uniqueNames = [...new Set(filtered.map(p => p.nombre))];
-    return uniqueNames;
-  };
-
-  // Obtener colores disponibles para un producto en una categoría
-  const getColorsForProduct = (categoryId, productName) => {
-    if (!categoryId || !productName) return [];
-    // Solo productos que no estén en estado 'sin_stock'
-    const filtered = products.filter(p => 
-      p.categoria_id == categoryId && p.nombre === productName && p.estado !== 'sin_stock'
-    );
-    const uniqueColors = [...new Set(filtered.map(p => p.colores))];
-    return uniqueColors;
-  };
-
-  // Obtener talles disponibles para un producto/color específico
-  const getSizesForProductColor = (categoryId, productName, color) => {
-    if (!categoryId || !productName || !color) return [];
-    // Solo productos que no estén en estado 'sin_stock'
-    const filtered = products.filter(p => 
-      p.categoria_id == categoryId && 
-      p.nombre === productName && 
-      p.colores === color &&
-      p.estado !== 'sin_stock'
-    );
-    const uniqueSizes = [...new Set(filtered.map(p => p.talle).filter(Boolean))];
-    // Si no hay talles, devolver ['Único']
-    return uniqueSizes.length > 0 ? uniqueSizes : ['Único'];
-  };
-
-  const handleItemChange = (idx, field, value) => {
+  const handleItemChange = async (index, field, value) => {
     const newItems = [...items];
-    newItems[idx][field] = value;
-    
-    // Si cambia el método de búsqueda, resetear campos relevantes
-    if (field === 'searchMethod') {
-      newItems[idx].sku = '';
-      newItems[idx].category_id = '';
-      newItems[idx].product_name = '';
-      newItems[idx].color = '';
-      newItems[idx].size = '';
-      newItems[idx].product_id = '';
-      newItems[idx].unit_price = 0;
-    }
-    
-    // Si cambia la categoría, resetear producto, color y talle
-    if (field === 'category_id') {
-      newItems[idx].product_name = '';
-      newItems[idx].color = '';
-      newItems[idx].size = '';
-      newItems[idx].product_id = '';
-      newItems[idx].unit_price = 0;
-    }
-    
-    // Si cambia el producto, resetear color y talle
-    if (field === 'product_name') {
-      newItems[idx].color = '';
-      newItems[idx].size = '';
-      newItems[idx].product_id = '';
-      newItems[idx].unit_price = 0;
-    }
-    
-    // Si cambia el color, resetear talle
-    if (field === 'color') {
-      // Autocompletar talle con 'Único' si no hay talles disponibles
-      const sizes = getSizesForProductColor(newItems[idx].category_id, newItems[idx].product_name, value);
-      if (sizes.length === 1 && sizes[0] === 'Único') {
-        newItems[idx].size = 'Único';
-      } else {
-        newItems[idx].size = '';
-      }
-      newItems[idx].product_id = '';
-      newItems[idx].unit_price = 0;
-    }
-    
-    // Si busca por SKU y se selecciona un producto, auto-completar precio
-    if (field === 'sku' && value) {
-      const product = products.find(p => p.sku === value);
+    newItems[index][field] = value;
+
+    // Lógica especial para búsqueda por SKU
+    if (field === 'sku' && value.length >= 3) {
+      const product = products.find(p => p.sku === value || p.codigo === value);
       if (product) {
-        newItems[idx].product_id = product.id;
-        newItems[idx].unit_price = product.precio;
+        newItems[index].product_id = product.id;
+        newItems[index].product_name = product.nombre;
+        newItems[index].unit_price = product.precio_venta || product.sale_price;
+        newItems[index].category_id = product.categoria_id || product.category_id;
+        newItems[index].size = product.talle || product.size;
+        newItems[index].color = product.color;
       }
     }
-    
-    // Si busca por detalles y todos los campos están completos, buscar producto
-    if (['category_id', 'product_name', 'color', 'size'].includes(field)) {
-      const item = newItems[idx];
-      if (item.category_id && item.product_name && item.color && item.size) {
-        const product = products.find(p => 
-          p.categoria_id == item.category_id && 
-          p.nombre === item.product_name &&
-          p.colores === item.color &&
-          p.talle === item.size
-        );
-        if (product) {
-          newItems[idx].product_id = product.id;
-          newItems[idx].unit_price = product.precio;
-        }
+
+    // Al cambiar categoría, resetear campos dependientes
+    if (field === 'category_id') {
+      newItems[index].product_name = '';
+      newItems[index].color = '';
+      newItems[index].size = '';
+      newItems[index].product_id = '';
+    }
+
+    // Al cambiar nombre de producto, buscar coincidencia parcial o resetear talle/color
+    if (field === 'product_name') {
+      newItems[index].color = '';
+      newItems[index].size = '';
+      newItems[index].product_id = '';
+    }
+
+    // Al completar la selección (talle), asignar ID y precio final
+    if (field === 'size') {
+      const product = products.find(p =>
+        (p.categoria_id == newItems[index].category_id || p.category_id == newItems[index].category_id) &&
+        (p.nombre === newItems[index].product_name || p.name === newItems[index].product_name) &&
+        p.color === newItems[index].color &&
+        (p.talle === value || p.size === value)
+      );
+      if (product) {
+        newItems[index].product_id = product.id;
+        newItems[index].unit_price = product.precio_venta || product.sale_price;
       }
     }
-    
+
     setItems(newItems);
   };
 
-  const addItem = () => setItems([...items, { ...initialItem }]);
-  const removeItem = idx => setItems(items.filter((_, i) => i !== idx));
+  const addItem = () => {
+    setItems([...items, { ...initialItem }]);
+  };
+
+  const removeItem = (index) => {
+    if (items.length > 1) {
+      const newItems = items.filter((_, i) => i !== index);
+      setItems(newItems);
+    }
+  };
 
   const calculateTotal = () => {
-    const subtotal = items.reduce((sum, item) => {
-      return sum + (Number(item.quantity) * Number(item.unit_price));
-    }, 0);
-    const discountByPercent = subtotal * (Number(discountPercent) / 100);
-    const totalDiscount = discountByPercent + Number(discountAmount);
-    return Math.max(0, subtotal - totalDiscount);
+    const subtotal = items.reduce((sum, item) => sum + (Number(item.quantity) * Number(item.unit_price)), 0);
+    const discount = (subtotal * (Number(discountPercent) / 100)) + Number(discountAmount);
+    return Math.max(0, subtotal - discount);
+  };
+
+  const getProductNamesForCategory = (categoryId) => {
+    if (!categoryId) return [];
+    const filtered = products.filter(p => (p.categoria_id == categoryId || p.category_id == categoryId));
+    return [...new Set(filtered.map(p => p.nombre || p.name))];
+  };
+
+  const getColorsForProduct = (categoryId, productName) => {
+    if (!categoryId || !productName) return [];
+    const filtered = products.filter(p =>
+      (p.categoria_id == categoryId || p.category_id == categoryId) &&
+      (p.nombre === productName || p.name === productName)
+    );
+    return [...new Set(filtered.map(p => p.color))];
+  };
+
+  const getSizesForProductColor = (categoryId, productName, color) => {
+    if (!categoryId || !productName || !color) return [];
+    const filtered = products.filter(p =>
+      (p.categoria_id == categoryId || p.category_id == categoryId) &&
+      (p.nombre === productName || p.name === productName) &&
+      p.color === color
+    );
+    return [...new Set(filtered.map(p => p.talle || p.size))];
   };
 
   const handleSubmit = async e => {
@@ -201,7 +158,7 @@ export default function RegisterSale() {
           quantity: Number(i.quantity),
           unit_price: Number(i.unit_price)
         })),
-        customer_name: '',
+        customer_name: customerName,
         customer_email: customerEmail,
         payment_method: paymentMethod,
         discount_percent: Number(discountPercent),
@@ -210,6 +167,7 @@ export default function RegisterSale() {
       toast.success('Venta registrada correctamente');
       setItems([{ ...initialItem }]);
       setCustomerEmail('');
+      setCustomerName('');
       setDiscountPercent(0);
       setDiscountAmount(0);
     } catch (err) {
@@ -363,55 +321,85 @@ export default function RegisterSale() {
                   {/* Campos según el método seleccionado */}
                   {item.searchMethod === 'sku' ? (
                     // Búsqueda por SKU
-                    <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '20px', marginBottom: '20px' }}>
-                      <div>
-                        <label style={{ display: 'block', marginBottom: '10px', fontSize: '14px', fontWeight: '600', color: '#555' }}>
-                          <FaBarcode style={{ marginRight: '8px', color: '#f73194' }} />
-                          SKU
-                        </label>
-                        <input
-                          type="text"
-                          placeholder="Ej: PROD-001"
-                          value={item.sku}
-                          onChange={e => handleItemChange(idx, 'sku', e.target.value)}
-                          required
-                          className="form-input"
-                          style={{ width: '100%', padding: '14px', border: '2px solid #e0e0e0', borderRadius: '8px', fontSize: '15px' }}
-                        />
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginBottom: '20px' }}>
+                      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '20px' }}>
+                        <div>
+                          <label style={{ display: 'block', marginBottom: '10px', fontSize: '14px', fontWeight: '600', color: '#555' }}>
+                            <FaBarcode style={{ marginRight: '8px', color: '#f73194' }} />
+                            SKU
+                          </label>
+                          <input
+                            type="text"
+                            placeholder="Ej: PROD-001"
+                            value={item.sku}
+                            onChange={e => handleItemChange(idx, 'sku', e.target.value)}
+                            required
+                            className="form-input"
+                            style={{ width: '100%', padding: '14px', border: '2px solid #e0e0e0', borderRadius: '8px', fontSize: '15px' }}
+                          />
+                        </div>
+                        <div>
+                          <label style={{ display: 'block', marginBottom: '10px', fontSize: '14px', fontWeight: '600', color: '#555' }}>
+                            <FaBox style={{ marginRight: '8px', color: '#f73194' }} />
+                            Cantidad
+                          </label>
+                          <input
+                            type="number"
+                            min="1"
+                            placeholder="Ej: 2"
+                            value={item.quantity}
+                            onChange={e => handleItemChange(idx, 'quantity', e.target.value)}
+                            required
+                            className="form-input"
+                            style={{ width: '100%', padding: '14px', border: '2px solid #e0e0e0', borderRadius: '8px', fontSize: '15px' }}
+                          />
+                        </div>
+                        <div>
+                          <label style={{ display: 'block', marginBottom: '10px', fontSize: '14px', fontWeight: '600', color: '#555' }}>
+                            <FaDollarSign style={{ marginRight: '8px', color: '#f73194' }} />
+                            Precio
+                          </label>
+                          <input
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            placeholder="0.00"
+                            value={item.unit_price}
+                            onChange={e => handleItemChange(idx, 'unit_price', e.target.value)}
+                            required
+                            className="form-input"
+                            style={{ width: '100%', padding: '14px', border: '2px solid #e0e0e0', borderRadius: '8px', fontSize: '15px' }}
+                          />
+                        </div>
                       </div>
-                      <div>
-                        <label style={{ display: 'block', marginBottom: '10px', fontSize: '14px', fontWeight: '600', color: '#555' }}>
-                          <FaBox style={{ marginRight: '8px', color: '#f73194' }} />
-                          Cantidad
-                        </label>
-                        <input
-                          type="number"
-                          min="1"
-                          placeholder="Ej: 2"
-                          value={item.quantity}
-                          onChange={e => handleItemChange(idx, 'quantity', e.target.value)}
-                          required
-                          className="form-input"
-                          style={{ width: '100%', padding: '14px', border: '2px solid #e0e0e0', borderRadius: '8px', fontSize: '15px' }}
-                        />
-                      </div>
-                      <div>
-                        <label style={{ display: 'block', marginBottom: '10px', fontSize: '14px', fontWeight: '600', color: '#555' }}>
-                          <FaDollarSign style={{ marginRight: '8px', color: '#f73194' }} />
-                          Precio
-                        </label>
-                        <input
-                          type="number"
-                          min="0"
-                          step="0.01"
-                          placeholder="0.00"
-                          value={item.unit_price}
-                          onChange={e => handleItemChange(idx, 'unit_price', e.target.value)}
-                          required
-                          className="form-input"
-                          style={{ width: '100%', padding: '14px', border: '2px solid #e0e0e0', borderRadius: '8px', fontSize: '15px' }}
-                        />
-                      </div>
+
+                      {/* Visualización de detalles del producto encontrado por SKU */}
+                      {item.product_id && (
+                        <div style={{
+                          display: 'grid',
+                          gridTemplateColumns: '1fr 2fr 1fr',
+                          gap: '12px',
+                          padding: '12px',
+                          background: '#f0f4f8',
+                          borderRadius: '8px',
+                          borderLeft: '4px solid #f73194'
+                        }}>
+                          <div>
+                            <span style={{ fontSize: '11px', color: '#888', display: 'block', textTransform: 'uppercase', fontWeight: 'bold' }}>Categoría</span>
+                            <span style={{ fontSize: '14px', fontWeight: '600', color: '#333' }}>
+                              {categories.find(c => c.id == item.category_id)?.name || 'Cargando...'}
+                            </span>
+                          </div>
+                          <div>
+                            <span style={{ fontSize: '11px', color: '#888', display: 'block', textTransform: 'uppercase', fontWeight: 'bold' }}>Producto</span>
+                            <span style={{ fontSize: '14px', fontWeight: '600', color: '#333' }}>{item.product_name}</span>
+                          </div>
+                          <div>
+                            <span style={{ fontSize: '11px', color: '#888', display: 'block', textTransform: 'uppercase', fontWeight: 'bold' }}>Talle</span>
+                            <span style={{ fontSize: '14px', fontWeight: '600', color: '#333' }}>{item.size || 'N/A'}</span>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   ) : (
                     // Búsqueda por categoría + detalles (en 3 filas más espaciosas)
@@ -456,7 +444,7 @@ export default function RegisterSale() {
                           </select>
                         </div>
                       </div>
-                      
+
                       {/* Fila 2: Color y Talle */}
                       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
                         <div>
@@ -498,7 +486,7 @@ export default function RegisterSale() {
                           </select>
                         </div>
                       </div>
-                      
+
                       {/* Fila 3: Cantidad y Precio */}
                       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                         <div>
@@ -577,20 +565,35 @@ export default function RegisterSale() {
               Datos del Cliente
             </h3>
 
-            <div style={{ marginBottom: '20px' }}>
-              <label style={{ display: 'block', marginBottom: '6px', fontSize: '14px', fontWeight: '500', color: '#555' }}>
-                <FaEnvelope style={{ marginRight: '6px', color: '#f73194' }} />
-                Email del Cliente
-              </label>
-              <input
-                type="email"
-                placeholder="cliente@ejemplo.com"
-                value={customerEmail}
-                onChange={e => setCustomerEmail(e.target.value)}
-                required
-                className="form-input"
-                style={{ width: '100%', padding: '12px', border: '2px solid #e0e0e0', borderRadius: '8px', fontSize: '14px' }}
-              />
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
+              <div>
+                <label style={{ display: 'block', marginBottom: '6px', fontSize: '14px', fontWeight: '500', color: '#555' }}>
+                  <FaBox style={{ marginRight: '6px', color: '#f73194' }} />
+                  Nombre del Cliente (Opcional)
+                </label>
+                <input
+                  type="text"
+                  placeholder="Ej: Juan Pérez"
+                  value={customerName}
+                  onChange={e => setCustomerName(e.target.value)}
+                  className="form-input"
+                  style={{ width: '100%', padding: '12px', border: '2px solid #e0e0e0', borderRadius: '8px', fontSize: '14px' }}
+                />
+              </div>
+              <div>
+                <label style={{ display: 'block', marginBottom: '6px', fontSize: '14px', fontWeight: '500', color: '#555' }}>
+                  <FaEnvelope style={{ marginRight: '6px', color: '#f73194' }} />
+                  Email del Cliente
+                </label>
+                <input
+                  type="email"
+                  placeholder="cliente@ejemplo.com"
+                  value={customerEmail}
+                  onChange={e => setCustomerEmail(e.target.value)}
+                  className="form-input"
+                  style={{ width: '100%', padding: '12px', border: '2px solid #e0e0e0', borderRadius: '8px', fontSize: '14px' }}
+                />
+              </div>
             </div>
 
             <div style={{ marginBottom: '20px' }}>
@@ -689,7 +692,7 @@ export default function RegisterSale() {
               <span style={{ fontSize: '14px', color: '#f73194' }}>Descuento:</span>
               <span style={{ fontSize: '16px', fontWeight: '600', color: '#f73194' }}>
                 -{formatCurrency(
-                  items.reduce((sum, item) => sum + (Number(item.quantity) * Number(item.unit_price)), 0) * (Number(discountPercent) / 100) + 
+                  items.reduce((sum, item) => sum + (Number(item.quantity) * Number(item.unit_price)), 0) * (Number(discountPercent) / 100) +
                   Number(discountAmount)
                 )}
               </span>

@@ -4,8 +4,8 @@ import { reportsService } from '../services/salesService';
 import { toast } from 'react-toastify';
 import { Link } from 'react-router-dom';
 import { formatCurrency, formatInteger, formatNumber } from '../utils/formatters';
-import { 
-  FaHome, FaTshirt, FaDollarSign, FaShoppingCart, FaChartLine, 
+import {
+  FaHome, FaTshirt, FaDollarSign, FaShoppingCart, FaChartLine,
   FaTrophy, FaStar, FaPlus, FaSync, FaBox, FaMoneyBillWave,
   FaStore, FaArrowRight, FaTag, FaPalette
 } from 'react-icons/fa';
@@ -27,22 +27,22 @@ const Dashboard = () => {
   const loadDashboardData = async () => {
     try {
       setLoading(true);
-      
-      // Cargar productos, valor del inventario, estadísticas de ventas y categorías más vendidas
-      const [productsResponse, inventoryValueResponse, monthlyStatsResponse, topCategoriesResponse] = await Promise.all([
-        productService.getAll(),
+
+      // Cargar conteo de productos, valor del inventario, estadísticas de ventas y categorías más vendidas
+      const [productsCountResponse, inventoryValueResponse, monthlyStatsResponse, topCategoriesResponse] = await Promise.all([
+        productService.getCount(),
         reportsService.getInventoryValue(),
         reportsService.getMonthlyStats(),
         reportsService.getTopCategories(3)
       ]);
 
-      const products = productsResponse.data || [];
+      const productsCount = productsCountResponse.count || 0;
       const inventoryData = inventoryValueResponse.data || {};
       const monthlyStats = monthlyStatsResponse.data || {};
       const topCategoriesData = topCategoriesResponse.data || [];
 
       setStats({
-        totalProducts: products.length,
+        totalProducts: productsCount,
         inventoryValue: inventoryData.total_value || 0,
         monthlyRevenue: monthlyStats.total_revenue || 0,
         monthlySales: monthlyStats.total_sales || 0
@@ -164,8 +164,8 @@ const Dashboard = () => {
             <h3 style={{ margin: '0 0 4px 0', fontSize: '28px', fontWeight: '700', color: '#f73194' }}>{stats.totalProducts}</h3>
             <p style={{ margin: 0, fontSize: '13px', color: '#666', fontWeight: '500', minHeight: '32px', display: 'flex', alignItems: 'center' }}>Total Productos</p>
           </div>
-          <Link 
-            to="/products" 
+          <Link
+            to="/products"
             style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 10px', background: 'rgba(108, 117, 125, 0.14)', borderRadius: '6px', textDecoration: 'none', color: '#f73194', fontWeight: '500', fontSize: '11px', transition: 'all 0.3s' }}
             onMouseOver={(e) => e.currentTarget.style.background = 'rgba(108, 117, 125, 0.25)'}
             onMouseOut={(e) => e.currentTarget.style.background = 'rgba(108, 117, 125, 0.14)'}
@@ -184,8 +184,8 @@ const Dashboard = () => {
             <h3 style={{ margin: '0 0 4px 0', fontSize: '22px', fontWeight: '700', color: '#f73194' }}>{formatCurrency(stats.inventoryValue || 0)}</h3>
             <p style={{ margin: 0, fontSize: '13px', color: '#666', fontWeight: '500', minHeight: '32px', display: 'flex', alignItems: 'center' }}>Capital en Ropa</p>
           </div>
-          <Link 
-            to="/products" 
+          <Link
+            to="/products"
             style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 10px', background: 'rgba(108, 117, 125, 0.14)', borderRadius: '6px', textDecoration: 'none', color: '#f73194', fontWeight: '500', fontSize: '11px', transition: 'all 0.3s' }}
             onMouseOver={(e) => e.currentTarget.style.background = 'rgba(108, 117, 125, 0.25)'}
             onMouseOut={(e) => e.currentTarget.style.background = 'rgba(108, 117, 125, 0.14)'}
@@ -204,8 +204,8 @@ const Dashboard = () => {
             <h3 style={{ margin: '0 0 4px 0', fontSize: '22px', fontWeight: '700', color: '#f73194' }}>{formatInteger(stats.monthlySales)}</h3>
             <p style={{ margin: 0, fontSize: '13px', color: '#666', fontWeight: '500', minHeight: '32px', display: 'flex', alignItems: 'center' }}>Ventas del Mes</p>
           </div>
-          <Link 
-            to="/sales/history" 
+          <Link
+            to="/sales/history"
             style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 10px', background: 'rgba(108, 117, 125, 0.14)', borderRadius: '6px', textDecoration: 'none', color: '#f73194', fontWeight: '500', fontSize: '11px', transition: 'all 0.3s' }}
             onMouseOver={(e) => e.currentTarget.style.background = 'rgba(108, 117, 125, 0.25)'}
             onMouseOut={(e) => e.currentTarget.style.background = 'rgba(108, 117, 125, 0.14)'}
@@ -224,8 +224,8 @@ const Dashboard = () => {
             <h3 style={{ margin: '0 0 4px 0', fontSize: '22px', fontWeight: '700', color: '#f73194' }}>{formatCurrency(stats.monthlyRevenue || 0)}</h3>
             <p style={{ margin: 0, fontSize: '13px', color: '#666', fontWeight: '500', minHeight: '32px', display: 'flex', alignItems: 'center' }}>Facturación del Mes</p>
           </div>
-          <Link 
-            to="/reports/advanced" 
+          <Link
+            to="/reports/advanced"
             style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 10px', background: 'rgba(108, 117, 125, 0.14)', borderRadius: '6px', textDecoration: 'none', color: '#f73194', fontWeight: '500', fontSize: '11px', transition: 'all 0.3s' }}
             onMouseOver={(e) => e.currentTarget.style.background = 'rgba(108, 117, 125, 0.25)'}
             onMouseOut={(e) => e.currentTarget.style.background = 'rgba(108, 117, 125, 0.14)'}
@@ -244,8 +244,8 @@ const Dashboard = () => {
               <FaTrophy style={{ color: '#f73194', fontSize: '28px' }} />
               Categorías Más Vendidas del Mes
             </h2>
-            <Link 
-              to="/reports/advanced" 
+            <Link
+              to="/reports/advanced"
               className="btn-gray"
               style={{ padding: '10px 20px', color: 'white', border: 'none', borderRadius: '8px', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', fontWeight: '500' }}
             >
@@ -253,30 +253,30 @@ const Dashboard = () => {
               <FaChartLine />
             </Link>
           </div>
-          
+
           <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
             {topCategories.map((category, index) => (
-              <div 
-                key={category.category_id} 
+              <div
+                key={category.category_id}
                 className="category-item"
-                style={{ 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  padding: '20px', 
-                  background: '#f8f9fa', 
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  padding: '20px',
+                  background: '#f8f9fa',
                   borderRadius: '10px',
                   border: '1px solid #e9ecef',
                   gap: '20px'
                 }}
               >
                 {/* Ranking Badge */}
-                <div style={{ 
-                  background: index === 0 ? 'linear-gradient(135deg, #FFD700 0%, #FFA500 100%)' : index === 1 ? 'linear-gradient(135deg, #C0C0C0 0%, #808080 100%)' : 'linear-gradient(135deg, #CD7F32 0%, #8B4513 100%)', 
-                  width: '50px', 
-                  height: '50px', 
-                  borderRadius: '12px', 
-                  display: 'flex', 
-                  alignItems: 'center', 
+                <div style={{
+                  background: index === 0 ? 'linear-gradient(135deg, #FFD700 0%, #FFA500 100%)' : index === 1 ? 'linear-gradient(135deg, #C0C0C0 0%, #808080 100%)' : 'linear-gradient(135deg, #CD7F32 0%, #8B4513 100%)',
+                  width: '50px',
+                  height: '50px',
+                  borderRadius: '12px',
+                  display: 'flex',
+                  alignItems: 'center',
                   justifyContent: 'center',
                   flexShrink: 0
                 }}>
@@ -308,8 +308,8 @@ const Dashboard = () => {
                 </div>
 
                 {/* Acción */}
-                <Link 
-                  to="/categories" 
+                <Link
+                  to="/categories"
                   className="btn-pink"
                   style={{ padding: '10px 20px', color: 'white', border: 'none', borderRadius: '8px', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', fontWeight: '500', whiteSpace: 'nowrap' }}
                 >
@@ -328,19 +328,19 @@ const Dashboard = () => {
           <FaChartLine style={{ color: '#f73194', fontSize: '28px' }} />
           Acciones Rápidas
         </h2>
-        
+
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '20px' }}>
           {/* Nueva Venta */}
-          <Link 
-            to="/sales/register" 
+          <Link
+            to="/sales/register"
             className="action-card"
-            style={{ 
-              display: 'flex', 
-              flexDirection: 'column', 
-              alignItems: 'center', 
-              padding: '30px 20px', 
-              background: 'linear-gradient(135deg, #fff5f7 0%, #ffe0e8 100%)', 
-              borderRadius: '12px', 
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              padding: '30px 20px',
+              background: 'linear-gradient(135deg, #fff5f7 0%, #ffe0e8 100%)',
+              borderRadius: '12px',
               textDecoration: 'none',
               border: '2px solid #ffcdd2',
               boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
@@ -354,16 +354,16 @@ const Dashboard = () => {
           </Link>
 
           {/* Nuevo Producto */}
-          <Link 
-            to="/products" 
+          <Link
+            to="/products"
             className="action-card"
-            style={{ 
-              display: 'flex', 
-              flexDirection: 'column', 
-              alignItems: 'center', 
-              padding: '30px 20px', 
-              background: 'linear-gradient(135deg, #fff5f7 0%, #ffe0e8 100%)', 
-              borderRadius: '12px', 
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              padding: '30px 20px',
+              background: 'linear-gradient(135deg, #fff5f7 0%, #ffe0e8 100%)',
+              borderRadius: '12px',
               textDecoration: 'none',
               border: '2px solid #ffcdd2',
               boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
@@ -377,15 +377,15 @@ const Dashboard = () => {
           </Link>
 
           {/* Actualizar Datos */}
-          <button 
+          <button
             className="action-card"
             onClick={loadDashboardData}
-            style={{ 
-              display: 'flex', 
-              flexDirection: 'column', 
-              alignItems: 'center', 
-              padding: '30px 20px', 
-              background: 'linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%)', 
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              padding: '30px 20px',
+              background: 'linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%)',
               borderRadius: '12px',
               border: '2px solid #bdbdbd',
               boxShadow: '0 2px 8px rgba(0,0,0,0.05)',

@@ -2,27 +2,31 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { formatCurrency, formatNumber } from '../utils/formatters';
-import { 
-  FaChartBar, 
-  FaArrowUp, 
-  FaArrowDown, 
-  FaMinus, 
-  FaTachometerAlt, 
-  FaShoppingCart, 
-  FaBox, 
-  FaDollarSign, 
-  FaWarehouse, 
-  FaCrown, 
-  FaMedal, 
-  FaTimesCircle, 
-  FaExclamationTriangle, 
+import useSortableData from '../hooks/useSortableData';
+import {
+  FaChartBar,
+  FaArrowUp,
+  FaArrowDown,
+  FaMinus,
+  FaTachometerAlt,
+  FaShoppingCart,
+  FaBox,
+  FaDollarSign,
+  FaWarehouse,
+  FaCrown,
+  FaMedal,
+  FaTimesCircle,
+  FaExclamationTriangle,
   FaCheckCircle,
   FaChartLine,
   FaReceipt,
   FaBoxes,
   FaPercent,
   FaBoxOpen,
-  FaTags
+  FaTags,
+  FaSort,
+  FaSortUp,
+  FaSortDown
 } from 'react-icons/fa';
 import { format, startOfMonth, endOfMonth, subMonths, startOfYear, subDays, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -43,11 +47,11 @@ function AdvancedReports() {
     startDate: format(startOfMonth(new Date()), 'yyyy-MM-dd'),
     endDate: format(endOfMonth(new Date()), 'yyyy-MM-dd')
   });
-  
+
   const [selectedPeriod, setSelectedPeriod] = useState('month');
   const [loading, setLoading] = useState(false);
   const [activeView, setActiveView] = useState('overview');
-  
+
   // Estados de datos
   const [kpis, setKpis] = useState({});
   const [salesTrend, setSalesTrend] = useState([]);
@@ -77,20 +81,24 @@ function AdvancedReports() {
         topProductsRes,
         categoryRes,
         profitRes,
-        inventoryRes
+        inventoryRes,
+        paymentRes,
+        dailySalesRes
       ] = await Promise.all([
-        axios.get(`${API_URL}/reportes/kpis-avanzados`, { 
-          params: dateRange, 
-          headers 
+        axios.get(`${API_URL}/reportes/kpis-avanzados`, {
+          params: dateRange,
+          headers
         }),
-        axios.get(`${API_URL}/reportes/tendencia-ventas`, { 
-          params: { ...dateRange, period: selectedPeriod }, 
-          headers 
+        axios.get(`${API_URL}/reportes/tendencia-ventas`, {
+          params: { ...dateRange, period: selectedPeriod },
+          headers
         }),
         axios.get(`${API_URL}/reportes/productos-mas-vendidos?limit=15`, { headers }),
         axios.get(`${API_URL}/reportes/ganancia-por-categoria`, { headers }),
         axios.get(`${API_URL}/reportes/margenes-rentabilidad`, { params: dateRange, headers }),
-        axios.get(`${API_URL}/reportes/salud-inventario`, { headers })
+        axios.get(`${API_URL}/reportes/salud-inventario`, { headers }),
+        axios.get(`${API_URL}/reportes/payment-methods`, { headers }),
+        axios.get(`${API_URL}/reportes/daily-sales`, { headers })
       ]);
 
       setKpis(kpisRes.data.data || {});
@@ -99,10 +107,17 @@ function AdvancedReports() {
       setCategoryPerformance(categoryRes.data.data || []);
       setProfitMargins(profitRes.data.data || []);
       setInventoryHealth(inventoryRes.data.data || []);
+      setPaymentMethods(paymentRes.data.data || []);
 
-      // Generar datos adicionales
-      generateAdditionalData();
-      
+      // Adaptar datos de distribución horaria si vienen del reporte diario
+      if (dailySalesRes.data.data) {
+        // Asumiendo que el backend podría proveer horas en el futuro, 
+        // por ahora usamos los datos de ventas diarias como tendencia si no hay horas específicas.
+        // O si el backend ya provee horas (revisar reportController), usarlas.
+        setHourlyDistribution(dailySalesRes.data.data.hourly || []);
+      }
+
+
     } catch (error) {
       console.error('Error fetching reports:', error);
       toast.error('Error cargando reportes avanzados');
@@ -111,30 +126,13 @@ function AdvancedReports() {
     }
   };
 
-  const generateAdditionalData = () => {
-    // Simulación de distribución horaria
-    const hours = Array.from({ length: 12 }, (_, i) => ({
-      hour: `${i + 9}:00`,
-      sales: Math.floor(Math.random() * 15) + 5,
-      revenue: Math.floor(Math.random() * 50000) + 10000
-    }));
-    setHourlyDistribution(hours);
 
-    // Simulación de métodos de pago
-    const payments = [
-      { name: 'Efectivo', value: 45, color: '#00C49F' },
-      { name: 'Tarjeta', value: 35, color: '#0088FE' },
-      { name: 'Transferencia', value: 15, color: '#FFBB28' },
-      { name: 'Otros', value: 5, color: '#FF8042' }
-    ];
-    setPaymentMethods(payments);
-  };
 
   const handlePeriodChange = (period) => {
     setSelectedPeriod(period);
     const now = new Date();
-    
-    switch(period) {
+
+    switch (period) {
       case 'today':
         setDateRange({
           startDate: format(now, 'yyyy-MM-dd'),
@@ -212,8 +210,8 @@ function AdvancedReports() {
           <p className="label">{label}</p>
           {payload.map((entry, index) => (
             <p key={index} style={{ color: entry.color }}>
-              {entry.name}: {typeof entry.value === 'number' ? 
-                entry.value.toLocaleString('es-AR', { style: 'currency', currency: 'ARS' }) : 
+              {entry.name}: {typeof entry.value === 'number' ?
+                entry.value.toLocaleString('es-AR', { style: 'currency', currency: 'ARS' }) :
                 entry.value}
             </p>
           ))}
@@ -289,7 +287,7 @@ function AdvancedReports() {
           </h1>
           <p className="subtitle" style={{ margin: '8px 0 0 0', color: '#666', fontSize: '14px' }}>Análisis integral del negocio</p>
         </div>
-        
+
         <div className="header-actions" style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
           <div className="period-selector" style={{ display: 'flex', gap: '8px', background: '#f5f5f5', padding: '4px', borderRadius: '8px' }}>
             {['today', 'week', 'month', 'quarter', 'year'].map(period => (
@@ -309,13 +307,13 @@ function AdvancedReports() {
               </button>
             ))}
           </div>
-          
+
         </div>
       </div>
 
       {/* Navegación de vistas */}
       <div className="view-tabs" style={{ display: 'flex', gap: '10px', marginBottom: '30px', background: 'white', padding: '15px', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)', flexWrap: 'wrap' }}>
-        <button 
+        <button
           className={activeView === 'overview' ? 'btn-pink' : ''}
           onClick={() => setActiveView('overview')}
           style={{ padding: '10px 20px', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '14px', fontWeight: '500', background: activeView === 'overview' ? '#f73194' : '#f5f5f5', color: activeView === 'overview' ? 'white' : '#666', display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.3s ease' }}
@@ -324,7 +322,7 @@ function AdvancedReports() {
         >
           <FaTachometerAlt /> General
         </button>
-        <button 
+        <button
           className={activeView === 'sales' ? 'btn-pink' : ''}
           onClick={() => setActiveView('sales')}
           style={{ padding: '10px 20px', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '14px', fontWeight: '500', background: activeView === 'sales' ? '#f73194' : '#f5f5f5', color: activeView === 'sales' ? 'white' : '#666', display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.3s ease' }}
@@ -333,7 +331,7 @@ function AdvancedReports() {
         >
           <FaShoppingCart /> Ventas
         </button>
-        <button 
+        <button
           className={activeView === 'products' ? 'btn-pink' : ''}
           onClick={() => setActiveView('products')}
           style={{ padding: '10px 20px', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '14px', fontWeight: '500', background: activeView === 'products' ? '#f73194' : '#f5f5f5', color: activeView === 'products' ? 'white' : '#666', display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.3s ease' }}
@@ -342,7 +340,7 @@ function AdvancedReports() {
         >
           <FaBox /> Productos
         </button>
-        <button 
+        <button
           className={activeView === 'profits' ? 'btn-pink' : ''}
           onClick={() => setActiveView('profits')}
           style={{ padding: '10px 20px', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '14px', fontWeight: '500', background: activeView === 'profits' ? '#f73194' : '#f5f5f5', color: activeView === 'profits' ? 'white' : '#666', display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.3s ease' }}
@@ -351,7 +349,7 @@ function AdvancedReports() {
         >
           <FaDollarSign /> Rentabilidad
         </button>
-        <button 
+        <button
           className={activeView === 'inventory' ? 'btn-pink' : ''}
           onClick={() => setActiveView('inventory')}
           style={{ padding: '10px 20px', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '14px', fontWeight: '500', background: activeView === 'inventory' ? '#f73194' : '#f5f5f5', color: activeView === 'inventory' ? 'white' : '#666', display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.3s ease' }}
@@ -436,8 +434,8 @@ function AdvancedReports() {
               <div className="chart-header" style={{ marginBottom: '20px' }}>
                 <h3 style={{ margin: 0, fontSize: '18px', color: '#333', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '8px' }}>📈 Tendencia de Ventas e Ingresos</h3>
                 <div className="chart-legend" style={{ display: 'flex', gap: '20px', marginTop: '10px' }}>
-                  <span style={{ fontSize: '13px', color: '#666', display: 'flex', alignItems: 'center', gap: '5px' }}><i className="dot" style={{background: '#4CAF50', width: '10px', height: '10px', borderRadius: '50%', display: 'inline-block'}}></i> Ingresos</span>
-                  <span style={{ fontSize: '13px', color: '#666', display: 'flex', alignItems: 'center', gap: '5px' }}><i className="dot" style={{background: '#2196F3', width: '10px', height: '10px', borderRadius: '50%', display: 'inline-block'}}></i> Ganancias</span>
+                  <span style={{ fontSize: '13px', color: '#666', display: 'flex', alignItems: 'center', gap: '5px' }}><i className="dot" style={{ background: '#4CAF50', width: '10px', height: '10px', borderRadius: '50%', display: 'inline-block' }}></i> Ingresos</span>
+                  <span style={{ fontSize: '13px', color: '#666', display: 'flex', alignItems: 'center', gap: '5px' }}><i className="dot" style={{ background: '#2196F3', width: '10px', height: '10px', borderRadius: '50%', display: 'inline-block' }}></i> Ganancias</span>
                 </div>
               </div>
               <ResponsiveContainer width="100%" height={300}>
@@ -572,7 +570,7 @@ function AdvancedReports() {
           <div className="section-header" style={{ marginBottom: '24px', padding: '20px', background: 'white', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', animationDelay: '0.25s' }}>
             <h2 style={{ margin: 0, fontSize: '22px', color: '#333', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '10px' }}>📊 Análisis Detallado de Ventas</h2>
           </div>
-          
+
           <div className="charts-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(500px, 1fr))', gap: '24px' }}>
             <div className="chart-card large" style={{ gridColumn: '1 / -1', background: 'white', padding: '24px', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', borderTop: '4px solid #4CAF50', animationDelay: '0.3s' }}>
               <div className="chart-header" style={{ marginBottom: '20px' }}>
@@ -603,8 +601,8 @@ function AdvancedReports() {
                       <span className="payment-percentage">{method.value}%</span>
                     </div>
                     <div className="payment-bar">
-                      <div 
-                        className="payment-fill" 
+                      <div
+                        className="payment-fill"
                         style={{ width: `${method.value}%`, background: method.color }}
                       ></div>
                     </div>
@@ -660,7 +658,7 @@ function AdvancedReports() {
           <div className="section-header" style={{ marginBottom: '24px', padding: '20px', background: 'white', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', animationDelay: '0.25s' }}>
             <h2 style={{ margin: 0, fontSize: '22px', color: '#333', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '10px' }}>📦 Análisis de Productos</h2>
           </div>
-          
+
           <div className="charts-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(500px, 1fr))', gap: '24px' }}>
             <div className="chart-card large" style={{ gridColumn: '1 / -1', background: 'white', padding: '24px', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', borderTop: '4px solid #f73194', animationDelay: '0.3s' }}>
               <div className="chart-header" style={{ marginBottom: '20px' }}>
@@ -735,7 +733,7 @@ function AdvancedReports() {
           <div className="section-header" style={{ marginBottom: '24px', padding: '20px', background: 'white', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', animationDelay: '0.25s' }}>
             <h2 style={{ margin: 0, fontSize: '22px', color: '#333', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '10px' }}>💰 Análisis de Rentabilidad</h2>
           </div>
-          
+
           <div className="charts-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(500px, 1fr))', gap: '24px' }}>
             <div className="chart-card large" style={{ gridColumn: '1 / -1', background: 'white', padding: '24px', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', borderTop: '4px solid #4CAF50', animationDelay: '0.3s' }}>
               <div className="chart-header" style={{ marginBottom: '20px' }}>
@@ -768,7 +766,7 @@ function AdvancedReports() {
                     cx="50%"
                     cy="50%"
                     outerRadius={100}
-                    label={({ category_name, percent }) => 
+                    label={({ category_name, percent }) =>
                       `${category_name}: ${(percent * 100).toFixed(0)}%`
                     }
                   >
@@ -793,9 +791,9 @@ function AdvancedReports() {
                       <span className="roi-value">{((cat.total_profit / cat.total_cost) * 100).toFixed(1)}%</span>
                     </div>
                     <div className="roi-bar">
-                      <div 
-                        className="roi-fill" 
-                        style={{ 
+                      <div
+                        className="roi-fill"
+                        style={{
                           width: `${Math.min(((cat.total_profit / cat.total_cost) * 100), 100)}%`,
                           background: COLORS[index % COLORS.length]
                         }}
@@ -830,7 +828,7 @@ function AdvancedReports() {
           <div className="section-header" style={{ marginBottom: '24px', padding: '20px', background: 'white', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', animationDelay: '0.25s' }}>
             <h2 style={{ margin: 0, fontSize: '22px', color: '#333', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '10px' }}>📦 Salud del Inventario</h2>
           </div>
-          
+
           <div className="kpis-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '24px', marginBottom: '30px' }}>
             <KPICard
               title="Valor Total Inventario"
