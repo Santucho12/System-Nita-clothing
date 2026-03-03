@@ -1,7 +1,9 @@
 const Promotion = require('../models/Promotion');
 
+const Promotion = require('../models/Promotion');
+
 // Obtener todas las promociones
-exports.getAllPromotions = async (req, res) => {
+exports.getAllPromotions = async (req, res, next) => {
   try {
     const { status, type } = req.query;
     const filters = {};
@@ -9,121 +11,139 @@ exports.getAllPromotions = async (req, res) => {
     if (type) filters.type = type;
 
     const promotions = await Promotion.findAll(filters);
-    res.json(promotions);
+    res.json({ success: true, data: promotions });
   } catch (error) {
-    console.error('Error al obtener promociones:', error);
-    res.status(500).json({ message: 'Error al obtener promociones', error: error.message });
+    next(error);
   }
 };
 
 // Obtener promoción por ID
-exports.getPromotionById = async (req, res) => {
+exports.getPromotionById = async (req, res, next) => {
   try {
     const promotion = await Promotion.findById(req.params.id);
     if (!promotion) {
-      return res.status(404).json({ message: 'Promoción no encontrada' });
+      const error = new Error('Promoción no encontrada');
+      error.status = 404;
+      throw error;
     }
-    res.json(promotion);
+    res.json({ success: true, data: promotion });
   } catch (error) {
-    console.error('Error al obtener promoción:', error);
-    res.status(500).json({ message: 'Error al obtener promoción', error: error.message });
+    next(error);
   }
 };
 
 // Obtener promociones activas
-exports.getActivePromotions = async (req, res) => {
+exports.getActivePromotions = async (req, res, next) => {
   try {
     const promotions = await Promotion.findActive();
-    res.json(promotions);
+    res.json({ success: true, data: promotions });
   } catch (error) {
-    console.error('Error al obtener promociones activas:', error);
-    res.status(500).json({ message: 'Error al obtener promociones activas', error: error.message });
+    next(error);
   }
 };
 
 // Crear promoción
-exports.createPromotion = async (req, res) => {
+exports.createPromotion = async (req, res, next) => {
   try {
     const { name, discount_value, applies_to } = req.body;
 
     // Validaciones
     if (!name || !discount_value || !applies_to) {
-      return res.status(400).json({ message: 'Faltan campos requeridos' });
+      const error = new Error('Faltan campos requeridos');
+      error.status = 400;
+      throw error;
     }
 
     if (discount_value <= 0) {
-      return res.status(400).json({ message: 'El valor del descuento debe ser mayor a 0' });
+      const error = new Error('El valor del descuento debe ser mayor a 0');
+      error.status = 400;
+      throw error;
     }
 
     const promotion = await Promotion.create(req.body);
-    res.status(201).json(promotion);
+    res.status(201).json({
+      success: true,
+      message: 'Promoción creada exitosamente',
+      data: promotion
+    });
   } catch (error) {
-    console.error('Error al crear promoción:', error);
-    res.status(500).json({ message: 'Error al crear promoción', error: error.message });
+    next(error);
   }
 };
 
 // Actualizar promoción
-exports.updatePromotion = async (req, res) => {
+exports.updatePromotion = async (req, res, next) => {
   try {
     const { name, discount_value } = req.body;
 
     if (!name || !discount_value) {
-      return res.status(400).json({ message: 'Faltan campos requeridos' });
+      const error = new Error('Faltan campos requeridos');
+      error.status = 400;
+      throw error;
     }
 
     if (discount_value <= 0) {
-      return res.status(400).json({ message: 'El valor del descuento debe ser mayor a 0' });
+      const error = new Error('El valor del descuento debe ser mayor a 0');
+      error.status = 400;
+      throw error;
     }
 
     const promotion = await Promotion.update(req.params.id, req.body);
-    res.json(promotion);
+    res.json({
+      success: true,
+      message: 'Promoción actualizada exitosamente',
+      data: promotion
+    });
   } catch (error) {
-    console.error('Error al actualizar promoción:', error);
-    res.status(500).json({ message: 'Error al actualizar promoción', error: error.message });
+    next(error);
   }
 };
 
 // Cambiar estado de promoción
-exports.updateStatus = async (req, res) => {
+exports.updateStatus = async (req, res, next) => {
   try {
     const { status } = req.body;
     if (!['activa', 'pausada', 'finalizada'].includes(status)) {
-      return res.status(400).json({ message: 'Estado inválido' });
+      const error = new Error('Estado inválido');
+      error.status = 400;
+      throw error;
     }
 
     const promotion = await Promotion.updateStatus(req.params.id, status);
-    res.json(promotion);
+    res.json({
+      success: true,
+      message: 'Estado actualizado exitosamente',
+      data: promotion
+    });
   } catch (error) {
-    console.error('Error al actualizar estado:', error);
-    res.status(500).json({ message: 'Error al actualizar estado', error: error.message });
+    next(error);
   }
 };
 
 // Eliminar promoción
-exports.deletePromotion = async (req, res) => {
+exports.deletePromotion = async (req, res, next) => {
   try {
     await Promotion.delete(req.params.id);
-    res.json({ message: 'Promoción eliminada exitosamente' });
+    res.json({ success: true, message: 'Promoción eliminada exitosamente' });
   } catch (error) {
-    console.error('Error al eliminar promoción:', error);
-    res.status(500).json({ message: 'Error al eliminar promoción', error: error.message });
+    next(error);
   }
 };
 
 // Obtener promoción aplicable a un producto
-exports.getPromotionForProduct = async (req, res) => {
+exports.getPromotionForProduct = async (req, res, next) => {
   try {
     const { productId, categoryId } = req.query;
-    
+
     if (!productId || !categoryId) {
-      return res.status(400).json({ message: 'Se requieren productId y categoryId' });
+      const error = new Error('Se requieren productId y categoryId');
+      error.status = 400;
+      throw error;
     }
 
     const promotion = await Promotion.findForProduct(productId, categoryId);
-    res.json(promotion || null);
+    res.json({ success: true, data: promotion || null });
   } catch (error) {
-    console.error('Error al obtener promoción para producto:', error);
-    res.status(500).json({ message: 'Error al obtener promoción', error: error.message });
+    next(error);
   }
 };

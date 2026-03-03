@@ -14,7 +14,8 @@ const initialItem = {
   size: '',
   product_id: '',
   quantity: 1,
-  unit_price: 0
+  unit_price: 0,
+  stock_available: 0
 };
 
 export default function RegisterSale() {
@@ -69,6 +70,14 @@ export default function RegisterSale() {
         newItems[index].category_id = product.categoria_id || product.category_id || '';
         newItems[index].size = product.tallas || product.talle || product.size || '';
         newItems[index].color = product.colores || product.color || '';
+        newItems[index].stock_available = product.stock || 0;
+
+        if (newItems[index].quantity > product.stock) {
+          toast.warning(`Stock limitado. ${product.nombre} solo tiene ${product.stock} unidades.`);
+          newItems[index].quantity = product.stock;
+        }
+      } else {
+        newItems[index].stock_available = 0;
       }
     }
 
@@ -78,6 +87,7 @@ export default function RegisterSale() {
       newItems[index].color = '';
       newItems[index].size = '';
       newItems[index].product_id = '';
+      newItems[index].stock_available = 0;
     }
 
     // Al cambiar nombre de producto, buscar coincidencia parcial o resetear talle/color
@@ -85,6 +95,7 @@ export default function RegisterSale() {
       newItems[index].color = '';
       newItems[index].size = '';
       newItems[index].product_id = '';
+      newItems[index].stock_available = 0;
     }
 
     // Al completar la selección (talle), asignar ID y precio final
@@ -98,6 +109,21 @@ export default function RegisterSale() {
       if (product) {
         newItems[index].product_id = product.id;
         newItems[index].unit_price = product.precio || product.precio_venta || product.sale_price || 0;
+        newItems[index].stock_available = product.stock || 0;
+
+        if (newItems[index].quantity > product.stock) {
+          toast.warning(`Stock limitado. Solo hay ${product.stock} unidades disponibles.`);
+          newItems[index].quantity = product.stock;
+        }
+      }
+    }
+
+    // Validación de cantidad en tiempo real
+    if (field === 'quantity') {
+      const qty = parseInt(value);
+      if (newItems[index].product_id && qty > newItems[index].stock_available) {
+        toast.error(`Stock insuficiente. Disponible: ${newItems[index].stock_available}`);
+        newItems[index].quantity = newItems[index].stock_available;
       }
     }
 
@@ -154,6 +180,14 @@ export default function RegisterSale() {
       toast.error('Todos los productos deben estar correctamente seleccionados. No se puede registrar venta con items inválidos.');
       return;
     }
+
+    // Validación extra de stock antes de enviar
+    const outOfStockItem = items.find(i => Number(i.quantity) > Number(i.stock_available));
+    if (outOfStockItem) {
+      toast.error(`Stock insuficiente para uno de los productos (${outOfStockItem.product_name}).`);
+      return;
+    }
+
     setLoading(true);
     try {
       await api.post('/ventas', {
@@ -174,6 +208,8 @@ export default function RegisterSale() {
       setCustomerName('');
       setDiscountPercent(0);
       setDiscountAmount(0);
+      // Recargar productos para actualizar stock localmente
+      loadProducts();
     } catch (err) {
       toast.error(err.response?.data?.message || 'Error al registrar venta');
     } finally {
@@ -347,16 +383,44 @@ export default function RegisterSale() {
                             <FaBox style={{ marginRight: '8px', color: '#f73194' }} />
                             Cantidad
                           </label>
-                          <input
-                            type="number"
-                            min="1"
-                            placeholder="Ej: 2"
-                            value={item.quantity}
-                            onChange={e => handleItemChange(idx, 'quantity', e.target.value)}
-                            required
-                            className="form-input"
-                            style={{ width: '100%', padding: '14px', border: '2px solid #e0e0e0', borderRadius: '8px', fontSize: '15px' }}
-                          />
+                          <div style={{ position: 'relative' }}>
+                            <input
+                              type="number"
+                              min="1"
+                              max={item.stock_available}
+                              placeholder="Ej: 2"
+                              value={item.quantity}
+                              onChange={e => handleItemChange(idx, 'quantity', e.target.value)}
+                              required
+                              className="form-input"
+                              style={{
+                                width: '100%',
+                                padding: '14px 85px 14px 14px',
+                                border: '2px solid #e0e0e0',
+                                borderRadius: '8px',
+                                fontSize: '15px',
+                                borderColor: item.quantity > item.stock_available ? '#dc3545' : '#e0e0e0'
+                              }}
+                            />
+                            {item.product_id && (
+                              <div style={{
+                                position: 'absolute',
+                                right: '12px',
+                                top: '50%',
+                                transform: 'translateY(-50%)',
+                                fontSize: '11px',
+                                fontWeight: '800',
+                                color: item.stock_available <= 0 ? '#dc3545' : item.stock_available <= 5 ? '#ff8c00' : '#4CAF50',
+                                pointerEvents: 'none',
+                                background: item.stock_available <= 5 ? '#fff3e0' : '#e8f5e9',
+                                padding: '2px 6px',
+                                borderRadius: '4px',
+                                border: `1px solid ${item.stock_available <= 5 ? '#ffe0b2' : '#c8e6c9'}`
+                              }}>
+                                Stock: {item.stock_available}
+                              </div>
+                            )}
+                          </div>
                         </div>
                         <div>
                           <label style={{ display: 'block', marginBottom: '10px', fontSize: '14px', fontWeight: '600', color: '#555' }}>
@@ -498,16 +562,44 @@ export default function RegisterSale() {
                             <FaBox style={{ marginRight: '8px', color: '#f73194' }} />
                             Cantidad
                           </label>
-                          <input
-                            type="number"
-                            min="1"
-                            placeholder="Ej: 2"
-                            value={item.quantity}
-                            onChange={e => handleItemChange(idx, 'quantity', e.target.value)}
-                            required
-                            className="form-input"
-                            style={{ width: '100%', padding: '14px', border: '2px solid #e0e0e0', borderRadius: '8px', fontSize: '15px' }}
-                          />
+                          <div style={{ position: 'relative' }}>
+                            <input
+                              type="number"
+                              min="1"
+                              max={item.stock_available}
+                              placeholder="Ej: 2"
+                              value={item.quantity}
+                              onChange={e => handleItemChange(idx, 'quantity', e.target.value)}
+                              required
+                              className="form-input"
+                              style={{
+                                width: '100%',
+                                padding: '14px 85px 14px 14px',
+                                border: '2px solid #e0e0e0',
+                                borderRadius: '8px',
+                                fontSize: '15px',
+                                borderColor: item.quantity > item.stock_available ? '#dc3545' : '#e0e0e0'
+                              }}
+                            />
+                            {item.product_id && (
+                              <div style={{
+                                position: 'absolute',
+                                right: '12px',
+                                top: '50%',
+                                transform: 'translateY(-50%)',
+                                fontSize: '11px',
+                                fontWeight: '800',
+                                color: item.stock_available <= 0 ? '#dc3545' : item.stock_available <= 5 ? '#ff8c00' : '#4CAF50',
+                                pointerEvents: 'none',
+                                background: item.stock_available <= 5 ? '#fff3e0' : '#e8f5e9',
+                                padding: '2px 6px',
+                                borderRadius: '4px',
+                                border: `1px solid ${item.stock_available <= 5 ? '#ffe0b2' : '#c8e6c9'}`
+                              }}>
+                                Stock: {item.stock_available}
+                              </div>
+                            )}
+                          </div>
                         </div>
                         <div>
                           <label style={{ display: 'block', marginBottom: '10px', fontSize: '14px', fontWeight: '600', color: '#555' }}>
@@ -710,7 +802,7 @@ export default function RegisterSale() {
             </div>
           </div>
         </div>
-      </div>
-    </div>
+      </div >
+    </div >
   );
 }

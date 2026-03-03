@@ -10,7 +10,7 @@ import {
 } from 'react-icons/fa';
 
 const Products = () => {
-  const [lastSku, setLastSku] = useState(undefined);
+  const [lastSku, setLastSku] = useState(null);
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [suppliers, setSuppliers] = useState([]);
@@ -45,6 +45,26 @@ const Products = () => {
     name: '',
     description: ''
   });
+  // Paginación
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(25);
+  const [totalItems, setTotalItems] = useState(0);
+
+  // Función para sugerir el siguiente SKU manteniendo el prefijo (ej: OC-100 -> OC-101)
+  const suggestNextSku = (sku) => {
+    if (!sku) return '1';
+    // Busca números al final del string
+    const match = sku.match(/^(.*?)(\d+)$/);
+    if (match) {
+      const prefix = match[1];
+      const number = match[2];
+      const nextNumber = (parseInt(number, 10) + 1).toString();
+      // Mantiene el padding de ceros si existía (ej: 001 -> 002)
+      const paddedNextNumber = nextNumber.padStart(number.length, '0');
+      return `${prefix}${paddedNextNumber}`;
+    }
+    return `${sku}-1`;
+  };
 
   // Hook de ordenado para los productos
   const { items: sortedProducts, requestSort, sortConfig } = useSortableData(products, { key: 'id', direction: 'descending' });
@@ -57,12 +77,12 @@ const Products = () => {
       if (storedSku) {
         setFormData(prev => ({
           ...prev,
-          sku: String(parseInt(storedSku) + 1)
+          sku: suggestNextSku(storedSku)
         }));
-      } else if (lastSku !== undefined && lastSku !== null) {
+      } else if (lastSku) {
         setFormData(prev => ({
           ...prev,
-          sku: String(parseInt(lastSku) + 1)
+          sku: suggestNextSku(lastSku)
         }));
       }
     }
@@ -75,21 +95,17 @@ const Products = () => {
         // Solo sugerir el siguiente SKU si no estamos editando
         setFormData(prev => ({
           ...prev,
-          sku: editingProduct ? prev.sku : (res.lastSku !== undefined ? String(parseInt(res.lastSku) + 1) : '')
+          sku: editingProduct ? prev.sku : (res.lastSku ? suggestNextSku(res.lastSku) : (prev.sku || ''))
         }));
-      }).catch(() => setLastSku(undefined));
+      }).catch(() => setLastSku(null));
     }
     loadInitialData();
-  }, []);
+  }, [showForm]);
 
-  // Filtrar productos cuando cambia la categoría seleccionada o término de búsqueda
+  // Cargar productos al cambiar página, filtros o búsqueda
   useEffect(() => {
-    if (selectedCategory || searchTerm || selectedSize || selectedColor || selectedStatus) {
-      filterProducts();
-    } else {
-      loadProducts();
-    }
-  }, [selectedCategory, searchTerm, selectedSize, selectedColor, selectedStatus]);
+    loadProducts();
+  }, [selectedCategory, searchTerm, selectedSize, selectedColor, selectedStatus, currentPage, itemsPerPage]);
 
   const loadInitialData = async () => {
     try {
@@ -104,10 +120,24 @@ const Products = () => {
 
   const loadProducts = async () => {
     try {
-      const response = await productService.getAll();
+      setLoading(true);
+      const params = {
+        limit: itemsPerPage,
+        offset: (currentPage - 1) * itemsPerPage,
+        q: searchTerm,
+        category: selectedCategory,
+        size: selectedSize,
+        color: selectedColor,
+        status: selectedStatus
+      };
+
+      const response = await productService.getAll(params);
       setProducts(response.data || []);
+      setTotalItems(response.pagination?.total || (response.data?.length || 0));
     } catch (error) {
-      toast.error('Error cargando productos: ' + error.message);
+      toast.error('Error cargando productos: ' + (error.message || 'Error desconocido'));
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -141,28 +171,6 @@ const Products = () => {
     }
   };
 
-  const filterProducts = async () => {
-    try {
-      let filtered = [];
-      if (searchTerm) {
-        const response = await productService.search(searchTerm);
-        filtered = response.data || [];
-      } else if (selectedCategory) {
-        const response = await productService.getByCategory(selectedCategory);
-        filtered = response.data || [];
-      } else {
-        const response = await productService.getAll();
-        filtered = response.data || [];
-      }
-      // Filtros locales
-      if (selectedSize) filtered = filtered.filter(p => p.tallas === selectedSize);
-      if (selectedColor) filtered = filtered.filter(p => p.colores && p.colores.toLowerCase().includes(selectedColor.toLowerCase()));
-      if (selectedStatus) filtered = filtered.filter(p => (p.status === selectedStatus) || (p.estado === selectedStatus));
-      setProducts(filtered);
-    } catch (error) {
-      toast.error('Error filtrando productos: ' + error.message);
-    }
-  };
 
   const handleInputChange = (e) => {
     const { name, value, type, files } = e.target;
@@ -323,7 +331,7 @@ const Products = () => {
       supplier_id: '',
       images: [],
       status: 'disponible',
-      sku: (lastSku !== undefined && lastSku !== null) ? String(parseInt(lastSku) + 1) : '1',
+      sku: lastSku ? suggestNextSku(lastSku) : '1',
       barcode: '',
       category_id: ''
     }));
@@ -400,6 +408,11 @@ const Products = () => {
             }
           }
 
+          @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+          }
+
           .page-header {
             animation: perspective3DFlip 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
           }
@@ -409,13 +422,13 @@ const Products = () => {
           }
 
           .product-card {
-            animation: perspective3DFlip 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+            animation: fadeIn 0.6s cubic-bezier(0.23, 1, 0.32, 1) both;
             transition: all 0.3s ease;
           }
 
           .product-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 16px rgba(247, 49, 148, 0.2) !important;
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 12px 24px rgba(247, 49, 148, 0.15) !important;
           }
 
           .empty-state {
@@ -616,7 +629,6 @@ const Products = () => {
               <option value="">Todos</option>
               <option value="disponible">Disponible</option>
               <option value="sin_stock">Sin stock</option>
-              <option value="descontinuado">Descontinuado</option>
             </select>
           </div>
 
@@ -639,6 +651,8 @@ const Products = () => {
             </button>
           )}
         </div>
+
+
       </div>
 
       {/* Modal Formulario */}
@@ -708,8 +722,8 @@ const Products = () => {
                 </div>
                 <div>
                   <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', fontSize: '14px', color: '#555' }}><FaBarcode style={{ marginRight: '6px', color: '#f73194' }} /> SKU *</label>
-                  <input type="number" name="sku" value={formData.sku} onChange={handleInputChange} min={lastSku !== undefined && lastSku !== null ? parseInt(lastSku) + 1 : 1} step="1" required className="form-input" style={{ width: '100%', padding: '10px 14px', border: '2px solid #e0e0e0', borderRadius: '8px', fontSize: '14px' }} placeholder={lastSku !== undefined ? `Ej: ${parseInt(lastSku) + 1}` : '1'} />
-                  {lastSku !== undefined && (<div style={{ fontSize: '12px', color: '#888', marginTop: '4px' }}>Siguiente sugerido: <b>{parseInt(lastSku) + 1}</b></div>)}
+                  <input type="text" name="sku" value={formData.sku} onChange={handleInputChange} required className="form-input" style={{ width: '100%', padding: '10px 14px', border: '2px solid #e0e0e0', borderRadius: '8px', fontSize: '14px' }} placeholder={lastSku ? `Ej: ${suggestNextSku(lastSku)}` : '1'} />
+                  {lastSku && (<div style={{ fontSize: '12px', color: '#888', marginTop: '4px' }}>Siguiente sugerido: <b>{suggestNextSku(lastSku)}</b></div>)}
                 </div>
               </div>
               {/* Imágenes */}
@@ -813,7 +827,22 @@ const Products = () => {
                       )}
                     </div>
                   ) : (
-                    <div style={{ color: '#999', fontSize: '14px', fontStyle: 'italic' }}>📷 Sin imagen</div>
+                    <div style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '10px',
+                      color: '#bbb',
+                      height: '240px',
+                      width: '100%',
+                      background: 'linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%)',
+                      borderRadius: '16px',
+                      border: '2px dashed #e0e0e0'
+                    }}>
+                      <FaTshirt style={{ fontSize: '48px', opacity: 0.5 }} />
+                      <span style={{ fontSize: '14px', fontWeight: '500', letterSpacing: '0.5px' }}>Sin imagen disponible</span>
+                    </div>
                   )}
                 </div>
 
@@ -950,7 +979,6 @@ const Products = () => {
                   >
                     <option value="disponible">✓ Disponible</option>
                     <option value="sin_stock">✗ Sin stock</option>
-                    <option value="descontinuado">⊘ Descontinuado</option>
                   </select>
                 </div>
 

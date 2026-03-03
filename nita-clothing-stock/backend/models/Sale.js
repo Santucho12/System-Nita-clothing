@@ -20,54 +20,54 @@ class Sale {
         }
     }
 
-        // Historial de ventas con filtros avanzados y paginación
-        static async getSalesHistory(filters) {
-                            // LOG TEMPORAL PARA DEBUG
-                            // eslint-disable-next-line no-console
+    // Historial de ventas con filtros avanzados y paginación
+    static async getSalesHistory(filters) {
+        // LOG TEMPORAL PARA DEBUG
+        // eslint-disable-next-line no-console
 
-            try {
-                let where = [];
-                let params = [];
-                if (filters.start_date && filters.end_date) {
-                    where.push('DATE(s.created_at) BETWEEN DATE(?) AND DATE(?)');
-                    params.push(filters.start_date, filters.end_date);
-                } else if (filters.month && filters.year) {
-                    where.push('DATE_FORMAT(s.created_at, "%Y-%m") = ?');
-                    params.push(`${filters.year}-${String(filters.month).padStart(2, '0')}`);
-                } else if (filters.year) {
-                    where.push('YEAR(s.created_at) = ?');
-                    params.push(filters.year);
-                }
-                if (filters.payment_method) {
-                    where.push('s.payment_method = ?');
-                    params.push(filters.payment_method);
-                }
-                if (filters.status) {
-                    where.push('s.status = ?');
-                    params.push(filters.status);
-                }
-                if (filters.seller_id) {
-                    where.push('s.seller_id = ?');
-                    params.push(filters.seller_id);
-                }
-                if (filters.customer_email && typeof filters.customer_email === 'string' && filters.customer_email.trim() !== '') {
-                    where.push('LOWER(s.customer_email) LIKE ? AND s.customer_email IS NOT NULL AND s.customer_email != ""');
-                    params.push(`%${filters.customer_email.toLowerCase().trim()}%`);
-                }
-                if (filters.customer_name) {
-                    where.push('s.customer_name LIKE ?');
-                    params.push(`%${filters.customer_name}%`);
-                }
-                if (filters.sale_number) {
-                    where.push('s.sale_number LIKE ?');
-                    params.push(`%${filters.sale_number}%`);
-                }
-                const whereClause = where.length ? 'WHERE ' + where.join(' AND ') : '';
-                const page = filters.page || 1;
-                const pageSize = filters.page_size || 20;
-                const offset = (page - 1) * pageSize;
-                // Consulta principal
-                const sql = `
+        try {
+            let where = [];
+            let params = [];
+            if (filters.start_date && filters.end_date) {
+                where.push('DATE(s.created_at) BETWEEN DATE(?) AND DATE(?)');
+                params.push(filters.start_date, filters.end_date);
+            } else if (filters.month && filters.year) {
+                where.push('DATE_FORMAT(s.created_at, "%Y-%m") = ?');
+                params.push(`${filters.year}-${String(filters.month).padStart(2, '0')}`);
+            } else if (filters.year) {
+                where.push('YEAR(s.created_at) = ?');
+                params.push(filters.year);
+            }
+            if (filters.payment_method) {
+                where.push('s.payment_method = ?');
+                params.push(filters.payment_method);
+            }
+            if (filters.status) {
+                where.push('s.status = ?');
+                params.push(filters.status);
+            }
+            if (filters.seller_id) {
+                where.push('s.seller_id = ?');
+                params.push(filters.seller_id);
+            }
+            if (filters.customer_email && typeof filters.customer_email === 'string' && filters.customer_email.trim() !== '') {
+                where.push('LOWER(s.customer_email) LIKE ? AND s.customer_email IS NOT NULL AND s.customer_email != ""');
+                params.push(`%${filters.customer_email.toLowerCase().trim()}%`);
+            }
+            if (filters.customer_name) {
+                where.push('s.customer_name LIKE ?');
+                params.push(`%${filters.customer_name}%`);
+            }
+            if (filters.sale_number) {
+                where.push('s.sale_number LIKE ?');
+                params.push(`%${filters.sale_number}%`);
+            }
+            const whereClause = where.length ? 'WHERE ' + where.join(' AND ') : '';
+            const page = filters.page || 1;
+            const pageSize = filters.page_size || 20;
+            const offset = (page - 1) * pageSize;
+            // Consulta principal
+            const sql = `
                     SELECT s.*, (
                         SELECT GROUP_CONCAT(CONCAT(si.product_name, ' x', si.quantity) SEPARATOR ', ')
                         FROM sale_items si WHERE si.sale_id = s.id
@@ -77,22 +77,20 @@ class Sale {
                     ORDER BY s.created_at DESC
                     LIMIT ${parseInt(pageSize)} OFFSET ${parseInt(offset)}
                 `;
-                console.log('SQL HISTORIAL:', sql);
-                console.log('PARAMS HISTORIAL:', params);
-                const sales = await database.all(sql, params);
-                // Total para paginación
-                const countSql = `SELECT COUNT(*) as total FROM sales s ${whereClause}`;
-                const totalRow = await database.get(countSql, params);
-                return {
-                    data: sales,
-                    total: totalRow.total,
-                    page,
-                    page_size: pageSize
-                };
-            } catch (error) {
-                throw new Error(`Error obteniendo historial de ventas: ${error.message}`);
-            }
+            const sales = await database.all(sql, params);
+            // Total para paginación
+            const countSql = `SELECT COUNT(*) as total FROM sales s ${whereClause}`;
+            const totalRow = await database.get(countSql, params);
+            return {
+                data: sales,
+                total: totalRow.total,
+                page,
+                page_size: pageSize
+            };
+        } catch (error) {
+            throw new Error(`Error obteniendo historial de ventas: ${error.message}`);
         }
+    }
     // Actualizar estado de la venta
     static async updateStatus(id, status) {
         try {
@@ -121,95 +119,107 @@ class Sale {
             throw new Error(`Error obteniendo ventas por rango: ${error.message}`);
         }
     }
-                    // Crear una nueva venta con múltiples items (carrito)
-                    static async createWithItems(saleData, items, customerEmail = null) {
-                        const database = require('../config/database');
-                        try {
-                            // Validar stock de todos los productos
-                            for (const item of items) {
-                                const product = await database.get('SELECT id, nombre, stock FROM productos WHERE id = ?', [item.product_id]);
-                                if (!product) throw new Error(`El producto con ID ${item.product_id} no existe`);
-                                if (product.stock < item.quantity) {
-                                    throw new Error(`Stock insuficiente para ${product.nombre}. Disponible: ${product.stock}, Solicitado: ${item.quantity}`);
-                                }
-                            }
-                            // Crear o actualizar cliente si hay email
-                            if (customerEmail) {
-                                await Sale.createOrUpdateCustomer(customerEmail, saleData.customer_name);
-                            }
+    // Crear una nueva venta con múltiples items (carrito)
+    static async createWithItems(saleData, items, customerEmail = null) {
+        const database = require('../config/database');
+        let connection;
+        try {
+            // Iniciar transacción
+            connection = await database.beginTransaction();
 
-                            // Insertar venta principal
-                            const sql = `
-                                INSERT INTO sales (subtotal, discount_percent, discount_amount, total, customer_name, customer_email, payment_method, created_at)
-                                VALUES (?, ?, ?, ?, ?, ?, ?, NOW())
+            // Validar stock de todos los productos (PASAR CONNECTION)
+            for (const item of items) {
+                const product = await database.get('SELECT id, nombre, stock FROM productos WHERE id = ? FOR UPDATE', [item.product_id], connection);
+                if (!product) throw new Error(`El producto con ID ${item.product_id} no existe`);
+                if (product.stock < item.quantity) {
+                    throw new Error(`Stock insuficiente para ${product.nombre}. Disponible: ${product.stock}, Solicitado: ${item.quantity}`);
+                }
+            }
+            // Crear o actualizar cliente si hay email
+            if (customerEmail) {
+                await Sale.createOrUpdateCustomer(customerEmail, saleData.customer_name, connection);
+            }
+
+            // Insertar venta principal con status 'completed'
+            // Nota: sale_number se generará a partir del ID insertado para evitar condiciones de carrera
+            const sql = `
+                                INSERT INTO sales (subtotal, discount_percent, discount_amount, total, customer_name, customer_email, payment_method, status, created_at)
+                                VALUES (?, ?, ?, ?, ?, ?, ?, 'completed', NOW())
                             `;
-                            const result = await database.run(sql, [
-                                saleData.subtotal,
-                                saleData.discount_percent,
-                                saleData.discount_amount,
-                                saleData.total,
-                                saleData.customer_name,
-                                customerEmail || null,
-                                saleData.payment_method
-                            ]);
-                            const sale_id = result.insertId || result.lastID;
-                            // Insertar items y actualizar stock
-                            for (const item of items) {
-                                // Obtener info de producto
-                                const product = await database.get('SELECT * FROM productos WHERE id = ?', [item.product_id]);
-                                const subtotal = parseFloat(item.unit_price) * parseInt(item.quantity);
-                                const profit = (parseFloat(item.unit_price) - parseFloat(product.costo)) * parseInt(item.quantity);
-                                let productSize = product.tallas;
-                                const allowedSizes = ['Talle único', 'S', 'M', 'L', '36', '38', '40', '42'];
-                                if (!productSize || productSize === '' || productSize === 'null' || !allowedSizes.includes(productSize)) {
-                                    productSize = 'Talle único';
-                                }
-                                // Logging detallado para debug
-                                console.log('[DEBUG] SaleItem.create', {
-                                    sale_id,
-                                    product_id: item.product_id,
-                                    product_name: product.nombre,
-                                    size: productSize,
-                                    color: product.colores || null,
-                                    quantity: item.quantity,
-                                    unit_price: item.unit_price,
-                                    unit_cost: product.costo,
-                                    subtotal,
-                                    profit
-                                });
-                                try {
-                                    await SaleItem.create({
-                                        sale_id,
-                                        product_id: item.product_id,
-                                        product_name: product.nombre,
-                                        product_size: productSize,
-                                        product_color: product.colores || null,
-                                        quantity: item.quantity,
-                                        unit_price: item.unit_price,
-                                        unit_cost: product.costo,
-                                        subtotal,
-                                        profit
-                                    });
-                                } catch (err) {
-                                    console.error('[ERROR] SaleItem.create', err);
-                                    throw err;
-                                }
-                                // Actualizar stock
-                                await database.run('UPDATE productos SET stock = stock - ?, updated_at = NOW() WHERE id = ?', [item.quantity, item.product_id]);
-                                // Consultar nuevo stock
-                                const updatedProduct = await database.get('SELECT stock FROM productos WHERE id = ?', [item.product_id]);
-                                if (updatedProduct && Number(updatedProduct.stock) === 0) {
-                                    await database.run("UPDATE productos SET estado = 'sin_stock', updated_at = NOW() WHERE id = ?", [item.product_id]);
-                                }
-                            }
-                            return { id: sale_id, ...saleData, items };
-                        } catch (error) {
-                            throw new Error(`Error creando venta: ${error.message}`);
-                        }
-                    }
-                // Rotación de categorías
-                static async getCategoryRotation() {
-                    const sql = `
+
+            const saleParams = [
+                saleData.subtotal || 0,
+                saleData.discount_percent || 0,
+                saleData.discount_amount || 0,
+                saleData.total || 0,
+                saleData.customer_name || 'Consumidor Final',
+                customerEmail || null,
+                saleData.payment_method || 'efectivo'
+            ];
+
+            const result = await database.run(sql, saleParams, connection);
+            const sale_id = result.insertId;
+
+            // Generar y actualizar número de venta atómicamente basado en el ID real
+            const saleNumber = `V-${String(sale_id).padStart(6, '0')}`;
+            await database.run('UPDATE sales SET sale_number = ? WHERE id = ?', [saleNumber, sale_id], connection);
+
+            // Insertar items y actualizar stock
+            for (const item of items) {
+                const product = await database.get('SELECT * FROM productos WHERE id = ?', [item.product_id], connection);
+                const subtotal = parseFloat(item.unit_price) * parseInt(item.quantity);
+                const profit = (parseFloat(item.unit_price) - parseFloat(product.costo)) * parseInt(item.quantity);
+
+                let productSize = product.tallas;
+                const allowedSizes = ['Talle único', 'S', 'M', 'L', '36', '38', '40', '42'];
+                if (!productSize || productSize === '' || productSize === 'null' || !allowedSizes.includes(productSize)) {
+                    productSize = 'Talle único';
+                }
+
+                try {
+                    await SaleItem.create({
+                        sale_id,
+                        product_id: item.product_id,
+                        product_name: product.nombre,
+                        product_size: productSize,
+                        product_color: product.colores || null,
+                        quantity: item.quantity,
+                        unit_price: item.unit_price,
+                        unit_cost: product.costo,
+                        subtotal,
+                        profit
+                    }, connection);
+                } catch (err) {
+                    console.error('[ERROR] SaleItem.create', err);
+                    throw err;
+                }
+
+                // Actualizar stock y estado atómicamente
+                await database.run(
+                    'UPDATE productos SET stock = stock - ?, estado = CASE WHEN (stock - ?) <= 0 THEN "sin_stock" ELSE "disponible" END, updated_at = NOW() WHERE id = ?',
+                    [item.quantity, item.quantity, item.product_id], connection);
+
+                // Consultar nuevo stock y actualizar estado si es necesario
+                const updatedProduct = await database.get('SELECT stock FROM productos WHERE id = ?', [item.product_id], connection);
+                if (updatedProduct && Number(updatedProduct.stock) === 0) {
+                    await database.run("UPDATE productos SET estado = 'sin_stock', updated_at = NOW() WHERE id = ?",
+                        [item.product_id], connection);
+                }
+            }
+
+            // Confirmar transacción
+            await database.commit(connection);
+            return { id: sale_id, ...saleData, items };
+        } catch (error) {
+            // Revertir cambios si hay error
+            if (connection) await database.rollback(connection);
+            throw new Error(`Error creando venta: ${error.message}`);
+        }
+    }
+
+    // Rotación de categorías
+    static async getCategoryRotation() {
+        const sql = `
                         SELECT c.nombre as category,
                                COUNT(p.id) as products_count,
                                IFNULL(SUM(si.quantity), 0) as total_sold,
@@ -224,17 +234,17 @@ class Sale {
                         LEFT JOIN sale_items si ON si.product_id = p.id
                         GROUP BY c.nombre
                     `;
-                    const [rows] = await database.query(sql);
-                    return rows;
-                }
+        const [rows] = await database.query(sql);
+        return rows;
+    }
 
-                // Alertas de reposición (productos bajo mínimo)
-                static async getRestockAlerts() {
-                    const sql = `
-                        SELECT p.id as product_id, p.nombre as product_name, p.stock as current_stock, p.stock_min as min_stock,
+    // Alertas de reposición (productos bajo mínimo)
+    static async getRestockAlerts() {
+        const sql = `
+                        SELECT p.id as product_id, p.nombre as product_name, p.stock as current_stock, p.stock_minimo as min_stock,
                                CASE 
-                                   WHEN p.stock <= 0 OR p.stock < (p.stock_min * 0.5) THEN 'critical'
-                                   WHEN p.stock < p.stock_min AND p.stock > 0 THEN 'low'
+                                   WHEN p.stock <= 0 OR p.stock < (p.stock_minimo * 0.5) THEN 'critical'
+                                   WHEN p.stock < p.stock_minimo AND p.stock > 0 THEN 'low'
                                    ELSE 'ok'
                                END as status,
                                (
@@ -242,58 +252,66 @@ class Sale {
                                    JOIN sales s ON si2.sale_id = s.id
                                    WHERE si2.product_id = p.id
                                ) as last_sale_date,
-                               s2.nombre as supplier
+                               s2.name as supplier
                         FROM productos p
-                        LEFT JOIN proveedores s2 ON p.proveedor_id = s2.id
-                        WHERE p.stock < p.stock_min
+                        LEFT JOIN suppliers s2 ON p.supplier_id = s2.id
+                        WHERE p.stock < p.stock_minimo
                     `;
-                    return await database.all(sql);
-                }
+        return await database.all(sql);
+    }
 
-                // Productos con stock crítico
-                static async getCriticalStock() {
-                    const sql = `
-                        SELECT p.id as product_id, p.nombre as product_name, p.stock as current_stock, p.stock_min as min_stock,
+    // Productos con stock crítico
+    static async getCriticalStock() {
+        const sql = `
+                        SELECT p.id as product_id, p.nombre as product_name, p.stock as current_stock, p.stock_minimo as min_stock,
                                'critical' as status,
                                (
                                    SELECT MAX(s.created_at) FROM sale_items si2
                                    JOIN sales s ON si2.sale_id = s.id
                                    WHERE si2.product_id = p.id
                                ) as last_sale_date,
-                               s2.nombre as supplier
+                               s2.name as supplier
                         FROM productos p
-                        LEFT JOIN proveedores s2 ON p.proveedor_id = s2.id
-                        WHERE p.stock <= 0 OR p.stock < (p.stock_min * 0.5)
+                        LEFT JOIN suppliers s2 ON p.supplier_id = s2.id
+                        WHERE p.stock <= 0 OR p.stock < (p.stock_minimo * 0.5)
                     `;
-                    return await database.all(sql);
-                }
-            // Ganancias generales
-            static async getGeneralProfits() {
-                const sql = `
+        return await database.all(sql);
+    }
+    // Ganancias generales (Netas)
+    static async getGeneralProfits() {
+        const sql = `
                     SELECT 
-                        SUM((si.unit_price - si.unit_cost) * si.quantity) as ganancia_total,
-                        SUM(CASE WHEN DATE_FORMAT(s.created_at, '%Y-%m') = DATE_FORMAT(NOW(), '%Y-%m') 
+                        (SUM((si.unit_price - si.unit_cost) * si.quantity) - IFNULL(s_totals.total_discounts, 0)) as ganancia_total,
+                        (SUM(CASE WHEN DATE_FORMAT(s.created_at, '%Y-%m') = DATE_FORMAT(NOW(), '%Y-%m') 
                                  THEN (si.unit_price - si.unit_cost) * si.quantity 
-                                 ELSE 0 END) as ganancia_mensual,
-                        SUM(CASE WHEN YEAR(s.created_at) = YEAR(NOW()) 
+                                 ELSE 0 END) - IFNULL(s_totals.monthly_discounts, 0)) as ganancia_mensual,
+                        (SUM(CASE WHEN YEAR(s.created_at) = YEAR(NOW()) 
                                  THEN (si.unit_price - si.unit_cost) * si.quantity 
-                                 ELSE 0 END) as ganancia_anual,
+                                 ELSE 0 END) - IFNULL(s_totals.yearly_discounts, 0)) as ganancia_anual,
                         AVG((si.unit_price - si.unit_cost) / NULLIF(si.unit_price, 0)) * 100 as margen_promedio,
                         SUM(si.unit_cost * si.quantity) as costo_total,
                         CASE WHEN SUM(si.unit_cost * si.quantity) > 0 
-                             THEN (SUM((si.unit_price - si.unit_cost) * si.quantity) / SUM(si.unit_cost * si.quantity)) * 100 
+                             THEN ((SUM((si.unit_price - si.unit_cost) * si.quantity) - IFNULL(s_totals.total_discounts, 0)) / SUM(si.unit_cost * si.quantity)) * 100 
                              ELSE 0 END as roi
                     FROM sale_items si
                     JOIN sales s ON si.sale_id = s.id
+                    CROSS JOIN (
+                        SELECT 
+                            SUM(discount_amount) as total_discounts,
+                            SUM(CASE WHEN DATE_FORMAT(created_at, '%Y-%m') = DATE_FORMAT(NOW(), '%Y-%m') THEN discount_amount ELSE 0 END) as monthly_discounts,
+                            SUM(CASE WHEN YEAR(created_at) = YEAR(NOW()) THEN discount_amount ELSE 0 END) as yearly_discounts
+                        FROM sales
+                        WHERE status = 'completed'
+                    ) s_totals
                     WHERE s.status = 'completed'
                 `;
-                const [rows] = await database.query(sql);
-                return rows[0];
-            }
+        const [rows] = await database.query(sql);
+        return rows[0];
+    }
 
-            // Ganancia por producto
-            static async getProfitByProduct() {
-                const sql = `
+    // Ganancia por producto
+    static async getProfitByProduct() {
+        const sql = `
                     SELECT 
                         p.id as product_id,
                         p.nombre as product_name,
@@ -309,13 +327,13 @@ class Sale {
                     GROUP BY p.id, p.nombre
                     ORDER BY total_profit DESC
                 `;
-                const [rows] = await database.query(sql);
-                return rows;
-            }
+        const [rows] = await database.query(sql);
+        return rows;
+    }
 
-            // Ganancia por categoría
-            static async getProfitByCategory() {
-                const sql = `
+    // Ganancia por categoría
+    static async getProfitByCategory() {
+        const sql = `
                     SELECT 
                         c.nombre as category,
                         SUM(si.quantity * si.unit_price) as total_revenue,
@@ -330,12 +348,12 @@ class Sale {
                     GROUP BY c.nombre
                     ORDER BY total_profit DESC
                 `;
-                const [rows] = await database.query(sql);
-                return rows;
-            }
-        // Productos más vendidos (por cantidad y monto)
-        static async getTopSellingProducts({ limit = 10, days = 30 } = {}) {
-            const sql = `
+        const [rows] = await database.query(sql);
+        return rows;
+    }
+    // Productos más vendidos (por cantidad y monto)
+    static async getTopSellingProducts({ limit = 10, days = 30 } = {}) {
+        const sql = `
                 SELECT p.id as product_id, p.nombre as product_name, c.nombre as category, 
                        SUM(si.quantity) as quantity_sold, 
                        SUM(si.quantity * si.unit_price) as total_revenue, 
@@ -350,13 +368,13 @@ class Sale {
                 ORDER BY quantity_sold DESC
                 LIMIT ${parseInt(limit)}
             `;
-            const [rows] = await database.query(sql, [days]);
-            return rows;
-        }
+        const [rows] = await database.query(sql, [days]);
+        return rows;
+    }
 
-        // Productos menos vendidos (por cantidad, últimos X días)
-        static async getLeastSellingProducts({ limit = 10, days = 30 } = {}) {
-            const sql = `
+    // Productos menos vendidos (por cantidad, últimos X días)
+    static async getLeastSellingProducts({ limit = 10, days = 30 } = {}) {
+        const sql = `
                 SELECT p.id as product_id, p.nombre as product_name, c.nombre as category,
                        IFNULL(SUM(si.quantity), 0) as quantity_sold,
                        IFNULL(SUM(si.quantity * si.unit_price), 0) as total_revenue
@@ -370,13 +388,13 @@ class Sale {
                 ORDER BY quantity_sold ASC, p.nombre ASC
                 LIMIT ${parseInt(limit)}
             `;
-            const [rows] = await database.query(sql, [days]);
-            return rows;
-        }
+        const [rows] = await database.query(sql, [days]);
+        return rows;
+    }
 
-        // Productos sin movimiento (sin ventas en X días)
-        static async getProductsWithoutSales({ days = 90 } = {}) {
-            const sql = `
+    // Productos sin movimiento (sin ventas en X días)
+    static async getProductsWithoutSales({ days = 90 } = {}) {
+        const sql = `
                 SELECT p.id as product_id, p.nombre as product_name, c.nombre as category
                 FROM productos p
                 JOIN categorias c ON p.categoria_id = c.id
@@ -388,18 +406,18 @@ class Sale {
                       AND s.status = 'completed'
                 )
             `;
-            const [rows] = await database.query(sql, [days]);
-            return rows;
-        }
+        const [rows] = await database.query(sql, [days]);
+        return rows;
+    }
 
-        // Stock inmovilizado (valor de stock sin vender)
-        static async getStockInmovilizado() {
-            const sql = `
+    // Stock inmovilizado (valor de stock sin vender)
+    static async getStockInmovilizado() {
+        const sql = `
                 SELECT COUNT(*) as total_products,
                        SUM(p.stock * p.costo) as total_investment
                 FROM productos p
             `;
-            const byCategorySql = `
+        const byCategorySql = `
                 SELECT c.nombre as category, 
                        SUM(p.stock * p.costo) as investment,
                        100.0 * SUM(p.stock * p.costo) / (SELECT SUM(stock * costo) FROM productos) as percentage
@@ -407,10 +425,10 @@ class Sale {
                 JOIN categorias c ON p.categoria_id = c.id
                 GROUP BY c.nombre
             `;
-            const total = await database.get(sql);
-            const byCategory = await database.all(byCategorySql);
-            return { ...total, by_category: byCategory };
-        }
+        const total = await database.get(sql);
+        const byCategory = await database.all(byCategorySql);
+        return { ...total, by_category: byCategory };
+    }
 
     // Crear una nueva venta (redirigir a createWithItems)
     static async create(saleData) {
@@ -521,25 +539,45 @@ class Sale {
         }
     }
 
-    // Cancelar o restaurar una venta (nuevo modelo: restaura stock de todos los items)
+    // Cancelar una venta (Soft Delete: cambia estado y restaura stock)
     static async delete(id) {
+        let connection;
         try {
-            // Obtener la venta y sus items
-            const sale = await Sale.getById(id);
+            // Iniciar transacción
+            connection = await database.beginTransaction();
+
+            // Obtener la venta y sus items dentro de la transacción
+            const saleSql = `SELECT * FROM sales WHERE id = ?`;
+            const sale = await database.get(saleSql, [id], connection);
+
             if (!sale) throw new Error('Venta no encontrada');
+            if (sale.status === 'cancelled') throw new Error('La venta ya se encuentra cancelada');
+
+            const itemsSql = `SELECT * FROM sale_items WHERE sale_id = ?`;
+            const items = await database.all(itemsSql, [id], connection);
+
             // Restaurar stock de cada producto vendido
-            for (const item of sale.items || []) {
+            for (const item of items || []) {
                 await database.run(
-                    'UPDATE productos SET stock = stock + ? WHERE id = ?',
-                    [item.quantity, item.product_id]
+                    'UPDATE productos SET stock = stock + ?, estado = "disponible", updated_at = NOW() WHERE id = ?',
+                    [item.quantity, item.product_id],
+                    connection
                 );
             }
-            // Eliminar items y venta
-            await database.run('DELETE FROM sale_items WHERE sale_id = ?', [id]);
-            await database.run('DELETE FROM sales WHERE id = ?', [id]);
+
+            // En vez de eliminar, actualizamos el estado a 'cancelled'
+            await database.run(
+                'UPDATE sales SET status = "cancelled", updated_at = NOW() WHERE id = ?',
+                [id],
+                connection
+            );
+
+            // Confirmar transacción
+            await database.commit(connection);
             return true;
         } catch (error) {
-            throw new Error(`Error eliminando venta: ${error.message}`);
+            if (connection) await database.rollback(connection);
+            throw new Error(`Error cancelando venta: ${error.message}`);
         }
     }
 
@@ -595,17 +633,19 @@ class Sale {
      * Crear o actualizar cliente automáticamente al registrar venta
      * @param {string} email - Email del cliente
      * @param {string} customerName - Nombre del cliente
+     * @param {object} connection - Conexión de la transacción (opcional)
      */
-    static async createOrUpdateCustomer(email, customerName) {
+    static async createOrUpdateCustomer(email, customerName, connection = null) {
         try {
             // Verificar si el cliente ya existe
-            const existingCustomer = await Customer.getByEmail(email);
+            const existingCustomer = await Customer.getByEmail(email, connection);
 
             if (existingCustomer) {
                 // Cliente existe: actualizar solo updated_at
                 await database.run(
-                    'UPDATE customers SET updated_at = datetime("now") WHERE email = ?',
-                    [email]
+                    'UPDATE customers SET updated_at = NOW() WHERE email = ?',
+                    [email],
+                    connection
                 );
             } else {
                 // Cliente nuevo: crear registro
@@ -619,45 +659,90 @@ class Sale {
                     province: null,
                     postal_code: null,
                     notes: 'Cliente creado automáticamente desde venta'
-                });
+                }, connection);
             }
 
             // Actualizar segmentación del cliente
-            await Sale.updateCustomerSegment(email);
+            await Sale.updateCustomerSegment(email, connection);
         } catch (error) {
             // No lanzar error para no romper la venta
             console.error('Error creando/actualizando cliente:', error.message);
         }
     }
 
+
+    /**
+     * Obtener reporte de performance (Best sellers y productos rentables)
+     */
+    static async getPerformanceReport() {
+        try {
+            const sql = `
+                SELECT p.nombre as name, SUM(si.quantity) as sold, SUM(si.profit) as profit
+                FROM sale_items si
+                JOIN productos p ON si.product_id = p.id
+                JOIN sales s ON si.sale_id = s.id
+                WHERE s.status = 'completed'
+                GROUP BY si.product_id
+                ORDER BY profit DESC
+                LIMIT 15
+            `;
+            return await database.all(sql);
+        } catch (error) {
+            throw new Error(`Error in getPerformanceReport: ${error.message}`);
+        }
+    }
+
+    /**
+     * Obtener crecimiento de ventas comparado con el mes anterior
+     */
+    static async getSalesGrowth() {
+        try {
+            const sql = `
+                SELECT 
+                    SUM(CASE WHEN MONTH(created_at) = MONTH(NOW()) AND YEAR(created_at) = YEAR(NOW()) THEN total ELSE 0 END) as current_month,
+                    SUM(CASE WHEN MONTH(created_at) = MONTH(DATE_SUB(NOW(), INTERVAL 1 MONTH)) AND YEAR(created_at) = YEAR(DATE_SUB(NOW(), INTERVAL 1 MONTH)) THEN total ELSE 0 END) as last_month
+                FROM sales
+                WHERE status = 'completed'
+            `;
+            const result = await database.get(sql);
+            const current = parseFloat(result.current_month || 0);
+            const last = parseFloat(result.last_month || 0);
+            const growth = last > 0 ? ((current - last) / last) * 100 : 100;
+            return { current, last, growth: growth.toFixed(2) };
+        } catch (error) {
+            return { current: 0, last: 0, growth: 0 };
+        }
+    }
+
     /**
      * Actualizar segmentación del cliente basado en su historial de compras
      * @param {string} email - Email del cliente
+     * @param {object} connection - Conexión de la transacción (opcional)
      */
-    static async updateCustomerSegment(email) {
+    static async updateCustomerSegment(email, connection = null) {
         try {
             // Contar compras en últimos 90 días
             const result = await database.get(`
                 SELECT COUNT(*) as purchase_count,
-                       MAX(sale_date) as last_purchase
+                       MAX(created_at) as last_purchase
                 FROM sales
                 WHERE customer_email = ?
-                  AND sale_date >= date('now', '-90 days')
-            `, [email]);
+                  AND created_at >= DATE_SUB(NOW(), INTERVAL 90 DAY)
+            `, [email], connection);
 
             // Determinar segmento
             let segment = 'new';
-            
-            if (result.purchase_count >= 5) {
+
+            if (result && result.purchase_count >= 5) {
                 segment = 'frequent';
-            } else if (result.purchase_count >= 2) {
+            } else if (result && result.purchase_count >= 2) {
                 segment = 'occasional';
-            } else if (result.last_purchase) {
-                const daysSinceLastPurchase = await database.get(`
-                    SELECT julianday('now') - julianday(?) as days_diff
-                `, [result.last_purchase]);
-                
-                if (daysSinceLastPurchase && daysSinceLastPurchase.days_diff > 90) {
+            } else if (result && result.last_purchase) {
+                const daysDiffResult = await database.get(`
+                    SELECT DATEDIFF(NOW(), ?) as days_diff
+                `, [result.last_purchase], connection);
+
+                if (daysDiffResult && daysDiffResult.days_diff > 90) {
                     segment = 'inactive';
                 }
             }
@@ -665,12 +750,69 @@ class Sale {
             // Actualizar segmento
             await database.run(
                 'UPDATE customers SET segment = ? WHERE email = ?',
-                [segment, email]
+                [segment, email],
+                connection
             );
         } catch (error) {
             console.error('Error actualizando segmentación:', error.message);
         }
     }
+
+    /**
+     * Obtener ventas agrupadas por método de pago (Versión Optimizada)
+     */
+    static async getSalesByPaymentMethod() {
+        try {
+            const sql = `
+                SELECT 
+                    payment_method as name, 
+                    COUNT(*) as count, 
+                    IFNULL(SUM(total), 0) as total,
+                    ROUND(100.0 * COUNT(*) / (SELECT COUNT(*) FROM sales WHERE status = 'completed'), 1) as value
+                FROM sales
+                WHERE status = 'completed'
+                GROUP BY payment_method
+            `;
+            const rows = await database.all(sql);
+            const colors = { 'efectivo': '#00C49F', 'tarjeta': '#0088FE', 'transferencia': '#FFBB28', 'otro': '#FF8042' };
+            return rows.map(r => ({
+                ...r,
+                name: r.name.charAt(0).toUpperCase() + r.name.slice(1),
+                color: colors[r.name] || '#999'
+            }));
+        } catch (error) {
+            throw new Error(`Error en getSalesByPaymentMethod: ${error.message}`);
+        }
+    }
+
+    /**
+     * Reporte de ventas diarias (distribución horaria)
+     */
+    static async getDailySalesReport() {
+        try {
+            const sql = `
+                SELECT 
+                    HOUR(created_at) as hour,
+                    COUNT(*) as sales,
+                    IFNULL(SUM(total), 0) as revenue
+                FROM sales
+                WHERE DATE(created_at) = CURDATE() AND status = 'completed'
+                GROUP BY HOUR(created_at)
+                ORDER BY hour ASC
+            `;
+            const rows = await database.all(sql);
+            const hourly = rows.map(r => ({
+                hour: `${String(r.hour).padStart(2, '0')}:00`,
+                sales: r.sales,
+                revenue: parseFloat(r.revenue)
+            }));
+            return { hourly };
+        } catch (error) {
+            throw new Error(`Error en getDailySalesReport: ${error.message}`);
+        }
+    }
 }
 
 module.exports = Sale;
+
+

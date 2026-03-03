@@ -1,7 +1,7 @@
 const Category = require('../models/Category');
 
 class CategoryController {
-    static async getAllCategories(req, res) {
+    static async getAllCategories(req, res, next) {
         try {
             const categories = await Category.getAll();
             res.status(200).json({
@@ -10,23 +10,18 @@ class CategoryController {
                 data: categories
             });
         } catch (error) {
-            res.status(500).json({
-                success: false,
-                message: 'Error interno del servidor',
-                error: error.message
-            });
+            next(error);
         }
     }
 
-    static async getCategoryById(req, res) {
+    static async getCategoryById(req, res, next) {
         try {
             const { id } = req.params;
             const category = await Category.getById(id);
             if (!category) {
-                return res.status(404).json({
-                    success: false,
-                    message: 'Categoría no encontrada'
-                });
+                const error = new Error('Categoría no encontrada');
+                error.status = 404;
+                throw error;
             }
             res.status(200).json({
                 success: true,
@@ -34,35 +29,25 @@ class CategoryController {
                 data: category
             });
         } catch (error) {
-            res.status(500).json({
-                success: false,
-                message: 'Error interno del servidor',
-                error: error.message
-            });
+            next(error);
         }
     }
 
-    static async createCategory(req, res) {
+    static async createCategory(req, res, next) {
         try {
-            // Log para depuración
-            console.log('[CategoryController.createCategory] req.body:', req.body);
             const { name, description } = req.body;
             const newCategory = await Category.create({ name, description });
-            console.log('[createCategory] newCategory:', newCategory);
             res.status(201).json({
                 success: true,
                 message: 'Categoría creada exitosamente',
                 data: newCategory
             });
         } catch (error) {
-            res.status(400).json({
-                success: false,
-                message: error.message
-            });
+            next(error);
         }
     }
 
-    static async updateCategory(req, res) {
+    static async updateCategory(req, res, next) {
         try {
             const { id } = req.params;
             const { name, description } = req.body;
@@ -73,40 +58,36 @@ class CategoryController {
                 data: updatedCategory
             });
         } catch (error) {
-            res.status(400).json({
-                success: false,
-                message: error.message
-            });
+            next(error);
         }
     }
 
-    static async deleteCategory(req, res) {
+    static async deleteCategory(req, res, next) {
         try {
             const { id } = req.params;
             await Category.delete(id);
             res.status(200).json({
                 success: true,
-                message: 'Categoría eliminada exitosamente'
+                message: 'Categoría eliminada exitosamente (Soft Delete)'
             });
         } catch (error) {
-            res.status(400).json({
-                success: false,
-                message: error.message
-            });
+            next(error);
         }
     }
 
-    static async changeCategoryStatus(req, res) {
+    static async changeCategoryStatus(req, res, next) {
         try {
             const { id } = req.params;
             const { status } = req.body;
             if (!['activa', 'inactiva'].includes(status)) {
-                return res.status(400).json({ success: false, message: 'Estado inválido' });
+                const error = new Error('Estado inválido');
+                error.status = 400;
+                throw error;
             }
             const result = await Category.changeStatus(id, status);
             res.status(200).json({ success: true, message: 'Estado de categoría actualizado', data: result });
         } catch (error) {
-            res.status(400).json({ success: false, message: error.message });
+            next(error);
         }
     }
 }

@@ -1,15 +1,16 @@
 const db = require('../config/database');
+const { deletePhysicalFile } = require('../utils/fileHelper');
 
 const ProductImage = {
   // Crear imagen
   async create(data) {
     const { product_id, url, thumbnail_url, is_primary, order, uploaded_by } = data;
-    
+
     const query = `
       INSERT INTO product_images (product_id, url, thumbnail_url, is_primary, \`order\`, uploaded_by, created_at)
       VALUES (?, ?, ?, ?, ?, ?, NOW())
     `;
-    
+
     const result = await db.run(query, [
       product_id,
       url,
@@ -18,8 +19,8 @@ const ProductImage = {
       order || 0,
       uploaded_by || null
     ]);
-    
-    return this.findById(result.lastID);
+
+    return this.findById(result.insertId);
   },
 
   // Obtener por ID
@@ -42,15 +43,25 @@ const ProductImage = {
   async setPrimary(id, productId) {
     // Quitar primaria de todas
     await db.run('UPDATE product_images SET is_primary = 0 WHERE product_id = ?', [productId]);
-    
+
     // Establecer nueva primaria
     await db.run('UPDATE product_images SET is_primary = 1 WHERE id = ?', [id]);
-    
+
     return this.findById(id);
   },
 
   // Eliminar
   async delete(id) {
+    // Obtener la imagen antes de borrarla para tener la URL
+    const image = await this.findById(id);
+    if (image) {
+      // Eliminar archivo físico
+      deletePhysicalFile(image.url);
+      if (image.thumbnail_url && image.thumbnail_url !== image.url) {
+        deletePhysicalFile(image.thumbnail_url);
+      }
+    }
+
     const query = 'DELETE FROM product_images WHERE id = ?';
     await db.run(query, [id]);
     return { success: true };
@@ -58,6 +69,15 @@ const ProductImage = {
 
   // Eliminar todas de un producto
   async deleteByProduct(productId) {
+    const images = await this.findByProduct(productId);
+
+    for (const image of images) {
+      deletePhysicalFile(image.url);
+      if (image.thumbnail_url && image.thumbnail_url !== image.url) {
+        deletePhysicalFile(image.thumbnail_url);
+      }
+    }
+
     const query = 'DELETE FROM product_images WHERE product_id = ?';
     await db.run(query, [productId]);
     return { success: true };

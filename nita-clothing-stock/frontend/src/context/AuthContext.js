@@ -13,9 +13,20 @@ export const AuthProvider = ({ children }) => {
 
         if (token && userData) {
             try {
-                setUser(JSON.parse(userData));
+                // Validación básica de expiración del JWT (Finding 23)
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                const now = Math.floor(Date.now() / 1000);
+
+                if (payload.exp && payload.exp < now) {
+                    console.warn('[AuthContext] Token expirado, cerrando sesión...');
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('user');
+                    setUser(null);
+                } else {
+                    setUser(JSON.parse(userData));
+                }
             } catch (e) {
-                console.error('[AuthContext] Error parsing user data', e);
+                console.error('[AuthContext] Error validando token o datos de usuario', e);
                 localStorage.removeItem('token');
                 localStorage.removeItem('user');
             }

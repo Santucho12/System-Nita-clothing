@@ -49,22 +49,46 @@ async function initDatabase() {
                 tallas VARCHAR(255),
                 colores VARCHAR(255),
                 proveedor VARCHAR(255),
+                supplier_id INT,
                 ubicacion VARCHAR(255),
-                estado ENUM('activo', 'inactivo', 'descontinuado') DEFAULT 'activo',
+                estado ENUM('disponible', 'sin_stock') DEFAULT 'disponible',
                 fecha_ingreso DATETIME DEFAULT CURRENT_TIMESTAMP,
                 imagen_url TEXT,
                 notas TEXT,
+                deleted_at DATETIME DEFAULT NULL,
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                 updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                FOREIGN KEY (categoria_id) REFERENCES categorias(id) ON DELETE SET NULL
+                FOREIGN KEY (categoria_id) REFERENCES categorias(id) ON DELETE SET NULL,
+                FOREIGN KEY (supplier_id) REFERENCES suppliers(id) ON DELETE SET NULL
             )
         `;
         await database.run(createProductsTable);
+
+        // ========== TABLA DE CLIENTES ==========
+        const createCustomersTable = `
+            CREATE TABLE IF NOT EXISTS customers (
+                email VARCHAR(255) PRIMARY KEY,
+                name VARCHAR(255) NOT NULL,
+                phone VARCHAR(50),
+                address TEXT,
+                city VARCHAR(100),
+                state VARCHAR(100),
+                postal_code VARCHAR(20),
+                notes TEXT,
+                segment ENUM('frequent', 'occasional', 'new', 'inactive') DEFAULT 'new',
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                INDEX idx_segment (segment),
+                INDEX idx_name (name)
+            )
+        `;
+        await database.run(createCustomersTable);
 
         // ========== TABLA DE VENTAS ==========
         const createSalesTable = `
             CREATE TABLE IF NOT EXISTS sales (
                 id INT AUTO_INCREMENT PRIMARY KEY,
+                sale_number VARCHAR(20) UNIQUE,
                 customer_name VARCHAR(255),
                 customer_email VARCHAR(255),
                 customer_phone VARCHAR(50),
@@ -113,26 +137,6 @@ async function initDatabase() {
             )
         `;
         await database.run(createSaleItemsTable);
-
-        // ========== TABLA DE CLIENTES ==========
-        const createCustomersTable = `
-            CREATE TABLE IF NOT EXISTS customers (
-                email VARCHAR(255) PRIMARY KEY,
-                name VARCHAR(255) NOT NULL,
-                phone VARCHAR(50),
-                address TEXT,
-                city VARCHAR(100),
-                state VARCHAR(100),
-                postal_code VARCHAR(20),
-                notes TEXT,
-                segment ENUM('frequent', 'occasional', 'new', 'inactive') DEFAULT 'new',
-                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-                updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                INDEX idx_segment (segment),
-                INDEX idx_name (name)
-            )
-        `;
-        await database.run(createCustomersTable);
 
         // ========== TABLA DE RESERVAS ==========
         const createReservationsTable = `
@@ -297,17 +301,38 @@ async function initDatabase() {
             // La columna ya existe, ignorar error
         }
 
+        // ========== TABLA DE CLAVES DE IDEMPOTENCIA ==========
+        const createIdempotencyTable = `
+            CREATE TABLE IF NOT EXISTS idempotency_keys (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                idempotency_key VARCHAR(255) NOT NULL UNIQUE,
+                user_id INT,
+                response_status INT,
+                response_body LONGTEXT,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                expires_at DATETIME,
+                FOREIGN KEY (user_id) REFERENCES usuarios(id) ON DELETE SET NULL,
+                INDEX idx_key (idempotency_key)
+            )
+        `;
+        await database.run(createIdempotencyTable);
+
         console.log('✅ Todas las tablas creadas correctamente.');
 
         // ======= BLOQUE ACTIVADO: Creación automática de usuario admin =======
         const adminExists = await database.get('SELECT id FROM usuarios WHERE email = ?', ['admin@nitaclothing.com']);
         if (!adminExists) {
-            const hashedPassword = await bcrypt.hash('admin123', 10);
-            await database.run(
-                'INSERT INTO usuarios (nombre, email, password, rol, activo) VALUES (?, ?, ?, ?, ?)',
-                ['Administrador', 'admin@nitaclothing.com', hashedPassword, 'admin', true]
-            );
-            console.log('✅ Usuario admin creado: admin@nitaclothing.com / admin123');
+            const adminPassword = process.env.ADMIN_INITIAL_PASSWORD;
+            if (!adminPassword) {
+                console.warn('⚠️  ADMIN_INITIAL_PASSWORD no configurado en .env. No se creará usuario admin automáticamente.');
+            } else {
+                const hashedPassword = await bcrypt.hash(adminPassword, 10);
+                await database.run(
+                    'INSERT INTO usuarios (nombre, email, password, rol, activo) VALUES (?, ?, ?, ?, ?)',
+                    ['Administrador', 'admin@nitaclothing.com', hashedPassword, 'admin', true]
+                );
+                console.log('✅ Usuario admin creado exitosamente');
+            }
         }
         // ======= FIN BLOQUE ACTIVADO =======
 

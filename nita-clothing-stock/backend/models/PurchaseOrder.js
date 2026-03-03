@@ -25,29 +25,30 @@ class PurchaseOrder {
       throw new Error('supplier_id e items son obligatorios');
     }
 
+    const connection = await database.beginTransaction();
     try {
       // Crear orden principal
-      const result = await database.run(
-        `INSERT INTO purchase_orders (
+      const sql = `INSERT INTO purchase_orders (
           supplier_id, order_date, expected_delivery_date, subtotal,
           tax_amount, shipping_cost, total_amount, status, payment_status,
           payment_method, notes, created_by, created_at, updated_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?, ?, ?, NOW(), NOW())`,
-        [
-          supplier_id,
-          order_date || new Date().toISOString().split('T')[0],
-          expected_delivery_date || null,
-          subtotal || 0,
-          tax_amount || 0,
-          shipping_cost || 0,
-          total_amount || 0,
-          payment_status || 'pending',
-          payment_method || null,
-          notes || null,
-          created_by
-        ]
-      );
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?, ?, ?, NOW(), NOW())`;
 
+      const params = [
+        supplier_id || null,
+        order_date || new Date().toISOString().split('T')[0],
+        expected_delivery_date || null,
+        subtotal || 0,
+        tax_amount || 0,
+        shipping_cost || 0,
+        total_amount || 0,
+        payment_status || 'pending',
+        payment_method || null,
+        notes || null,
+        created_by || null
+      ];
+
+      const result = await database.run(sql, params, connection);
       const purchaseOrderId = result.insertId;
 
       // Insertar items
@@ -64,12 +65,15 @@ class PurchaseOrder {
             item.quantity,
             item.unit_cost,
             item.subtotal || (item.quantity * item.unit_cost)
-          ]
+          ],
+          connection
         );
       }
 
+      await database.commit(connection);
       return await this.getById(purchaseOrderId);
     } catch (error) {
+      if (connection) await database.rollback(connection);
       throw error;
     }
   }
@@ -200,7 +204,7 @@ class PurchaseOrder {
    */
   static async receiveOrder(id, userId) {
     const order = await this.getById(id);
-    
+
     if (!order) {
       throw new Error('Orden de compra no encontrada');
     }
@@ -213,6 +217,8 @@ class PurchaseOrder {
       throw new Error('No se puede recibir una orden cancelada');
     }
 
+    const connection = await database.beginTransaction();
+
     try {
       const Product = require('./Product');
       const ActivityLog = require('./ActivityLog');
@@ -223,22 +229,28 @@ class PurchaseOrder {
 
       // Incrementar stock de cada producto
       for (const item of order.items) {
-        const product = await Product.getById(item.product_id);
-        
+        // Bloqueo de fila (Row-level locking) para evitar condiciones de carrera (Race Conditions)
+        const product = await database.get(
+          `SELECT stock, costo, stock_minimo FROM productos WHERE id = ? FOR UPDATE`,
+          [item.product_id],
+          connection
+        );
+
         if (!product) {
           console.warn(`Producto ${item.product_name} (ID: ${item.product_id}) no encontrado, omitiendo...`);
           continue;
         }
 
-        const oldStock = product.stock_quantity || 0;
+        const oldStock = product.stock || 0;
         const newStock = oldStock + item.quantity;
-        const oldCost = product.cost_price || 0;
+        const oldCost = product.costo || 0;
         const newCost = item.unit_cost;
 
-        // Actualizar stock y costo usando database directamente
+        // Actualizar stock y costo
         await database.run(
-          `UPDATE productos SET stock = ?, costo = ?, updated_at = ? WHERE id = ?`,
-          [newStock, newCost, new Date(), item.product_id]
+          `UPDATE productos SET stock = ?, costo = ?, updated_at = NOW() WHERE id = ?`,
+          [newStock, newCost, item.product_id],
+          connection
         );
 
         // Registrar en activity log
@@ -247,29 +259,21 @@ class PurchaseOrder {
           action: 'receive_purchase_order',
           table_name: 'productos',
           record_id: item.product_id,
-          old_value: JSON.stringify({ 
-            stock: oldStock, 
-            cost: oldCost 
-          }),
-          new_value: JSON.stringify({ 
-            stock: newStock, 
-            cost: newCost,
-            purchase_order_id: id,
-            quantity_added: item.quantity
-          }),
-          ip_address: null
-        });
+          old_value: JSON.stringify({ stock: oldStock, costo: oldCost }),
+          new_value: JSON.stringify({ stock: newStock, costo: newCost }),
+          notes: `Recibido mediante OC #${id}`
+        }, connection);
 
         stockUpdates.push({
           product_id: item.product_id,
           product_name: item.product_name,
           old_stock: oldStock,
           new_stock: newStock,
-          quantity_added: item.quantity
+          received: item.quantity
         });
 
         // Notificar si el producto estaba sin stock o bajo
-        if (oldStock === 0 || (product.min_stock && oldStock < product.min_stock)) {
+        if (oldStock === 0 || (product.stock_minimo && oldStock < product.stock_minimo)) {
           notificationHelper.notifySystemAlert(
             '📦 Stock Reabastecido',
             `${item.product_name}: stock actualizado de ${oldStock} a ${newStock} unidades`
@@ -279,8 +283,9 @@ class PurchaseOrder {
 
       // Actualizar estado de la orden a "received"
       await database.run(
-        `UPDATE purchase_orders SET status = 'received', received_date = NOW(), updated_at = NOW() WHERE id = ?`,
-        [id]
+        'UPDATE purchase_orders SET status = "received", received_date = NOW(), updated_at = NOW() WHERE id = ?',
+        [id],
+        connection
       );
 
       // Registrar recepción de orden en activity log
@@ -290,15 +295,17 @@ class PurchaseOrder {
         table_name: 'purchase_orders',
         record_id: id,
         old_value: JSON.stringify({ status: order.status }),
-        new_value: JSON.stringify({ 
+        new_value: JSON.stringify({
           status: 'received',
           received_date: new Date().toISOString(),
           stock_updates: stockUpdates
         }),
         ip_address: null
-      });
+      }, connection);
 
-      // Notificar orden recibida
+      await database.commit(connection);
+
+      // Notificar orden recibida (fuera de la transacción por si falla el envío)
       notificationHelper.notifyOrderReceived({
         id: order.id,
         order_number: `OC-${order.id}`,
@@ -315,6 +322,7 @@ class PurchaseOrder {
       };
 
     } catch (error) {
+      await database.rollback(connection);
       console.error('Error recibiendo orden:', error);
       throw new Error(`Error al recibir la orden: ${error.message}`);
     }
@@ -386,7 +394,7 @@ class PurchaseOrder {
    */
   static async delete(id) {
     const order = await this.getById(id);
-    
+
     if (!order) {
       throw new Error('Orden no encontrada');
     }

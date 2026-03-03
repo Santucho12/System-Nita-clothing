@@ -2,18 +2,21 @@ const Supplier = require('../models/Supplier');
 
 const supplierController = {
   // Crear nuevo proveedor
-  async create(req, res) {
+  async create(req, res, next) {
     try {
       const supplier = await Supplier.create(req.body);
-      res.status(201).json({ message: 'Proveedor creado exitosamente', data: supplier });
+      res.status(201).json({
+        success: true,
+        message: 'Proveedor creado exitosamente',
+        data: supplier
+      });
     } catch (error) {
-      console.error('Error creando proveedor:', error);
-      res.status(500).json({ error: error.message });
+      next(error);
     }
   },
 
   // Obtener todos los proveedores
-  async getAll(req, res) {
+  async getAll(req, res, next) {
     try {
       const filters = {
         status: req.query.status,
@@ -26,51 +29,63 @@ const supplierController = {
       };
 
       const suppliers = await Supplier.getAll(filters);
-      res.json({ data: suppliers, count: suppliers.length });
+      res.status(200).json({
+        success: true,
+        data: suppliers,
+        count: suppliers.length
+      });
     } catch (error) {
-      console.error('Error obteniendo proveedores:', error);
-      res.status(500).json({ error: error.message });
+      next(error);
     }
   },
 
   // Obtener proveedor por ID
-  async getById(req, res) {
+  async getById(req, res, next) {
     try {
       const supplier = await Supplier.getById(req.params.id);
       if (!supplier) {
-        return res.status(404).json({ error: 'Proveedor no encontrado' });
+        const error = new Error('Proveedor no encontrado');
+        error.status = 404;
+        throw error;
       }
-      res.json({ data: supplier });
+      res.status(200).json({
+        success: true,
+        data: supplier
+      });
     } catch (error) {
-      console.error('Error obteniendo proveedor:', error);
-      res.status(500).json({ error: error.message });
+      next(error);
     }
   },
 
   // Actualizar proveedor
-  async update(req, res) {
+  async update(req, res, next) {
     try {
       const supplier = await Supplier.update(req.params.id, req.body);
-      res.json({ message: 'Proveedor actualizado exitosamente', data: supplier });
+      res.status(200).json({
+        success: true,
+        message: 'Proveedor actualizado exitosamente',
+        data: supplier
+      });
     } catch (error) {
-      console.error('Error actualizando proveedor:', error);
-      res.status(500).json({ error: error.message });
+      next(error);
     }
   },
 
   // Eliminar proveedor
-  async delete(req, res) {
+  async delete(req, res, next) {
     try {
       await Supplier.delete(req.params.id);
-      res.json({ message: 'Proveedor eliminado exitosamente' });
+      res.status(200).json({
+        success: true,
+        message: 'Proveedor eliminado exitosamente (Soft Delete)'
+      });
     } catch (error) {
-      console.error('Error eliminando proveedor:', error);
-      res.status(500).json({ error: error.message });
+      next(error);
     }
   },
 
   // Obtener órdenes de compra de un proveedor
-  async getPurchaseOrders(req, res) {
+  async getPurchaseOrders(req, res, next) {
     try {
       const filters = {
         status: req.query.status,
@@ -80,15 +95,17 @@ const supplierController = {
       };
 
       const orders = await Supplier.getPurchaseOrders(req.params.id, filters);
-      res.json({ data: orders });
+      res.status(200).json({
+        success: true,
+        data: orders
+      });
     } catch (error) {
-      console.error('Error obteniendo órdenes:', error);
-      res.status(500).json({ error: error.message });
+      next(error);
     }
   },
 
   // Obtener productos de un proveedor
-  async getProducts(req, res) {
+  async getProducts(req, res, next) {
     try {
       const filters = {
         status: req.query.status,
@@ -97,44 +114,52 @@ const supplierController = {
       };
 
       const products = await Supplier.getProducts(req.params.id, filters);
-      res.json({ data: products });
+      res.status(200).json({
+        success: true,
+        data: products
+      });
     } catch (error) {
-      console.error('Error obteniendo productos:', error);
-      res.status(500).json({ error: error.message });
+      next(error);
     }
   },
 
   // Obtener estadísticas de un proveedor
-  async getStats(req, res) {
+  async getStats(req, res, next) {
     try {
       const stats = await Supplier.getStats(req.params.id);
-      res.json({ data: stats });
+      res.status(200).json({
+        success: true,
+        data: stats
+      });
     } catch (error) {
-      console.error('Error obteniendo estadísticas:', error);
-      res.status(500).json({ error: error.message });
+      next(error);
     }
   },
 
   // Obtener mejores proveedores
-  async getTopSuppliers(req, res) {
+  async getTopSuppliers(req, res, next) {
     try {
       const limit = parseInt(req.query.limit) || 10;
       const suppliers = await Supplier.getTopSuppliers(limit);
-      res.json({ data: suppliers });
+      res.status(200).json({
+        success: true,
+        data: suppliers
+      });
     } catch (error) {
-      console.error('Error obteniendo top proveedores:', error);
-      res.status(500).json({ error: error.message });
+      next(error);
     }
   },
 
   // Obtener proveedores con pagos pendientes
-  async getPendingPayments(req, res) {
+  async getPendingPayments(req, res, next) {
     try {
       const suppliers = await Supplier.getSuppliersWithPendingPayments();
-      res.json({ data: suppliers });
+      res.status(200).json({
+        success: true,
+        data: suppliers
+      });
     } catch (error) {
-      console.error('Error obteniendo pagos pendientes:', error);
-      res.status(500).json({ error: error.message });
+      next(error);
     }
   }
 };

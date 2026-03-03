@@ -10,20 +10,25 @@ const initWebSocket = (server) => {
 
   wss.on('connection', (ws, req) => {
     console.log('Nueva conexión WebSocket');
+    ws.isAlive = true;
+    ws.on('pong', () => {
+      ws.isAlive = true;
+    });
 
     // Autenticar con token
     const token = new URL(req.url, 'http://localhost').searchParams.get('token');
-    
+
     if (!token) {
       ws.close(4001, 'Token no proporcionado');
       return;
     }
 
     try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'nita-secret-key');
+      const { JWT_SECRET } = require('../config/jwtConfig');
+      const decoded = jwt.verify(token, JWT_SECRET);
       ws.userId = decoded.id;
       ws.userRole = decoded.role;
-      
+
       // Guardar cliente
       clients.set(decoded.id, ws);
       console.log(`Usuario ${decoded.id} conectado via WebSocket`);
@@ -46,7 +51,7 @@ const initWebSocket = (server) => {
       try {
         const data = JSON.parse(message);
         console.log('Mensaje recibido:', data);
-        
+
         // Responder al ping
         if (data.type === 'ping') {
           ws.send(JSON.stringify({ type: 'pong' }));

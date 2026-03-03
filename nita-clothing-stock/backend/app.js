@@ -1,3 +1,4 @@
+require('dotenv').config();
 
 const express = require('express');
 const cors = require('cors');
@@ -36,15 +37,30 @@ const activityLogRoutes = require('./routes/activityLogs');
 const reportRoutes = require('./routes/reports');
 // WebSocket
 const { initWebSocket } = require('./utils/websocket');
+// Idempotencia
+const idempotency = require('./middleware/idempotency');
 
+const allowedOrigins = process.env.CORS_ORIGINS ? process.env.CORS_ORIGINS.split(',') : ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:3002'];
 
-
-app.use(cors());
+app.use(cors({
+    origin: (origin, callback) => {
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error('No permitido por CORS'));
+        }
+    },
+    credentials: true,
+    allowedHeaders: ['Content-Type', 'Authorization', 'Idempotency-Key']
+}));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
+// Middleware de idempotencia (después de bodyParser para interceptar post-data)
+app.use(idempotency);
+
 // Middleware para Content Security Policy que permita fuentes externas y conexiones al frontend
-const cspHeader = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data:; connect-src 'self' http://localhost:3000 http://localhost:3001 http://localhost:5000 ws://localhost:5000;";
+const cspHeader = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: blob:; connect-src 'self' http://localhost:3000 http://localhost:3001 http://localhost:3002 http://localhost:5000 ws://localhost:5000;";
 app.use((req, res, next) => {
     res.setHeader('Content-Security-Policy', cspHeader);
     next();
@@ -99,27 +115,19 @@ app.get('/', (req, res) => {
     });
 });
 
-// Middleware para rutas no encontradas
-app.use('*', (req, res) => {
-    res.status(404).json({
-        success: false,
-        message: 'Endpoint no encontrado',
-        path: req.originalUrl,
-        method: req.method,
-        suggestion: 'Visita /api para ver todos los endpoints disponibles'
-    });
+const errorHandler = require('./middleware/errorHandler');
+
+// ... (existing routes)
+
+// Middleware para rutas no encontradas (404)
+app.use((req, res, next) => {
+    const error = new Error('Endpoint no encontrado');
+    error.status = 404;
+    next(error);
 });
 
-// Middleware global de manejo de errores
-app.use((err, req, res, next) => {
-    console.error('Error no manejado:', err);
-    
-    res.status(err.status || 500).json({
-        success: false,
-        message: 'Error interno del servidor',
-        error: process.env.NODE_ENV === 'development' ? err.message : 'Algo salió mal'
-    });
-});
+// Middleware global de manejo de errores (DEBE ser el último)
+app.use(errorHandler);
 
 // Función para inicializar el servidor
 async function startServer() {
@@ -128,6 +136,11 @@ async function startServer() {
         console.log('🔌 Conectando a la base de datos...');
         await database.connect();
         console.log('✅ Base de datos conectada exitosamente');
+
+        // Verificar seguridad del entorno
+        if (!process.env.JWT_SECRET) {
+            console.warn('⚠️  [SEGURIDAD] JWT_SECRET no detectado. El sistema es vulnerable en producción.');
+        }
 
         // Iniciar el servidor
         const server = app.listen(PORT, () => {
@@ -147,7 +160,7 @@ async function startServer() {
             console.log('💡 Tip: Usa Postman para probar los endpoints');
             console.log('📖 Los ejemplos de requests están en los archivos de rutas');
         });
-        
+
         // Inicializar WebSocket
         initWebSocket(server);
         console.log('✅ WebSocket Server inicializado');

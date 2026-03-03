@@ -89,7 +89,7 @@ export default function DashboardSales() {
             <i className="fas fa-ticket-alt"></i>
           </div>
           <div className="metric-main">
-            <h3>${(stats.month?.total_amount / (stats.month?.total_sales || 1))?.toFixed(2)}</h3>
+            <h3>${((stats.month?.total_amount || 0) / (stats.month?.total_sales || 1)).toFixed(2)}</h3>
             <span className="count">Periodo actual</span>
           </div>
         </div>

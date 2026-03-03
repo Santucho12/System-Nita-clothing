@@ -52,21 +52,25 @@ class Database {
         await connection.release();
     }
 
-    async all(sql, params = []) {
+    async all(sql, params = [], connection = null) {
         const pool = await this.connect();
-        const [rows] = await pool.execute(sql, params);
+        const executor = connection || pool;
+        const [rows] = await executor.execute(sql, params);
         return rows;
     }
 
-    async get(sql, params = []) {
+    async get(sql, params = [], connection = null) {
         const pool = await this.connect();
-        const [rows] = await pool.execute(sql, params);
+        const executor = connection || pool;
+        if (!executor) throw new Error('Cargando base de datos...');
+        const [rows] = await executor.execute(sql, params);
         return rows[0] || null;
     }
 
-    async query(sql, params = []) {
+    async query(sql, params = [], connection = null) {
         const pool = await this.connect();
-        return await pool.execute(sql, params);
+        const executor = connection || pool;
+        return await executor.execute(sql, params);
     }
 }
 

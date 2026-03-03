@@ -3,17 +3,17 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { formatCurrency, formatNumber } from '../utils/formatters';
-import { 
-  FaChartBar, 
-  FaChartLine, 
-  FaBox, 
-  FaDollarSign, 
-  FaTags, 
-  FaCalendarDay, 
-  FaCalendarWeek, 
-  FaCalendarAlt, 
-  FaMoneyBillWave, 
-  FaPercentage 
+import {
+  FaChartBar,
+  FaChartLine,
+  FaBox,
+  FaDollarSign,
+  FaTags,
+  FaCalendarDay,
+  FaCalendarWeek,
+  FaCalendarAlt,
+  FaMoneyBillWave,
+  FaPercentage
 } from 'react-icons/fa';
 import {
   Chart as ChartJS,
@@ -69,7 +69,7 @@ function Reports() {
           axios.get(`${API_URL}/reportes/ventas-mes`, { headers }),
           axios.get(`${API_URL}/reportes/ventas-anio`, { headers })
         ]);
-        
+
         setSalesData({
           day: dayRes.data,
           month: monthRes.data,
@@ -80,7 +80,7 @@ function Reports() {
           axios.get(`${API_URL}/reportes/productos-mas-vendidos?limit=10`, { headers }),
           axios.get(`${API_URL}/reportes/productos-menos-vendidos?days=30`, { headers })
         ]);
-        
+
         setProductsData({
           top: topRes.data.data || [],
           low: lowRes.data.data || []
@@ -91,7 +91,7 @@ function Reports() {
           axios.get(`${API_URL}/reportes/ganancia-por-producto`, { headers }),
           axios.get(`${API_URL}/reportes/ganancia-por-categoria`, { headers })
         ]);
-        
+
         setProfitData({
           general: generalRes.data.data || {},
           byProduct: byProductRes.data.data || [],
@@ -110,7 +110,7 @@ function Reports() {
 
   const getSalesChartData = () => {
     if (!salesData?.month?.daily) return null;
-    
+
     return {
       labels: salesData.month.daily.map(d => new Date(d.date).getDate()),
       datasets: [
@@ -127,7 +127,7 @@ function Reports() {
 
   const getTopProductsChartData = () => {
     if (!productsData?.top || productsData.top.length === 0) return null;
-    
+
     return {
       labels: productsData.top.map(p => p.product_name || 'Sin nombre'),
       datasets: [
@@ -153,7 +153,7 @@ function Reports() {
 
   const getProfitByCategoryChartData = () => {
     if (!profitData?.byCategory || profitData.byCategory.length === 0) return null;
-    
+
     return {
       labels: profitData.byCategory.map(c => c.category_name || 'Sin categoría'),
       datasets: [
@@ -216,6 +216,11 @@ function Reports() {
             transition: all 0.3s ease;
           }
 
+            @keyframes fadeIn {
+            0% { opacity: 0; transform: translateY(10px); }
+            100% { opacity: 1; transform: translateY(0); }
+          }
+
           .stat-card:hover, .chart-container:hover {
             transform: translateY(-5px);
             box-shadow: 0 8px 16px rgba(247, 49, 148, 0.2) !important;
@@ -227,7 +232,7 @@ function Reports() {
           <FaChartBar style={{ marginRight: '12px', color: '#f73194', fontSize: '32px' }} />
           Reportes y Estadísticas
         </h1>
-        <button 
+        <button
           className="btn-advanced-dashboard"
           onClick={() => navigate('/reports/advanced')}
           style={{
@@ -258,10 +263,10 @@ function Reports() {
           Estadisticas premium
         </button>
       </div>
-      
+
       <div className="tabs" style={{ display: 'flex', gap: '10px', marginBottom: '30px', background: 'white', padding: '15px', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)', flexWrap: 'wrap' }}>
-        <button 
-          className={activeTab === 'sales' ? 'active' : ''} 
+        <button
+          className={activeTab === 'sales' ? 'active' : ''}
           onClick={() => setActiveTab('sales')}
           style={{ padding: '10px 20px', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '14px', fontWeight: '500', background: activeTab === 'sales' ? '#f73194' : '#f5f5f5', color: activeTab === 'sales' ? 'white' : '#666', display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.3s ease' }}
           onMouseOver={(e) => { if (activeTab !== 'sales') { e.currentTarget.style.background = '#e0e0e0'; e.currentTarget.style.transform = 'scale(1.05)'; } }}
@@ -269,8 +274,8 @@ function Reports() {
         >
           <FaChartLine /> Ventas
         </button>
-        <button 
-          className={activeTab === 'products' ? 'active' : ''} 
+        <button
+          className={activeTab === 'products' ? 'active' : ''}
           onClick={() => setActiveTab('products')}
           style={{ padding: '10px 20px', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '14px', fontWeight: '500', background: activeTab === 'products' ? '#f73194' : '#f5f5f5', color: activeTab === 'products' ? 'white' : '#666', display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.3s ease' }}
           onMouseOver={(e) => { if (activeTab !== 'products') { e.currentTarget.style.background = '#e0e0e0'; e.currentTarget.style.transform = 'scale(1.05)'; } }}
@@ -278,8 +283,8 @@ function Reports() {
         >
           <FaBox /> Productos
         </button>
-        <button 
-          className={activeTab === 'profits' ? 'active' : ''} 
+        <button
+          className={activeTab === 'profits' ? 'active' : ''}
           onClick={() => setActiveTab('profits')}
           style={{ padding: '10px 20px', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '14px', fontWeight: '500', background: activeTab === 'profits' ? '#f73194' : '#f5f5f5', color: activeTab === 'profits' ? 'white' : '#666', display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.3s ease' }}
           onMouseOver={(e) => { if (activeTab !== 'profits') { e.currentTarget.style.background = '#e0e0e0'; e.currentTarget.style.transform = 'scale(1.05)'; } }}
@@ -287,8 +292,8 @@ function Reports() {
         >
           <FaDollarSign /> Ganancias
         </button>
-        <button 
-          className={activeTab === 'categories' ? 'active' : ''} 
+        <button
+          className={activeTab === 'categories' ? 'active' : ''}
           onClick={() => setActiveTab('categories')}
           style={{ padding: '10px 20px', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '14px', fontWeight: '500', background: activeTab === 'categories' ? '#f73194' : '#f5f5f5', color: activeTab === 'categories' ? 'white' : '#666', display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.3s ease' }}
           onMouseOver={(e) => { if (activeTab !== 'categories') { e.currentTarget.style.background = '#e0e0e0'; e.currentTarget.style.transform = 'scale(1.05)'; } }}
@@ -310,7 +315,7 @@ function Reports() {
               <h2 style={{ margin: '0 0 25px 0', fontSize: '24px', color: '#333', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <span style={{ color: '#f73194' }}>📈</span> Reporte de Ventas
               </h2>
-              
+
               <div className="stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '20px', marginBottom: '30px' }}>
                 <div className="stat-card" style={{ background: 'white', padding: '25px', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', borderTop: '4px solid #4CAF50', animationDelay: '0.3s' }}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -366,7 +371,7 @@ function Reports() {
               <h2 style={{ margin: '0 0 25px 0', fontSize: '24px', color: '#333', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <span style={{ color: '#f73194' }}>📦</span> Análisis de Productos
               </h2>
-              
+
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginTop: '20px' }}>
                 <div className="chart-container" style={{ background: 'white', padding: '25px', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', animationDelay: '0.3s' }}>
                   <h3 style={{ margin: '0 0 15px 0', fontSize: '18px', color: '#333', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -445,7 +450,7 @@ function Reports() {
               <h2 style={{ margin: '0 0 25px 0', fontSize: '24px', color: '#333', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <span style={{ color: '#f73194' }}>💰</span> Análisis de Ganancias
               </h2>
-              
+
               <div className="stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '20px', marginBottom: '30px' }}>
                 <div className="stat-card" style={{ background: 'white', padding: '25px', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', borderTop: '4px solid #4CAF50', animationDelay: '0.3s' }}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -462,7 +467,7 @@ function Reports() {
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                     <div>
                       <h3 style={{ margin: '0 0 8px 0', fontSize: '14px', color: '#999', fontWeight: '500' }}>Margen Promedio</h3>
-                      <p className="amount" style={{ margin: '0', fontSize: '28px', fontWeight: 'bold', color: '#333' }}>{parseFloat(profitData.general?.avg_profit_margin || 0).toFixed(1)}%</p>
+                      <p className="amount" style={{ margin: '0', fontSize: '28px', fontWeight: 'bold', color: '#333' }}>{parseFloat(profitData.general?.avg_profit_margin || 0).toFixed(2)}%</p>
                     </div>
                     <div style={{ width: '60px', height: '60px', borderRadius: '12px', background: 'linear-gradient(135deg, #2196F3 0%, #1976D2 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '28px', color: 'white' }}>
                       <FaPercentage />
@@ -473,7 +478,7 @@ function Reports() {
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                     <div>
                       <h3 style={{ margin: '0 0 8px 0', fontSize: '14px', color: '#999', fontWeight: '500' }}>ROI</h3>
-                      <p className="amount" style={{ margin: '0', fontSize: '28px', fontWeight: 'bold', color: '#333' }}>{parseFloat(profitData.general?.roi || 0).toFixed(1)}%</p>
+                      <p className="amount" style={{ margin: '0', fontSize: '28px', fontWeight: 'bold', color: '#333' }}>{parseFloat(profitData.general?.roi || 0).toFixed(2)}%</p>
                     </div>
                     <div style={{ width: '60px', height: '60px', borderRadius: '12px', background: 'linear-gradient(135deg, #FF9800 0%, #F57C00 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '28px', color: 'white' }}>
                       <FaChartLine />
@@ -499,7 +504,7 @@ function Reports() {
                           <tr key={index} style={{ borderBottom: '1px solid #f0f0f0' }}>
                             <td style={{ padding: '12px', fontSize: '14px', color: '#333' }}>{product.product_name}</td>
                             <td style={{ padding: '12px', fontSize: '14px', color: '#4CAF50', fontWeight: '600' }}>{formatCurrency(product.total_profit)}</td>
-                            <td style={{ padding: '12px', fontSize: '14px', color: '#2196F3', fontWeight: '600' }}>{parseFloat(product.profit_margin).toFixed(1)}%</td>
+                            <td style={{ padding: '12px', fontSize: '14px', color: '#2196F3', fontWeight: '600' }}>{parseFloat(product.profit_margin).toFixed(2)}%</td>
                           </tr>
                         ))}
                       </tbody>
@@ -528,7 +533,7 @@ function Reports() {
               <h2 style={{ margin: '0 0 25px 0', fontSize: '24px', color: '#333', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <span style={{ color: '#f73194' }}>🏷️</span> Rotación de Categorías
               </h2>
-              
+
               {categoriesData.length > 0 ? (
                 <div className="chart-container" style={{ background: 'white', padding: '25px', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', animationDelay: '0.3s' }}>
                   <table className="report-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
@@ -548,15 +553,15 @@ function Reports() {
                           <td style={{ padding: '12px', fontSize: '14px', color: '#4CAF50', fontWeight: '600' }}>{formatCurrency(cat.total_sold)}</td>
                           <td style={{ padding: '12px', fontSize: '14px', color: '#333' }}>{cat.current_stock}</td>
                           <td style={{ padding: '12px' }}>
-                            <span style={{ 
-                              padding: '4px 12px', 
-                              borderRadius: '12px', 
-                              fontSize: '13px', 
+                            <span style={{
+                              padding: '4px 12px',
+                              borderRadius: '12px',
+                              fontSize: '13px',
                               fontWeight: '600',
                               background: cat.rotation_rate > 5 ? '#E8F5E9' : cat.rotation_rate > 2 ? '#FFF3E0' : '#FFEBEE',
                               color: cat.rotation_rate > 5 ? '#4CAF50' : cat.rotation_rate > 2 ? '#FF9800' : '#F44336'
                             }}>
-                              {parseFloat(cat.rotation_rate).toFixed(1)}x
+                              {parseFloat(cat.rotation_rate).toFixed(2)}x
                             </span>
                           </td>
                           <td style={{ padding: '12px', fontSize: '14px', color: '#999' }}>{cat.days_to_sell || 'N/A'} días</td>

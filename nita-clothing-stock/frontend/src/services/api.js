@@ -1,11 +1,15 @@
 import axios from 'axios';
 
 // Configuración base de Axios
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
-export const IMAGE_BASE_URL = process.env.REACT_APP_IMAGE_URL || 'http://localhost:5000';
+// Configuración base de Axios
+const API_BASE_URL = process.env.REACT_APP_API_URL;
+if (!API_BASE_URL) {
+  console.error('⚠️  REACT_APP_API_URL no está configurada en las variables de entorno (.env)');
+}
+export const IMAGE_BASE_URL = process.env.REACT_APP_IMAGE_URL || API_BASE_URL?.replace('/api', '') || 'http://localhost:5000';
 
 const api = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: API_BASE_URL || 'http://localhost:5000/api',
   headers: {
     'Content-Type': 'application/json',
   },
@@ -29,12 +33,24 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    console.error('Error en API:', error);
+    // Extraer información detallada del error
+    const detailedError = {
+      message: error.response?.data?.message || error.message || 'Error desconocido',
+      status: error.response?.status,
+      data: error.response?.data,
+      originalError: error
+    };
+
+    console.error('Error en API:', detailedError);
+
     if (error.response?.status === 401) {
       localStorage.removeItem('token');
+      localStorage.removeItem('user');
       window.location.href = '/login';
     }
-    return Promise.reject(error);
+
+    // Propagamos el error detallado para que los servicios puedan usarlo
+    return Promise.reject(detailedError);
   }
 );
 
@@ -112,13 +128,13 @@ export const productService = {
       throw new Error(error.response?.data?.message || 'Error obteniendo último SKU');
     }
   },
-  // Obtener todos los productos
-  getAll: async () => {
+  // Obtener todos los productos con paginación y filtros
+  getAll: async (params = {}) => {
     try {
-      const response = await api.get('/productos');
+      const response = await api.get('/productos', { params });
       return response.data;
     } catch (error) {
-      throw new Error(error.response?.data?.message || 'Error obteniendo productos');
+      throw new Error(error.message || 'Error obteniendo productos');
     }
   },
 

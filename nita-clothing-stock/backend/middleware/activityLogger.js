@@ -7,16 +7,23 @@ const logActivity = (action, tableName) => {
     const originalJson = res.json.bind(res);
 
     // Override res.json para capturar la respuesta
-    res.json = function(data) {
+    res.json = function (data) {
       // Solo registrar si fue exitoso
       if (res.statusCode >= 200 && res.statusCode < 300) {
+        // Función para truncar valores largos (ej: imágenes en base64)
+        const truncate = (val) => {
+          if (!val) return null;
+          const str = typeof val === 'string' ? val : JSON.stringify(val);
+          return str.length > 1000 ? str.substring(0, 1000) + '... (truncado)' : str;
+        };
+
         const logData = {
           user_id: req.user?.id || null,
           action: action || req.method,
           table_name: tableName || req.baseUrl.split('/').pop(),
           record_id: data?.id || req.params?.id || null,
-          old_value: req.body?.old_value || null,
-          new_value: req.body || data || null,
+          old_value: truncate(req.body?.old_value),
+          new_value: truncate(req.body || data),
           ip_address: req.ip || req.connection.remoteAddress
         };
 

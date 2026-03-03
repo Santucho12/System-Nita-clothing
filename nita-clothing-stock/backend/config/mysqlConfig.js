@@ -1,9 +1,9 @@
 module.exports = {
-  host: '127.0.0.1',
-  user: 'root',
-  password: 'purre1010',
-  database: 'nita',
-  port: 3306,
+  host: process.env.DB_HOST || '127.0.0.1',
+  user: process.env.DB_USER || 'root',
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME || 'nita',
+  port: parseInt(process.env.DB_PORT) || 3306,
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0

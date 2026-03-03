@@ -43,21 +43,44 @@ class ExchangeReturn {
       throw new Error('Tipo debe ser "exchange" o "return"');
     }
 
+    let connection;
     try {
+      connection = await database.beginTransaction();
+
       // Crear registro principal
       const result = await database.run(
         `INSERT INTO exchanges_returns (
           type, original_sale_id, customer_name, customer_email, customer_phone,
           status, refund_amount, refund_method, notes, processed_by, created_at
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())`,
-        [type, original_sale_id, customer_name, customer_email, customer_phone, 
-         status, refund_amount, refund_method, notes, processed_by]
+        [type, original_sale_id, customer_name, customer_email, customer_phone,
+          status, refund_amount, refund_method, notes, processed_by],
+        connection
       );
 
       const exchangeReturnId = result.insertId;
 
-      // Insertar items
+      // Obtener la venta original para validar cantidades
+      const Sale = require('./Sale');
+      const originalSale = await Sale.getById(original_sale_id, connection);
+      if (!originalSale) {
+        throw new Error('Venta original no encontrada');
+      }
+
+      // Insertar items y validar contra la venta original
       for (const item of items) {
+        // Buscar el item correspondiente en la venta original
+        const originalItem = originalSale.items.find(si => si.product_id === item.product_id);
+        if (!originalItem) {
+          throw new Error(`El producto con ID ${item.product_id} no pertenece a la venta original`);
+        }
+
+        // Validar que la cantidad a devolver no supere la comprada
+        // TODO: En un sistema más avanzado, deberíamos restar las devoluciones previas si las hubo
+        if (item.quantity > originalItem.quantity) {
+          throw new Error(`Cantidad inválida para el producto ${originalItem.product_name}. Comprado: ${originalItem.quantity}, Intentando devolver: ${item.quantity}`);
+        }
+
         await database.run(
           `INSERT INTO exchange_return_items (
             exchange_return_id, product_id, quantity, reason, reason_notes,
@@ -73,36 +96,20 @@ class ExchangeReturn {
             item.new_quantity || 0,
             item.unit_price || 0,
             item.subtotal || 0
-          ]
+          ],
+          connection
         );
 
-        // Si está aprobado, restaurar/ajustar stock automáticamente
+        // Si se crea como 'approved' o 'completed', ajustar stock una sola vez
         if (status === 'approved' || status === 'completed') {
-          // Restaurar stock del producto devuelto
-          const product = await Product.findById(item.product_id);
-          if (product) {
-            await Product.update(item.product_id, {
-              stock: product.stock + item.quantity
-            });
-          }
-
-          // Si es cambio, descontar stock del nuevo producto
-          if (type === 'exchange' && item.new_product_id) {
-            const newProduct = await Product.findById(item.new_product_id);
-            if (newProduct) {
-              if (newProduct.stock < item.new_quantity) {
-                throw new Error(`Stock insuficiente para producto ${newProduct.name}`);
-              }
-              await Product.update(item.new_product_id, {
-                stock: newProduct.stock - item.new_quantity
-              });
-            }
-          }
+          await this._adjustStock(item, type, connection);
         }
       }
 
+      await database.commit(connection);
       return await this.getById(exchangeReturnId);
     } catch (error) {
+      if (connection) await database.rollback(connection);
       throw error;
     }
   }
@@ -218,39 +225,24 @@ class ExchangeReturn {
       throw new Error('Cambio/devolución no encontrado');
     }
 
+    let connection;
     try {
+      connection = await database.beginTransaction();
+
       // Actualizar estado
       await database.run(
         `UPDATE exchanges_returns 
          SET status = ?, processed_by = ?, processed_date = NOW(), 
              approval_notes = ?
          WHERE id = ?`,
-        [status, processed_by, approval_notes, id]
+        [status, processed_by, approval_notes, id],
+        connection
       );
 
-      // Si se aprueba, ajustar stock
+      // Si se aprueba, ajustar stock (solo si estaba pendiente)
       if (status === 'approved' && exchangeReturn.status === 'pending') {
         for (const item of exchangeReturn.items) {
-          // Restaurar stock del producto devuelto
-          const product = await Product.findById(item.product_id);
-          if (product) {
-            await Product.update(item.product_id, {
-              stock: product.stock + item.quantity
-            });
-          }
-
-          // Si es cambio, descontar stock del nuevo producto
-          if (exchangeReturn.type === 'exchange' && item.new_product_id) {
-            const newProduct = await Product.findById(item.new_product_id);
-            if (newProduct) {
-              if (newProduct.stock < item.new_quantity) {
-                throw new Error(`Stock insuficiente para producto ${newProduct.name}`);
-              }
-              await Product.update(item.new_product_id, {
-                stock: newProduct.stock - item.new_quantity
-              });
-            }
-          }
+          await this._adjustStock(item, exchangeReturn.type, connection);
         }
       }
 
@@ -258,27 +250,29 @@ class ExchangeReturn {
       if (status === 'rejected' && exchangeReturn.status === 'approved') {
         for (const item of exchangeReturn.items) {
           // Revertir stock del producto devuelto
-          const product = await Product.findById(item.product_id);
+          const product = await Product.getById(item.product_id, connection);
           if (product) {
             await Product.update(item.product_id, {
               stock: product.stock - item.quantity
-            });
+            }, connection);
           }
 
           // Si es cambio, restaurar stock del nuevo producto
           if (exchangeReturn.type === 'exchange' && item.new_product_id) {
-            const newProduct = await Product.findById(item.new_product_id);
+            const newProduct = await Product.getById(item.new_product_id, connection);
             if (newProduct) {
               await Product.update(item.new_product_id, {
                 stock: newProduct.stock + item.new_quantity
-              });
+              }, connection);
             }
           }
         }
       }
 
+      await database.commit(connection);
       return await this.getById(id);
     } catch (error) {
+      if (connection) await database.rollback(connection);
       throw error;
     }
   }
@@ -403,6 +397,35 @@ class ExchangeReturn {
        LIMIT ?`,
       [limit]
     );
+  }
+
+  /**
+   * Helper interno para ajustar stock de forma centralizada
+   * @private
+   */
+  static async _adjustStock(item, type, connection) {
+    // Restaurar stock del producto devuelto
+    const product = await Product.getById(item.product_id, connection);
+    if (product) {
+      await Product.update(item.product_id, {
+        stock: product.stock + item.quantity,
+        estado: 'disponible'
+      }, connection);
+    }
+
+    // Si es cambio, descontar stock del nuevo producto
+    if (type === 'exchange' && item.new_product_id) {
+      const newProduct = await Product.getById(item.new_product_id, connection);
+      if (newProduct) {
+        if (newProduct.stock < item.new_quantity) {
+          throw new Error(`Stock insuficiente para producto ${newProduct.nombre}`);
+        }
+        await Product.update(item.new_product_id, {
+          stock: newProduct.stock - item.new_quantity,
+          estado: (newProduct.stock - item.new_quantity) === 0 ? 'sin_stock' : 'disponible'
+        }, connection);
+      }
+    }
   }
 }
 

@@ -1,17 +1,20 @@
 const PurchaseOrder = require('../models/PurchaseOrder');
 
 const purchaseOrderController = {
-  async create(req, res) {
+  async create(req, res, next) {
     try {
       const order = await PurchaseOrder.create({ ...req.body, created_by: req.user.id });
-      res.status(201).json({ message: 'Orden de compra creada exitosamente', data: order });
+      res.status(201).json({
+        success: true,
+        message: 'Orden de compra creada exitosamente',
+        data: order
+      });
     } catch (error) {
-      console.error('Error creando orden:', error);
-      res.status(500).json({ error: error.message });
+      next(error);
     }
   },
 
-  async getAll(req, res) {
+  async getAll(req, res, next) {
     try {
       const filters = {
         supplier_id: req.query.supplier_id,
@@ -24,44 +27,54 @@ const purchaseOrderController = {
       };
 
       const orders = await PurchaseOrder.getAll(filters);
-      res.json({ data: orders, count: orders.length });
+      res.json({
+        success: true,
+        data: orders,
+        count: orders.length
+      });
     } catch (error) {
-      console.error('Error obteniendo órdenes:', error);
-      res.status(500).json({ error: error.message });
+      next(error);
     }
   },
 
-  async getById(req, res) {
+  async getById(req, res, next) {
     try {
       const order = await PurchaseOrder.getById(req.params.id);
       if (!order) {
-        return res.status(404).json({ error: 'Orden no encontrada' });
+        const error = new Error('Orden de compra no encontrada');
+        error.status = 404;
+        throw error;
       }
-      res.json({ data: order });
+      res.json({
+        success: true,
+        data: order
+      });
     } catch (error) {
-      console.error('Error obteniendo orden:', error);
-      res.status(500).json({ error: error.message });
+      next(error);
     }
   },
 
-  async updateStatus(req, res) {
+  async updateStatus(req, res, next) {
     try {
       const { status, received_date } = req.body;
       const order = await PurchaseOrder.updateStatus(req.params.id, status, received_date);
-      res.json({ message: 'Estado actualizado exitosamente', data: order });
+      res.json({
+        success: true,
+        message: 'Estado actualizado exitosamente',
+        data: order
+      });
     } catch (error) {
-      console.error('Error actualizando estado:', error);
-      res.status(500).json({ error: error.message });
+      next(error);
     }
   },
 
-  async receiveOrder(req, res) {
+  async receiveOrder(req, res, next) {
     try {
       const orderId = req.params.id;
       const userId = req.user?.id || null;
 
       const result = await PurchaseOrder.receiveOrder(orderId, userId);
-      
+
       res.json({
         success: true,
         message: result.message,
@@ -69,66 +82,74 @@ const purchaseOrderController = {
         stock_updates: result.stock_updates
       });
     } catch (error) {
-      console.error('Error recibiendo orden:', error);
-      res.status(400).json({ 
-        success: false,
-        error: error.message 
-      });
+      next(error);
     }
   },
 
-  async updatePaymentStatus(req, res) {
+  async updatePaymentStatus(req, res, next) {
     try {
       const { payment_status, payment_date } = req.body;
       const order = await PurchaseOrder.updatePaymentStatus(req.params.id, payment_status, payment_date);
-      res.json({ message: 'Estado de pago actualizado', data: order });
+      res.json({
+        success: true,
+        message: 'Estado de pago actualizado',
+        data: order
+      });
     } catch (error) {
-      console.error('Error actualizando pago:', error);
-      res.status(500).json({ error: error.message });
+      next(error);
     }
   },
 
-  async update(req, res) {
+  async update(req, res, next) {
     try {
       const order = await PurchaseOrder.update(req.params.id, req.body);
-      res.json({ message: 'Orden actualizada exitosamente', data: order });
+      res.json({
+        success: true,
+        message: 'Orden actualizada exitosamente',
+        data: order
+      });
     } catch (error) {
-      console.error('Error actualizando orden:', error);
-      res.status(500).json({ error: error.message });
+      next(error);
     }
   },
 
-  async delete(req, res) {
+  async delete(req, res, next) {
     try {
       await PurchaseOrder.delete(req.params.id);
-      res.json({ message: 'Orden eliminada exitosamente' });
+      res.json({
+        success: true,
+        message: 'Orden eliminada exitosamente'
+      });
     } catch (error) {
-      console.error('Error eliminando orden:', error);
-      res.status(500).json({ error: error.message });
+      next(error);
     }
   },
 
-  async getStats(req, res) {
+  async getStats(req, res, next) {
     try {
       const filters = {
         start_date: req.query.start_date,
         end_date: req.query.end_date
       };
       const stats = await PurchaseOrder.getStats(filters);
-      res.json({ data: stats });
+      res.json({
+        success: true,
+        data: stats
+      });
     } catch (error) {
-      console.error('Error obteniendo estadísticas:', error);
-      res.status(500).json({ error: error.message });
+      next(error);
     }
   },
 
-  async getPendingPayments(req, res) {
+  async getPendingPayments(req, res, next) {
     try {
       const orders = await PurchaseOrder.getPendingPayments();
-      res.json({ data: orders });
+      res.json({
+        success: true,
+        data: orders
+      });
     } catch (error) {
-      console.error('Error obteniendo pagos pendientes:', error);
-      res.status(500).json({ error: error.message });
+      next(error);
     }
   }
 };

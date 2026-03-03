@@ -4,9 +4,11 @@ class Supplier {
   /**
    * Crear nuevo proveedor
    */
-  static async create(data) {
+  static async create(data, connection = null) {
     const {
       name,
+      contact_name,
+      email,
       phone,
       address,
       city,
@@ -14,54 +16,51 @@ class Supplier {
       postal_code,
       country,
       website,
-      min_purchase,
+      tax_id,
+      payment_terms,
       notes
     } = data;
 
     // Validar campos obligatorios
-    if (!name) {
-      throw new Error('El nombre del proveedor es obligatorio');
-    }
+    if (!name) throw new Error('El nombre del proveedor es obligatorio');
 
-    try {
-      const result = await database.run(
-        `INSERT INTO suppliers (
-          name, phone, address, city, state, postal_code, country, website, min_purchase, notes, status, created_at, updated_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'active', NOW(), NOW())`,
-        [
-          name,
-          phone || null,
-          address || null,
-          city || null,
-          state || null,
-          postal_code || null,
-          country || null,
-          website || null,
-          min_purchase || null,
-          notes || null
-        ]
-      );
+    const sql = `INSERT INTO suppliers (
+          name, contact_name, email, phone, address, city, state, 
+          postal_code, country, website, tax_id, payment_terms, notes, 
+          status, created_at, updated_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'active', NOW(), NOW())`;
 
-      return await this.getById(result.insertId);
-    } catch (error) {
-      if (error.code === 'ER_DUP_ENTRY') {
-        throw new Error('Ya existe un proveedor con ese email o tax_id');
-      }
-      throw error;
-    }
+    const params = [
+      name,
+      contact_name || null,
+      email || null,
+      phone || null,
+      address || null,
+      city || null,
+      state || null,
+      postal_code || null,
+      country || null,
+      website || null,
+      tax_id || null,
+      payment_terms || 'net_30',
+      notes || null
+    ];
+
+    const result = await database.run(sql, params, connection);
+    return await this.getById(result.insertId, connection);
   }
 
   /**
    * Obtener todos los proveedores con filtros
    */
-  static async getAll(filters = {}) {
+  static async getAll(filters = {}, connection = null) {
     let query = `
       SELECT s.*,
              COUNT(DISTINCT p.id) as products_count,
              COUNT(DISTINCT po.id) as orders_count,
              SUM(po.total_amount) as total_purchased
       FROM suppliers s
-      LEFT JOIN productos p ON s.id = p.supplier_id
+      LEFT JOIN productos p ON (s.id = p.supplier_id OR CAST(p.proveedor AS UNSIGNED) = s.id) AND p.deleted_at IS NULL
       LEFT JOIN purchase_orders po ON s.id = po.supplier_id
       WHERE 1=1
     `;
@@ -101,24 +100,25 @@ class Supplier {
       }
     }
 
-    return await database.all(query, params);
+    return await database.all(query, params, connection);
   }
 
   /**
    * Obtener proveedor por ID
    */
-  static async getById(id) {
+  static async getById(id, connection = null) {
     const supplier = await database.get(
       `SELECT s.*,
               COUNT(DISTINCT p.id) as products_count,
               COUNT(DISTINCT po.id) as orders_count,
               SUM(po.total_amount) as total_purchased
        FROM suppliers s
-       LEFT JOIN productos p ON s.id = p.supplier_id
+       LEFT JOIN productos p ON (s.id = p.supplier_id OR CAST(p.proveedor AS UNSIGNED) = s.id) AND p.deleted_at IS NULL
        LEFT JOIN purchase_orders po ON s.id = po.supplier_id
        WHERE s.id = ?
        GROUP BY s.id`,
-      [id]
+      [id],
+      connection
     );
 
     return supplier || null;
@@ -127,11 +127,11 @@ class Supplier {
   /**
    * Actualizar proveedor
    */
-  static async update(id, data) {
+  static async update(id, data, connection = null) {
     const allowedFields = [
-      'name', 'phone', 'address',
+      'name', 'contact_name', 'email', 'phone', 'address',
       'city', 'state', 'postal_code', 'country', 'website',
-      'min_purchase', 'notes', 'status'
+      'tax_id', 'payment_terms', 'notes', 'status'
     ];
 
     const updates = [];
@@ -144,36 +144,29 @@ class Supplier {
       }
     }
 
-    if (updates.length === 0) {
-      throw new Error('No hay campos para actualizar');
-    }
+    if (updates.length === 0) throw new Error('No hay campos para actualizar');
 
     updates.push('updated_at = NOW()');
     params.push(id);
 
-    try {
-      await database.run(
-        `UPDATE suppliers SET ${updates.join(', ')} WHERE id = ?`,
-        params
-      );
+    await database.run(
+      `UPDATE suppliers SET ${updates.join(', ')} WHERE id = ?`,
+      params,
+      connection
+    );
 
-      return await this.getById(id);
-    } catch (error) {
-      if (error.code === 'ER_DUP_ENTRY') {
-        throw new Error('Ya existe un proveedor con ese email o tax_id');
-      }
-      throw error;
-    }
+    return await this.getById(id, connection);
   }
 
   /**
    * Eliminar proveedor (soft delete)
    */
-  static async delete(id) {
+  static async delete(id, connection = null) {
     // Verificar si tiene productos asociados
     const products = await database.get(
-      'SELECT COUNT(*) as count FROM productos WHERE supplier_id = ?',
-      [id]
+      'SELECT COUNT(*) as count FROM productos WHERE (supplier_id = ? OR CAST(proveedor AS UNSIGNED) = ?) AND deleted_at IS NULL',
+      [id, id],
+      connection
     );
 
     if (products.count > 0) {
@@ -183,7 +176,8 @@ class Supplier {
     // Soft delete
     await database.run(
       'UPDATE suppliers SET status = ?, updated_at = NOW() WHERE id = ?',
-      ['inactive', id]
+      ['inactive', id],
+      connection
     );
 
     return true;
@@ -192,7 +186,7 @@ class Supplier {
   /**
    * Obtener órdenes de compra de un proveedor
    */
-  static async getPurchaseOrders(supplierId, filters = {}) {
+  static async getPurchaseOrders(supplierId, filters = {}, connection = null) {
     let query = `
       SELECT po.*,
              COUNT(poi.id) as items_count
@@ -219,26 +213,24 @@ class Supplier {
 
     query += ' GROUP BY po.id ORDER BY po.order_date DESC';
 
-    if (filters.limit) {
-      query += ` LIMIT ${parseInt(filters.limit)}`;
-    }
+    if (filters.limit) query += ` LIMIT ${parseInt(filters.limit)}`;
 
-    return await database.all(query, params);
+    return await database.all(query, params, connection);
   }
 
   /**
    * Obtener productos de un proveedor
    */
-  static async getProducts(supplierId, filters = {}) {
+  static async getProducts(supplierId, filters = {}, connection = null) {
     let query = `
       SELECT p.*
       FROM productos p
-      WHERE p.supplier_id = ?
+      WHERE (p.supplier_id = ? OR CAST(p.proveedor AS UNSIGNED) = ?) AND p.deleted_at IS NULL
     `;
-    const params = [supplierId];
+    const params = [supplierId, supplierId];
 
     if (filters.status) {
-      query += ' AND p.status = ?';
+      query += ' AND p.estado = ?';
       params.push(filters.status);
     }
 
@@ -249,17 +241,15 @@ class Supplier {
 
     query += ' ORDER BY p.nombre ASC';
 
-    if (filters.limit) {
-      query += ` LIMIT ${parseInt(filters.limit)}`;
-    }
+    if (filters.limit) query += ` LIMIT ${parseInt(filters.limit)}`;
 
-    return await database.all(query, params);
+    return await database.all(query, params, connection);
   }
 
   /**
    * Obtener estadísticas de un proveedor
    */
-  static async getStats(supplierId) {
+  static async getStats(supplierId, connection = null) {
     const stats = await database.get(
       `SELECT 
         COUNT(DISTINCT po.id) as total_orders,
@@ -269,11 +259,12 @@ class Supplier {
         SUM(CASE WHEN po.status = 'received' THEN 1 ELSE 0 END) as received_orders,
         SUM(CASE WHEN po.payment_status = 'paid' THEN po.total_amount ELSE 0 END) as total_paid,
         SUM(CASE WHEN po.payment_status = 'pending' THEN po.total_amount ELSE 0 END) as total_pending_payment,
-        (SELECT COUNT(*) FROM productos WHERE supplier_id = ?) as products_count,
+        (SELECT COUNT(*) FROM productos WHERE (supplier_id = ? OR CAST(proveedor AS UNSIGNED) = ?) AND deleted_at IS NULL) as products_count,
         (SELECT MAX(order_date) FROM purchase_orders WHERE supplier_id = ?) as last_order_date
        FROM purchase_orders po
        WHERE po.supplier_id = ?`,
-      [supplierId, supplierId, supplierId]
+      [supplierId, supplierId, supplierId, supplierId],
+      connection
     );
 
     return stats || {
@@ -292,7 +283,7 @@ class Supplier {
   /**
    * Obtener mejores proveedores (por volumen de compra)
    */
-  static async getTopSuppliers(limit = 10) {
+  static async getTopSuppliers(limit = 10, connection = null) {
     return await database.all(
       `SELECT s.*, 
               COUNT(DISTINCT po.id) as orders_count,

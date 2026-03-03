@@ -183,11 +183,11 @@ function AdvancedReports() {
         <div className="kpi-trend">
           {trend > 0 ? (
             <span className="trend-up" style={{ color: '#4CAF50', fontSize: '14px', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <FaArrowUp /> {trend}%
+              <FaArrowUp /> {trend.toFixed(2)}%
             </span>
           ) : trend < 0 ? (
             <span className="trend-down" style={{ color: '#F44336', fontSize: '14px', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <FaArrowDown /> {Math.abs(trend)}%
+              <FaArrowDown /> {Math.abs(trend).toFixed(2)}%
             </span>
           ) : (
             <span className="trend-neutral" style={{ color: '#999', fontSize: '14px', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -379,7 +379,7 @@ function AdvancedReports() {
               <KPICard
                 title="Ganancia Neta"
                 value={formatCurrency(kpis.netProfit || 0)}
-                subtitle={`Margen: ${formatNumber(kpis.profitMargin || 0, 1)}%`}
+                subtitle={`Margen: ${formatNumber(kpis.profitMargin || 0, 2)}%`}
                 icon={FaChartLine}
                 color="#2196F3"
                 trend={kpis.profitGrowth || 0}
@@ -418,7 +418,7 @@ function AdvancedReports() {
             <div style={{ animationDelay: '0.8s' }}>
               <KPICard
                 title="ROI"
-                value={`${(kpis.roi || 0).toFixed(1)}%`}
+                value={`${(kpis.roi || 0).toFixed(2)}%`}
                 subtitle="Retorno de inversión"
                 icon={FaPercent}
                 color="#4CAF50"
@@ -487,7 +487,7 @@ function AdvancedReports() {
                     cx="50%"
                     cy="50%"
                     outerRadius={100}
-                    label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                    label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(2)}%`}
                   >
                     {categoryPerformance.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
@@ -767,7 +767,7 @@ function AdvancedReports() {
                     cy="50%"
                     outerRadius={100}
                     label={({ category_name, percent }) =>
-                      `${category_name}: ${(percent * 100).toFixed(0)}%`
+                      `${category_name}: ${(percent * 100).toFixed(2)}%`
                     }
                   >
                     {categoryPerformance.map((entry, index) => (
@@ -788,7 +788,7 @@ function AdvancedReports() {
                   <div key={index} className="roi-item">
                     <div className="roi-info">
                       <span className="cat-name">{cat.category_name}</span>
-                      <span className="roi-value">{((cat.total_profit / cat.total_cost) * 100).toFixed(1)}%</span>
+                      <span className="roi-value">{((cat.total_profit / cat.total_cost) * 100).toFixed(2)}%</span>
                     </div>
                     <div className="roi-bar">
                       <div
