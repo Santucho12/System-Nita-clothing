@@ -5,7 +5,7 @@ import {
   FaTshirt, FaPlus, FaEdit, FaTrash, FaCopy, FaSearch,
   FaFileExcel, FaTimes, FaBox, FaDollarSign, FaBarcode, FaTag,
   FaPalette, FaRulerVertical, FaCalendarAlt, FaCheckCircle, FaExclamationTriangle,
-  FaTimesCircle, FaEye, FaSave, FaBoxes, FaUser
+  FaTimesCircle, FaEye, FaSave, FaBoxes, FaUser, FaCamera
 } from 'react-icons/fa';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
@@ -498,6 +498,63 @@ const Products = () => {
             box-shadow: 0 0 0 3px rgba(247, 49, 148, 0.1) !important;
             outline: none !important;
           }
+
+          /* Premium Form Styles */
+          .form-group-premium {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+          }
+
+          .label-premium {
+            font-size: 13px;
+            font-weight: 700;
+            color: #64748b;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+          }
+
+          .label-premium svg {
+            color: #f73194;
+            font-size: 14px;
+          }
+
+          .input-premium {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #f1f5f9;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 500;
+            color: #1e293b;
+            transition: all 0.2s ease;
+            background: #f8fafc;
+          }
+
+          .input-premium:focus {
+            outline: none;
+            border-color: #f73194;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(247, 49, 148, 0.1);
+          }
+
+          .input-premium::placeholder {
+            color: #94a3b8;
+          }
+
+          @keyframes modalSlideUp {
+            from {
+              opacity: 0;
+              transform: translateY(20px) scale(0.98);
+            }
+            to {
+              opacity: 1;
+              transform: translateY(0) scale(1);
+            }
+          }
         `}
       </style>
 
@@ -643,104 +700,276 @@ const Products = () => {
         </div>
       </div>
 
-      {/* Modal Formulario */}
+      {/* Modal Formulario Premium */}
       {showForm && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '20px' }} onClick={resetForm}>
-          <div style={{ background: 'white', padding: '30px', borderRadius: '12px', maxWidth: '800px', width: '100%', maxHeight: '90vh', overflow: 'auto' }} onClick={e => e.stopPropagation()}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px', paddingBottom: '15px', borderBottom: '2px solid #f0f0f0' }}>
-              <h3 style={{ margin: 0, fontSize: '24px', fontWeight: '600', color: '#333', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <FaTshirt style={{ color: '#f73194' }} />
-                {editingProduct ? 'Editar Producto' : 'Nuevo Producto'}
-              </h3>
-              <button onClick={resetForm} style={{ background: 'none', border: 'none', fontSize: '28px', cursor: 'pointer', color: '#999', transition: 'color 0.3s' }} onMouseOver={(e) => e.currentTarget.style.color = '#f73194'} onMouseOut={(e) => e.currentTarget.style.color = '#999'}>×</button>
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(15, 23, 42, 0.65)',
+            backdropFilter: 'blur(8px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 2000,
+            padding: '20px'
+          }}
+          onClick={resetForm}
+        >
+          <div
+            style={{
+              background: 'white',
+              padding: '0',
+              borderRadius: '24px',
+              maxWidth: '1000px',
+              width: '100%',
+              maxHeight: '90vh',
+              overflow: 'hidden',
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+              display: 'flex',
+              flexDirection: 'column',
+              animation: 'modalSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1)'
+            }}
+            onClick={e => e.stopPropagation()}
+          >
+            {/* Header del Modal */}
+            <div style={{
+              padding: '24px 32px',
+              borderBottom: '1px solid #f1f5f9',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              background: '#fff'
+            }}>
+              <div>
+                <h3 style={{ margin: 0, fontSize: '22px', fontWeight: '800', color: '#1e293b', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div style={{ background: '#fff0f7', color: '#f73194', padding: '10px', borderRadius: '12px', display: 'flex' }}>
+                    {editingProduct ? <FaEdit /> : <FaPlus />}
+                  </div>
+                  {editingProduct ? 'Editar Producto' : 'Crear Nuevo Producto'}
+                </h3>
+                <p style={{ margin: '4px 0 0 46px', fontSize: '13px', color: '#64748b', fontWeight: '500' }}>
+                  {editingProduct ? 'Modifica los detalles del producto existente' : 'Completa los datos para añadir un producto al stock'}
+                </p>
+              </div>
+              <button
+                onClick={resetForm}
+                style={{
+                  background: '#f1f5f9',
+                  border: 'none',
+                  width: '36px',
+                  height: '36px',
+                  borderRadius: '50%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  color: '#64748b',
+                  transition: 'all 0.2s'
+                }}
+                onMouseOver={(e) => { e.currentTarget.style.background = '#ffeef5'; e.currentTarget.style.color = '#f73194'; }}
+                onMouseOut={(e) => { e.currentTarget.style.background = '#f1f5f9'; e.currentTarget.style.color = '#64748b'; }}
+              >
+                <FaTimes />
+              </button>
             </div>
 
-            <form onSubmit={handleSubmit}>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '15px', marginBottom: '15px' }}>
-                {/* Fila 1 */}
-                <div>
-                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', fontSize: '14px', color: '#555' }}><FaTshirt style={{ marginRight: '6px', color: '#f73194' }} /> Nombre *</label>
-                  <input type="text" name="name" value={formData.name} onChange={handleInputChange} placeholder="Ej: Remera Básica" required className="form-input" style={{ width: '100%', padding: '10px 14px', border: '2px solid #e0e0e0', borderRadius: '8px', fontSize: '14px' }} />
-                </div>
-                <div>
-                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', fontSize: '14px', color: '#555' }}><FaTag style={{ marginRight: '6px', color: '#f73194' }} /> Categoría *</label>
-                  <select name="category_id" value={formData.category_id} onChange={handleInputChange} required className="form-input" style={{ width: '100%', padding: '10px 14px', border: '2px solid #e0e0e0', borderRadius: '8px', fontSize: '14px', cursor: 'pointer' }}>
-                    <option value="">Selecciona</option>
-                    {categories.map(category => (<option key={category.id} value={category.id}>{category.name}</option>))}
-                  </select>
-                </div>
-                <div>
-                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', fontSize: '14px', color: '#555' }}><FaRulerVertical style={{ marginRight: '6px', color: '#f73194' }} /> Talle *</label>
-                  <select name="size" value={formData.size} onChange={handleInputChange} required className="form-input" style={{ width: '100%', padding: '10px 14px', border: '2px solid #e0e0e0', borderRadius: '8px', fontSize: '14px', cursor: 'pointer' }}>
-                    <option value="">Selecciona</option>
-                    <option value="Talle único">Talle único</option>
-                    <option value="S">S</option>
-                    <option value="M">M</option>
-                    <option value="L">L</option>
-                    <option value="36">36</option>
-                    <option value="38">38</option>
-                    <option value="40">40</option>
-                    <option value="42">42</option>
-                  </select>
-                </div>
-                {/* Fila 2 */}
-                <div>
-                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', fontSize: '14px', color: '#555' }}><FaPalette style={{ marginRight: '6px', color: '#f73194' }} /> Color *</label>
-                  <input type="text" name="color" value={formData.color} onChange={handleInputChange} placeholder="Ej: Negro" required className="form-input" style={{ width: '100%', padding: '10px 14px', border: '2px solid #e0e0e0', borderRadius: '8px', fontSize: '14px' }} />
-                </div>
-                <div>
-                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', fontSize: '14px', color: '#555' }}><FaDollarSign style={{ marginRight: '6px', color: '#4CAF50' }} /> Precio Costo *</label>
-                  <input type="number" name="cost_price" value={formData.cost_price} onChange={handleInputChange} min="0" step="0.01" required className="form-input" style={{ width: '100%', padding: '10px 14px', border: '2px solid #e0e0e0', borderRadius: '8px', fontSize: '14px' }} />
-                </div>
-                <div>
-                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', fontSize: '14px', color: '#555' }}><FaDollarSign style={{ marginRight: '6px', color: '#f73194' }} /> Precio Venta *</label>
-                  <input type="number" name="sale_price" value={formData.sale_price} onChange={handleInputChange} min="0" step="0.01" required className="form-input" style={{ width: '100%', padding: '10px 14px', border: '2px solid #e0e0e0', borderRadius: '8px', fontSize: '14px' }} />
-                </div>
-                {/* Fila 3 */}
-                <div>
-                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', fontSize: '14px', color: '#555' }}><FaBox style={{ marginRight: '6px', color: '#f73194' }} /> Cantidad</label>
-                  <input type="number" name="quantity" value={formData.quantity} onChange={handleInputChange} min="0" className="form-input" style={{ width: '100%', padding: '10px 14px', border: '2px solid #e0e0e0', borderRadius: '8px', fontSize: '14px' }} placeholder="Por defecto 1" />
-                </div>
-                <div>
-                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', fontSize: '14px', color: '#555' }}>Proveedor</label>
-                  <select name="supplier_id" value={formData.supplier_id} onChange={handleInputChange} className="form-input" style={{ width: '100%', padding: '10px 14px', border: '2px solid #e0e0e0', borderRadius: '8px', fontSize: '14px', cursor: 'pointer' }}>
-                    <option value="">Selecciona</option>
-                    {suppliers.map(supplier => (<option key={supplier.id} value={supplier.id}>{supplier.name}</option>))}
-                  </select>
-                </div>
-                <div>
-                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', fontSize: '14px', color: '#555' }}><FaBarcode style={{ marginRight: '6px', color: '#f73194' }} /> SKU *</label>
-                  <input type="number" name="sku" value={formData.sku} onChange={handleInputChange} min={lastSku !== undefined && lastSku !== null ? parseInt(lastSku) + 1 : 1} step="1" required className="form-input" style={{ width: '100%', padding: '10px 14px', border: '2px solid #e0e0e0', borderRadius: '8px', fontSize: '14px' }} placeholder={lastSku !== undefined ? `Ej: ${parseInt(lastSku) + 1}` : '1'} />
-                  {lastSku !== undefined && (<div style={{ fontSize: '12px', color: '#888', marginTop: '4px' }}>Siguiente sugerido: <b>{parseInt(lastSku) + 1}</b></div>)}
-                </div>
-              </div>
-              {/* Imágenes */}
-              <div style={{ marginBottom: '20px' }}>
-                <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', fontSize: '14px', color: '#555' }}>Imágenes</label>
-                <input type="file" name="images" accept="image/jpeg,image/png,image/webp" multiple onChange={handleInputChange} className="form-input" style={{ width: '100%', padding: '10px 14px', border: '2px solid #e0e0e0', borderRadius: '8px', fontSize: '14px' }} />
-                {formData.images && formData.images.length > 0 && (
-                  <div style={{ display: 'flex', gap: '8px', marginTop: '12px', flexWrap: 'wrap' }}>
-                    {formData.images.map((img, idx) => (
-                      <img
-                        key={idx}
-                        src={img instanceof File ? URL.createObjectURL(img) : getImageUrl(img)}
-                        alt={`preview-${idx}`}
-                        style={{ width: '60px', height: '60px', objectFit: 'cover', borderRadius: '6px', border: '2px solid #f73194' }}
-                      />
-                    ))}
+            <form onSubmit={handleSubmit} style={{ overflowY: 'auto', flex: 1 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '350px 1fr', gap: '0' }}>
+
+                {/* Lateral Izquierdo: IMÁGENES */}
+                <div style={{ padding: '32px', background: '#f8fafc', borderRight: '1px solid #f1f5f9' }}>
+                  <label style={{ display: 'block', marginBottom: '16px', fontWeight: '700', fontSize: '14px', color: '#475569', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    Fotografías del Producto
+                  </label>
+
+                  <div
+                    style={{
+                      border: '2px dashed #cbd5e1',
+                      borderRadius: '20px',
+                      padding: '24px',
+                      textAlign: 'center',
+                      background: 'white',
+                      transition: 'all 0.3s ease',
+                      cursor: 'pointer',
+                      position: 'relative',
+                      overflow: 'hidden'
+                    }}
+                    onMouseOver={(e) => e.currentTarget.style.borderColor = '#f73194'}
+                    onMouseOut={(e) => e.currentTarget.style.borderColor = '#cbd5e1'}
+                  >
+                    <input
+                      type="file"
+                      name="images"
+                      accept="image/*"
+                      multiple
+                      onChange={handleInputChange}
+                      style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', opacity: 0, cursor: 'pointer', zIndex: 10 }}
+                    />
+
+                    {formData.images && formData.images.length > 0 ? (
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(80px, 1fr))', gap: '10px' }}>
+                        {formData.images.map((img, idx) => (
+                          <div key={idx} style={{ position: 'relative', paddingTop: '100%', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}>
+                            <img
+                              src={img instanceof File ? URL.createObjectURL(img) : getImageUrl(img)}
+                              alt={`preview-${idx}`}
+                              style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover' }}
+                            />
+                          </div>
+                        ))}
+                        <div style={{ border: '2px dashed #e2e8f0', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', color: '#94a3b8', minHeight: '80px' }}>
+                          <FaPlus />
+                        </div>
+                      </div>
+                    ) : (
+                      <div style={{ padding: '20px 0' }}>
+                        <div style={{ fontSize: '48px', color: '#cbd5e1', marginBottom: '12px' }}>
+                          <FaCamera />
+                        </div>
+                        <p style={{ margin: 0, fontSize: '14px', fontWeight: '600', color: '#64748b' }}>Subir fotos</p>
+                        <p style={{ margin: '4px 0 0', fontSize: '12px', color: '#94a3b8' }}>JPG, PNG o WebP</p>
+                      </div>
+                    )}
                   </div>
-                )}
+
+                  <div style={{ marginTop: '24px', padding: '16px', background: '#fffbeb', borderRadius: '16px', border: '1px solid #fef3c7' }}>
+                    <div style={{ display: 'flex', gap: '10px' }}>
+                      <FaExclamationTriangle style={{ color: '#d97706', marginTop: '2px' }} />
+                      <p style={{ margin: 0, fontSize: '12px', color: '#92400e', lineHeight: '1.5' }}>
+                        <strong>Tip Pro:</strong> Las fotos con fondo claro y buena iluminación ayudan a vender más rápido.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Lateral Derecho: CAMPOS */}
+                <div style={{ padding: '32px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '20px', marginBottom: '24px' }}>
+                    <div className="form-group-premium">
+                      <label className="label-premium"><FaTshirt /> Nombre del Producto</label>
+                      <input type="text" name="name" value={formData.name} onChange={handleInputChange} placeholder="Ej: Remera Básica Oversize" required className="input-premium" />
+                    </div>
+                    <div className="form-group-premium">
+                      <label className="label-premium"><FaBarcode /> SKU / Código</label>
+                      <input type="text" name="sku" value={formData.sku} onChange={handleInputChange} placeholder="Autogenerado" className="input-premium" />
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px', marginBottom: '24px' }}>
+                    <div className="form-group-premium">
+                      <label className="label-premium"><FaTag /> Categoría</label>
+                      <select name="category_id" value={formData.category_id} onChange={handleInputChange} required className="input-premium">
+                        <option value="">Selecciona...</option>
+                        {categories.map(cat => (<option key={cat.id} value={cat.id}>{cat.name}</option>))}
+                      </select>
+                    </div>
+                    <div className="form-group-premium">
+                      <label className="label-premium"><FaRulerVertical /> Talle</label>
+                      <select name="size" value={formData.size} onChange={handleInputChange} required className="input-premium">
+                        <option value="">Elegir...</option>
+                        {['Talle único', 'S', 'M', 'L', 'XL', '36', '38', '40', '42', '44'].map(s => <option key={s} value={s}>{s}</option>)}
+                      </select>
+                    </div>
+                    <div className="form-group-premium">
+                      <label className="label-premium"><FaPalette /> Color</label>
+                      <input type="text" name="color" value={formData.color} onChange={handleInputChange} placeholder="Ej: Negro" required className="input-premium" />
+                    </div>
+                  </div>
+
+                  {/* Sección de Precios con Cálculo de Margen */}
+                  <div style={{ background: '#f1f5f9', padding: '24px', borderRadius: '20px', marginBottom: '24px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '20px', alignItems: 'center' }}>
+                      <div className="form-group-premium">
+                        <label className="label-premium" style={{ color: '#475569' }}><FaDollarSign /> Precio Costo</label>
+                        <input type="number" name="cost_price" value={formData.cost_price} onChange={handleInputChange} placeholder="0.00" className="input-premium" style={{ background: 'white' }} />
+                      </div>
+                      <div className="form-group-premium">
+                        <label className="label-premium" style={{ color: '#f73194' }}><FaDollarSign /> Precio Venta</label>
+                        <input type="number" name="sale_price" value={formData.sale_price} onChange={handleInputChange} placeholder="0.00" className="input-premium" style={{ background: 'white', borderColor: '#f73194' }} />
+                      </div>
+                      <div style={{ textAlign: 'center' }}>
+                        <span style={{ fontSize: '11px', color: '#64748b', fontWeight: '700', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>Margen Est.</span>
+                        {formData.sale_price && formData.cost_price && Number(formData.sale_price) > 0 ? (
+                          <div style={{
+                            fontSize: '20px',
+                            fontWeight: '800',
+                            color: (Number(formData.sale_price) - Number(formData.cost_price)) > 0 ? '#10b981' : '#ef4444'
+                          }}>
+                            {Math.round(((Number(formData.sale_price) - Number(formData.cost_price)) / Number(formData.sale_price)) * 100)}%
+                          </div>
+                        ) : <div style={{ fontSize: '20px', fontWeight: '800', color: '#cbd5e1' }}>--</div>}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                    <div className="form-group-premium">
+                      <label className="label-premium"><FaBox /> Stock Inicial</label>
+                      <input type="number" name="quantity" value={formData.quantity} onChange={handleInputChange} min="0" className="input-premium" />
+                    </div>
+                    <div className="form-group-premium">
+                      <label className="label-premium"><FaUser /> Proveedor (Opcional)</label>
+                      <select name="supplier_id" value={formData.supplier_id} onChange={handleInputChange} className="input-premium">
+                        <option value="">Sin asignar</option>
+                        {suppliers.map(s => (<option key={s.id} value={s.id}>{s.name || s.nombre}</option>))}
+                      </select>
+                    </div>
+                  </div>
+                </div>
               </div>
-              {/* Botones */}
-              <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', paddingTop: '20px', borderTop: '2px solid #f0f0f0' }}>
-                <button type="button" className="btn-gray" onClick={resetForm} style={{ padding: '12px 24px', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '15px', fontWeight: '500' }}><FaTimes /> Cancelar</button>
+
+              {/* Footer de Acciones */}
+              <div style={{
+                padding: '24px 32px',
+                background: 'white',
+                borderTop: '1px solid #f1f5f9',
+                display: 'flex',
+                justifyContent: 'flex-end',
+                gap: '16px',
+                position: 'sticky',
+                bottom: 0,
+                zIndex: 20
+              }}>
+                <button
+                  type="button"
+                  onClick={resetForm}
+                  style={{
+                    padding: '12px 28px',
+                    borderRadius: '14px',
+                    border: '1px solid #e2e8f0',
+                    background: 'white',
+                    color: '#64748b',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s'
+                  }}
+                  onMouseOver={(e) => e.currentTarget.style.background = '#f8fafc'}
+                  onMouseOut={(e) => e.currentTarget.style.background = 'white'}
+                >
+                  Cancelar
+                </button>
                 <button
                   type="submit"
-                  className="btn-pink"
-                  style={{ padding: '12px 24px', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '15px', fontWeight: '500' }}
-                  disabled={!formData.name || formData.name.trim() === '' || !formData.sale_price || isNaN(parseFloat(formData.sale_price)) || !formData.quantity || isNaN(parseInt(formData.quantity))}
+                  style={{
+                    padding: '12px 36px',
+                    borderRadius: '14px',
+                    border: 'none',
+                    background: '#f73194',
+                    color: 'white',
+                    fontWeight: '700',
+                    cursor: 'pointer',
+                    boxShadow: '0 10px 15px -3px rgba(247, 49, 148, 0.3)',
+                    transition: 'all 0.2s'
+                  }}
+                  onMouseOver={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
+                  onMouseOut={(e) => e.currentTarget.style.transform = 'translateY(0)'}
                 >
-                  <FaSave /> {editingProduct ? 'Actualizar' : 'Crear'}
+                  <FaSave style={{ marginRight: '8px' }} />
+                  {editingProduct ? 'Guardar Cambios' : 'Confirmar Registro'}
                 </button>
               </div>
             </form>
@@ -834,9 +1063,7 @@ const Products = () => {
                       <span className="price-value-premium">${product.precio || product.sale_price}</span>
                     </div>
 
-                    <div className={`product-stock-pill ${stockStatus === 'stock-critical' ? 'stock-badge out-of-stock' : stockStatus === 'stock-low' ? 'stock-badge low-stock' : 'stock-badge in-stock'}`}>
-                      {product.quantity} u.
-                    </div>
+
                   </div>
                 </div>
               </div>
@@ -964,67 +1191,137 @@ const Products = () => {
 
       {/* Modal de crear categoría */}
       {showCategoryForm && (
-        <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.5)', zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={() => setShowCategoryForm(false)}>
-          <div style={{ background: 'white', borderRadius: '12px', boxShadow: '0 8px 32px rgba(0,0,0,0.2)', padding: '30px', maxWidth: '500px', width: '90%' }} onClick={e => e.stopPropagation()}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px', borderBottom: '2px solid #f5f5f5', paddingBottom: '15px' }}>
-              <h3 style={{ margin: 0, fontSize: '22px', color: '#333', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <FaTag style={{ color: '#f73194' }} />
-                Nueva Categoría
-              </h3>
-              <button onClick={() => setShowCategoryForm(false)} style={{ background: 'none', border: 'none', fontSize: '28px', cursor: 'pointer', color: '#999', lineHeight: 1 }}>×</button>
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(15, 23, 42, 0.65)',
+            backdropFilter: 'blur(8px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 2005,
+            padding: '20px'
+          }}
+          onClick={() => setShowCategoryForm(false)}
+        >
+          <div
+            style={{
+              background: 'white',
+              padding: '0',
+              borderRadius: '24px',
+              maxWidth: '500px',
+              width: '100%',
+              overflow: 'hidden',
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+              display: 'flex',
+              flexDirection: 'column',
+              animation: 'modalSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1)'
+            }}
+            onClick={e => e.stopPropagation()}
+          >
+            {/* Header del Modal */}
+            <div style={{
+              padding: '24px 32px',
+              borderBottom: '1px solid #f1f5f9',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              background: '#fff'
+            }}>
+              <div>
+                <h3 style={{ margin: 0, fontSize: '20px', fontWeight: '800', color: '#1e293b', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div style={{ background: '#fff0f7', color: '#f73194', padding: '10px', borderRadius: '12px', display: 'flex' }}>
+                    <FaTag />
+                  </div>
+                  Nueva Categoría
+                </h3>
+              </div>
+              <button
+                onClick={() => setShowCategoryForm(false)}
+                style={{
+                  background: '#f1f5f9',
+                  border: 'none',
+                  width: '32px',
+                  height: '32px',
+                  borderRadius: '50%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  color: '#64748b'
+                }}
+              >
+                <FaTimes />
+              </button>
             </div>
 
-            <form onSubmit={handleCategorySubmit}>
-              <div style={{ marginBottom: '20px' }}>
-                <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600', color: '#555' }}>
-                  Nombre *
-                </label>
-                <input
-                  type="text"
-                  name="name"
-                  value={categoryFormData.name}
-                  onChange={handleCategoryInputChange}
-                  required
-                  placeholder="Ej: Remeras, Pantalones, Accesorios..."
-                  style={{ width: '100%', padding: '12px', border: '2px solid #e0e0e0', borderRadius: '8px', fontSize: '14px', transition: 'all 0.3s' }}
-                  onFocus={(e) => e.target.style.borderColor = '#f73194'}
-                  onBlur={(e) => e.target.style.borderColor = '#e0e0e0'}
-                />
+            <form onSubmit={handleCategorySubmit} style={{ padding: '32px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                <div className="form-group-premium">
+                  <label className="label-premium">Nombre de la Categoría *</label>
+                  <input
+                    type="text"
+                    name="name"
+                    value={categoryFormData.name}
+                    onChange={handleCategoryInputChange}
+                    placeholder="Ej: Accesorios, Remeras, etc."
+                    required
+                    className="input-premium"
+                  />
+                </div>
+
+                <div className="form-group-premium">
+                  <label className="label-premium">Descripción (Opcional)</label>
+                  <textarea
+                    name="description"
+                    value={categoryFormData.description}
+                    onChange={handleCategoryInputChange}
+                    placeholder="Describe brevemente esta categoría..."
+                    className="input-premium"
+                    style={{ minHeight: '100px', resize: 'vertical' }}
+                  />
+                </div>
               </div>
 
-              <div style={{ marginBottom: '25px' }}>
-                <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '600', color: '#555' }}>
-                  Descripción
-                </label>
-                <textarea
-                  name="description"
-                  value={categoryFormData.description}
-                  onChange={handleCategoryInputChange}
-                  rows="3"
-                  placeholder="Descripción opcional de la categoría..."
-                  style={{ width: '100%', padding: '12px', border: '2px solid #e0e0e0', borderRadius: '8px', fontSize: '14px', resize: 'vertical', transition: 'all 0.3s' }}
-                  onFocus={(e) => e.target.style.borderColor = '#f73194'}
-                  onBlur={(e) => e.target.style.borderColor = '#e0e0e0'}
-                />
-              </div>
-
-              <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+              <div style={{
+                marginTop: '32px',
+                display: 'flex',
+                justifyContent: 'flex-end',
+                gap: '12px'
+              }}>
                 <button
                   type="button"
                   onClick={() => setShowCategoryForm(false)}
-                  style={{ padding: '12px 24px', background: '#6c757d', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '15px', fontWeight: '500', transition: 'all 0.3s' }}
-                  onMouseOver={(e) => e.currentTarget.style.background = '#5a6268'}
-                  onMouseOut={(e) => e.currentTarget.style.background = '#6c757d'}
+                  style={{
+                    padding: '12px 24px',
+                    borderRadius: '12px',
+                    border: '1px solid #e2e8f0',
+                    background: 'white',
+                    color: '#64748b',
+                    fontWeight: '600',
+                    cursor: 'pointer'
+                  }}
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  style={{ padding: '12px 24px', background: '#f73194', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '15px', fontWeight: '500', display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.3s' }}
-                  onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
-                  onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                  style={{
+                    padding: '12px 28px',
+                    borderRadius: '12px',
+                    border: 'none',
+                    background: '#f73194',
+                    color: 'white',
+                    fontWeight: '700',
+                    cursor: 'pointer',
+                    boxShadow: '0 4px 12px rgba(247, 49, 148, 0.2)'
+                  }}
                 >
-                  <FaPlus />
+                  <FaPlus style={{ marginRight: '8px' }} />
                   Crear Categoría
                 </button>
               </div>
