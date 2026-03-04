@@ -45,7 +45,7 @@ class Supplier {
              COUNT(DISTINCT po.id) as orders_count,
              SUM(po.total_amount) as total_purchased
       FROM suppliers s
-      LEFT JOIN productos p ON (s.id = p.supplier_id OR CAST(p.proveedor AS UNSIGNED) = s.id) AND p.deleted_at IS NULL
+      LEFT JOIN productos p ON s.id = p.supplier_id AND p.deleted_at IS NULL
       LEFT JOIN purchase_orders po ON s.id = po.supplier_id
       WHERE 1=1
     `;
@@ -59,7 +59,8 @@ class Supplier {
     if (filters.name) {
       query += ' AND s.name LIKE ?';
       params.push(`%${filters.name}%`);
-    }
+    }
+
 
     query += ' GROUP BY s.id ORDER BY s.name ASC';
 
@@ -83,7 +84,7 @@ class Supplier {
               COUNT(DISTINCT po.id) as orders_count,
               SUM(po.total_amount) as total_purchased
        FROM suppliers s
-       LEFT JOIN productos p ON (s.id = p.supplier_id OR CAST(p.proveedor AS UNSIGNED) = s.id) AND p.deleted_at IS NULL
+       LEFT JOIN productos p ON s.id = p.supplier_id AND p.deleted_at IS NULL
        LEFT JOIN purchase_orders po ON s.id = po.supplier_id
        WHERE s.id = ?
        GROUP BY s.id`,
@@ -132,8 +133,8 @@ class Supplier {
   static async delete(id, connection = null) {
     // Verificar si tiene productos asociados
     const products = await database.get(
-      'SELECT COUNT(*) as count FROM productos WHERE (supplier_id = ? OR CAST(proveedor AS UNSIGNED) = ?) AND deleted_at IS NULL',
-      [id, id],
+      'SELECT COUNT(*) as count FROM productos WHERE supplier_id = ? AND deleted_at IS NULL',
+      [id],
       connection
     );
 
@@ -193,9 +194,9 @@ class Supplier {
     let query = `
       SELECT p.*
       FROM productos p
-      WHERE (p.supplier_id = ? OR CAST(p.proveedor AS UNSIGNED) = ?) AND p.deleted_at IS NULL
+      WHERE p.supplier_id = ? AND p.deleted_at IS NULL
     `;
-    const params = [supplierId, supplierId];
+    const params = [supplierId];
 
     if (filters.status) {
       query += ' AND p.estado = ?';
@@ -227,11 +228,11 @@ class Supplier {
         SUM(CASE WHEN po.status = 'received' THEN 1 ELSE 0 END) as received_orders,
         SUM(CASE WHEN po.payment_status = 'paid' THEN po.total_amount ELSE 0 END) as total_paid,
         SUM(CASE WHEN po.payment_status = 'pending' THEN po.total_amount ELSE 0 END) as total_pending_payment,
-        (SELECT COUNT(*) FROM productos WHERE (supplier_id = ? OR CAST(proveedor AS UNSIGNED) = ?) AND deleted_at IS NULL) as products_count,
+        (SELECT COUNT(*) FROM productos WHERE supplier_id = ? AND deleted_at IS NULL) as products_count,
         (SELECT MAX(order_date) FROM purchase_orders WHERE supplier_id = ?) as last_order_date
        FROM purchase_orders po
        WHERE po.supplier_id = ?`,
-      [supplierId, supplierId, supplierId, supplierId],
+      [supplierId, supplierId, supplierId],
       connection
     );
 

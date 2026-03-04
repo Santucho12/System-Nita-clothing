@@ -64,10 +64,10 @@ class ProductController {
             if (!req.files || req.files.length === 0) {
                 return res.status(400).json({ success: false, message: 'No se enviaron imágenes' });
             }
-                        // Guardar archivos en /uploads/products y devolver URLs
-                        const imageUrls = req.files
-                            .filter(file => file && file.filename)
-                            .map(file => `/uploads/products/${file.filename}`);
+            // Guardar archivos en /uploads/products y devolver URLs
+            const imageUrls = req.files
+                .filter(file => file && file.filename)
+                .map(file => `/uploads/products/${file.filename}`);
             const updated = await Product.addImages(id, imageUrls);
             res.status(200).json({ success: true, data: updated });
         } catch (error) {
@@ -160,8 +160,8 @@ class ProductController {
             let imageUrls = [];
             if (req.files && req.files.length > 0) {
                 imageUrls = req.files
-                  .filter(file => file && file.filename)
-                  .map(file => `/uploads/products/${file.filename}`);
+                    .filter(file => file && file.filename)
+                    .map(file => `/uploads/products/${file.filename}`);
             }
             if (imageUrls.length > 0) {
                 data = { ...data, images: imageUrls };
@@ -179,7 +179,7 @@ class ProductController {
                 nombre: data.name || null,
                 codigo: data.sku || null, // SKU convertido a codigo
                 categoria_id: data.category_id ? parseInt(data.category_id) : null,
-                proveedor: data.supplier_id ? parseInt(data.supplier_id) : null,
+                supplier_id: data.supplier_id ? parseInt(data.supplier_id) : null,
                 tallas: data.tallas || data.size || null,
                 colores: data.colores || data.color || null,
                 ubicacion: data.ubicacion || null,
@@ -207,8 +207,8 @@ class ProductController {
     }
 
     static async updateProduct(req, res) {
-                                // Log para ver el contenido real del body recibido
-                                console.log('[updateProduct] req.body:', req.body);
+        // Log para ver el contenido real del body recibido
+        console.log('[updateProduct] req.body:', req.body);
         try {
             const { id } = req.params;
             let data = req.body;
@@ -224,7 +224,7 @@ class ProductController {
                 try {
                     const arr = JSON.parse(data.imagen_url);
                     if (Array.isArray(arr)) imagenesFinal = arr.filter(img => img && img !== 'undefined');
-                } catch {}
+                } catch { }
             }
 
             // Asegurar que armamos el objeto solo con los campos permitidos/necesarios
@@ -233,7 +233,7 @@ class ProductController {
                 nombre: data.nombre,
                 codigo: data.codigo,
                 categoria_id: data.categoria_id,
-                proveedor: data.proveedor,
+                supplier_id: data.supplier_id,
                 tallas: data.tallas,
                 colores: data.colores,
                 ubicacion: data.ubicacion,

@@ -25,7 +25,7 @@ router.use(authMiddleware);
 // Listar y buscar productos (todos los autenticados)
 router.get('/', ProductController.getAllProducts);
 router.get('/search', ProductController.searchProducts);
-router.get('/count', ProductController.getProductsCount);
+router.get('/count', ProductController.getCount);
 router.get('/stock-bajo', ProductController.getLowStockProducts);
 
 // Obtener el último SKU (DEBE ir antes de /:id)

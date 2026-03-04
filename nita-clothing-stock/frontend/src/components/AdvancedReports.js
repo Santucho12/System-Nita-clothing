@@ -41,7 +41,7 @@ const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'
 
 function AdvancedReports() {
   const [dateRange, setDateRange] = useState({
-    startDate: format(subDays(new Date(), 30), 'yyyy-MM-dd'),
+    startDate: format(new Date(new Date().getFullYear(), new Date().getMonth(), 1), 'yyyy-MM-dd'),
     endDate: format(new Date(), 'yyyy-MM-dd')
   });
 
@@ -547,21 +547,21 @@ function AdvancedReports() {
                 {categoryPerformance.filter(cat => cat.total_cost > 0).map((cat, index) => {
                   const roi = (cat.total_profit / cat.total_cost) * 100;
                   return (
-                  <div key={index} className="roi-item">
-                    <div className="roi-info">
-                      <span className="cat-name">{cat.category_name}</span>
-                      <span className="roi-value">{roi.toFixed(2)}%</span>
+                    <div key={index} className="roi-item">
+                      <div className="roi-info">
+                        <span className="cat-name">{cat.category_name}</span>
+                        <span className="roi-value">{roi.toFixed(2)}%</span>
+                      </div>
+                      <div className="roi-bar">
+                        <div
+                          className="roi-fill"
+                          style={{
+                            width: `${Math.min(roi, 100)}%`,
+                            background: COLORS[index % COLORS.length]
+                          }}
+                        ></div>
+                      </div>
                     </div>
-                    <div className="roi-bar">
-                      <div
-                        className="roi-fill"
-                        style={{
-                          width: `${Math.min(roi, 100)}%`,
-                          background: COLORS[index % COLORS.length]
-                        }}
-                      ></div>
-                    </div>
-                  </div>
                   );
                 })}
               </div>
