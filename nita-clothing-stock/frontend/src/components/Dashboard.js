@@ -226,13 +226,77 @@ const Dashboard = () => {
         `}
       </style>
 
-      {/* Header */}
-      <div className="page-header" style={{ marginBottom: '30px', background: 'white', padding: '30px', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)', textAlign: 'center' }}>
-        <h1 style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 0 10px 0', fontSize: '32px', color: '#333', fontWeight: '600', gap: '12px' }}>
-          <FaHome style={{ color: '#f73194', fontSize: '36px' }} />
-          Sistema de Gestión Nita Clothing
-        </h1>
-        <p style={{ margin: 0, fontSize: '16px', color: '#666', fontWeight: '400' }}>Stock, Ventas y Reportes</p>
+      {/* Header Premium - Estética Stack Vertical */}
+      <div className="page-header" style={{
+        marginBottom: '40px',
+        background: 'white',
+        padding: '30px 40px',
+        borderRadius: '24px',
+        boxShadow: '0 4px 20px rgba(0,0,0,0.03)',
+        textAlign: 'left',
+        border: '1px solid #f1f5f9',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'flex-start',
+        gap: '20px'
+      }}>
+        {/* Fila 1: Badge + Fecha */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div style={{
+            background: '#fff0f7',
+            color: '#f73194',
+            padding: '6px 16px',
+            borderRadius: '100px',
+            fontSize: '11px',
+            fontWeight: '800',
+            letterSpacing: '0.04em'
+          }}>
+            PANEL DE CONTROL
+          </div>
+          <span style={{ color: '#cbd5e1', fontSize: '18px' }}>•</span>
+          <span style={{ color: '#64748b', fontSize: '14px', fontWeight: '500' }}>
+            {new Date().toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })}
+          </span>
+        </div>
+
+        {/* Fila 2: Saludo */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+          <h1 style={{
+            margin: 0,
+            fontSize: '42px',
+            color: '#1e293b',
+            fontWeight: '850',
+            letterSpacing: '-0.02em'
+          }}>
+          </h1>
+
+        </div>
+
+        {/* Fila 3: Subtítulo */}
+        <p style={{
+          margin: 0,
+          fontSize: '17px',
+          color: '#64748b',
+          fontWeight: '500',
+          maxWidth: '850px',
+          lineHeight: '1.5'
+        }}>
+        </p>
+
+        <style>
+          {`
+            @keyframes waveHand {
+              0% { transform: rotate( 0.0deg) }
+              10% { transform: rotate(14.0deg) }
+              20% { transform: rotate(-8.0deg) }
+              30% { transform: rotate(14.0deg) }
+              40% { transform: rotate(-4.0deg) }
+              50% { transform: rotate(10.0deg) }
+              60% { transform: rotate( 0.0deg) }
+              100% { transform: rotate( 0.0deg) }
+            }
+          `}
+        </style>
       </div>
 
       {/* Estadísticas principales */}

@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { categoryService } from '../services/api';
 import { toast } from 'react-toastify';
-import { FaFolderOpen, FaPlus, FaEdit, FaTrash, FaFolder, FaTimes, FaSave, FaToggleOn, FaToggleOff, FaCalendarAlt, FaSearch } from 'react-icons/fa';
+import {
+  FaFolderOpen, FaPlus, FaEdit, FaTrash, FaFolder, FaTimes,
+  FaSave, FaToggleOn, FaToggleOff, FaCalendarAlt, FaSearch,
+  FaLayerGroup
+} from 'react-icons/fa';
 
 const Categories = () => {
   const [categories, setCategories] = useState([]);
@@ -102,170 +106,347 @@ const Categories = () => {
   );
 
   return (
-    <div style={{ padding: '30px', background: 'var(--bg-gradient)', minHeight: '100vh' }}>
+    <div style={{
+      padding: '40px',
+      background: '#f8fafc',
+      minHeight: '100vh',
+      fontFamily: "'Inter', sans-serif"
+    }}>
       <style>
         {`
-          @keyframes perspective3DFlip {
-            0% { opacity: 0; transform: perspective(1000px) rotateY(-15deg) rotateX(10deg); }
-            100% { opacity: 1; transform: perspective(1000px) rotateY(0deg) rotateX(0deg); }
+          @keyframes slideInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
           }
-          .page-header { animation: perspective3DFlip 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
-          .form-card { animation: perspective3DFlip 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 0.1s both; }
-          .category-card { 
+          
+          .categories-header {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            animation: slideInUp 0.6s ease-out;
+          }
+
+          .category-card-premium {
+            background: white;
+            border-radius: 20px;
+            padding: 24px;
+            border: 1px solid #f1f5f9;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            animation: perspective3DFlip 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+            animation: slideInUp 0.6s ease-out both;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
           }
-          .category-card:hover { transform: translateY(-8px) scale(1.02); box-shadow: 0 12px 24px rgba(0,0,0,0.15) !important; }
-          .btn-pink { background: #f73194; color: white; border: none; transition: all 0.3s; }
-          .btn-pink:hover { transform: scale(1.05); background: #d6267d; }
-          .btn-outline-pink { border: 2px solid #f73194; color: #f73194; background: transparent; transition: all 0.3s; }
-          .btn-outline-pink:hover { background: #f73194; color: white; }
-          .input-focus:focus { border-color: #f73194 !important; box-shadow: 0 0 0 4px rgba(247, 49, 148, 0.1) !important; outline: none !important; }
+
+          .category-card-premium:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            border-color: #f73194;
+          }
+
+          .category-icon-bg {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            background: #fff0f7;
+            color: #f73194;
+            transition: all 0.3s;
+          }
+
+          .category-card-premium:hover .category-icon-bg {
+            background: #f73194;
+            color: white;
+            transform: scale(1.1) rotate(5deg);
+          }
+
+          .search-wrapper-premium {
+            background: white;
+            border-radius: 12px;
+            padding: 4px 12px;
+            border: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.3s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+          }
+
+          .search-wrapper-premium:focus-within {
+            border-color: #f73194;
+            box-shadow: 0 0 0 3px rgba(247, 49, 148, 0.1);
+          }
+
+          .search-input-premium {
+            border: none;
+            padding: 10px 0;
+            flex-grow: 1;
+            font-size: 14px;
+            font-weight: 500;
+            color: #1e293b;
+            outline: none;
+          }
+
+          .btn-add-premium {
+            padding: 12px 24px;
+            background: #f73194;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 6px rgba(247, 49, 148, 0.2);
+          }
+
+          .btn-add-premium:hover {
+            background: #d42079;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(247, 49, 148, 0.3);
+          }
+
+          .btn-action-premium {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            border: 1px solid #f1f5f9;
+            background: #f8fafc;
+            color: #64748b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+          }
+
+          .btn-action-premium:hover {
+            background: #fff0f7;
+            color: #f73194;
+            border-color: #f73194;
+            transform: scale(1.1);
+          }
+
+          .btn-delete-premium:hover {
+            background: #fef2f2;
+            color: #ef4444;
+            border-color: #fecaca;
+          }
+          
+          @keyframes spin { to { transform: rotate(360deg); } }
         `}
       </style>
 
-      <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px', background: 'white', padding: '25px', borderRadius: '15px', boxShadow: '0 4px 15px rgba(0,0,0,0.05)' }}>
-        <h1 style={{ display: 'flex', alignItems: 'center', margin: 0, fontSize: '28px', color: '#333', fontWeight: '700' }}>
-          <FaFolderOpen style={{ marginRight: '15px', color: '#f73194', fontSize: '32px' }} />
-          Gestión de Categorías
-        </h1>
-        <button
-          className="btn-pink"
-          onClick={() => setShowForm(true)}
-          style={{ padding: '12px 24px', borderRadius: '10px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '15px', fontWeight: '600' }}
-        >
-          <FaPlus /> Nueva Categoría
-        </button>
-      </div>
+      {/* Header Sección */}
+      <div className="categories-header" style={{
+        padding: '30px',
+        borderRadius: '24px',
+        marginBottom: '40px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '24px'
+      }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div>
+            <h1 style={{ margin: 0, color: '#1e293b', fontSize: '32px', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '15px' }}>
+              <div style={{ width: '56px', height: '56px', borderRadius: '16px', background: '#f73194', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <FaLayerGroup size={28} />
+              </div>
+              Categorías
+            </h1>
+            <p style={{ margin: '8px 0 0 71px', color: '#64748b', fontWeight: '500' }}>Administra y organiza tus productos por Categorias</p>
+          </div>
+          <button className="btn-add-premium" onClick={() => setShowForm(true)}>
+            <FaPlus /> Nueva Categoría
+          </button>
+        </div>
 
-      <div style={{ marginBottom: '30px', display: 'flex', gap: '15px' }}>
-        <div style={{ flex: 1, position: 'relative' }}>
-          <FaSearch style={{ position: 'absolute', left: '15px', top: '50%', transform: 'translateY(-50%)', color: '#f73194' }} />
+        <div className="search-wrapper-premium">
+          <FaSearch color="#94a3b8" size={18} />
           <input
+            className="search-input-premium"
             type="text"
-            placeholder="Buscar categorías..."
+            placeholder="Buscar por nombre o descripción..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="input-focus"
-            style={{ width: '100%', padding: '14px 14px 14px 45px', borderRadius: '12px', border: '2px solid #eee', fontSize: '15px' }}
           />
         </div>
       </div>
 
+      {/* Formulario */}
       {showForm && (
-        <div className="form-card" style={{ background: 'white', padding: '30px', borderRadius: '15px', boxShadow: '0 10px 30px rgba(0,0,0,0.1)', marginBottom: '30px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px', borderBottom: '2px solid #f8f9fa', paddingBottom: '15px' }}>
-            <h3 style={{ margin: 0, color: '#333', fontSize: '20px' }}>
-              {editingCategory ? '✏️ Editar Categoría' : '📂 Nueva Categoría'}
-            </h3>
-            <button onClick={handleCancel} style={{ background: 'none', border: 'none', color: '#999', cursor: 'pointer', fontSize: '20px' }}><FaTimes /></button>
-          </div>
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(15, 23, 42, 0.4)', backdropFilter: 'blur(4px)', zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div className="categories-header" style={{ width: '100%', maxWidth: '500px', padding: '35px', borderRadius: '24px', background: 'white' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px' }}>
+              <h2 style={{ margin: 0, color: '#1e293b', fontWeight: '800' }}>
+                {editingCategory ? '✏️ Editar Categoría' : '📂 Nueva Categoría'}
+              </h2>
+              <button onClick={handleCancel} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: '20px' }}><FaTimes /></button>
+            </div>
 
-          <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '20px' }}>
-            <div>
-              <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', color: '#555' }}>Nombre</label>
-              <input
-                type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleInputChange}
-                required
-                className="input-focus"
-                placeholder="Ej: Accesorios"
-                style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '2px solid #eee' }}
-              />
-            </div>
-            <div>
-              <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', color: '#555' }}>Descripción</label>
-              <input
-                type="text"
-                name="description"
-                value={formData.description}
-                onChange={handleInputChange}
-                className="input-focus"
-                placeholder="Descripción opcional..."
-                style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '2px solid #eee' }}
-              />
-            </div>
-            <div style={{ gridColumn: 'span 2', display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '10px' }}>
-              <button type="button" onClick={handleCancel} style={{ padding: '12px 25px', borderRadius: '8px', border: 'none', background: '#eee', cursor: 'pointer', fontWeight: '600' }}>Cancelar</button>
-              <button type="submit" className="btn-pink" style={{ padding: '12px 25px', borderRadius: '8px', cursor: 'pointer', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <FaSave /> {editingCategory ? 'Actualizar' : 'Crear Categoría'}
-              </button>
-            </div>
-          </form>
+            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              <div>
+                <label style={{ display: 'block', marginBottom: '8px', fontWeight: '700', color: '#64748b', fontSize: '13px', textTransform: 'uppercase' }}>Nombre</label>
+                <input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleInputChange}
+                  required
+                  style={{ width: '100%', padding: '14px', borderRadius: '12px', border: '1px solid #e2e8f0', outline: 'none', fontSize: '15px' }}
+                  placeholder="Ej: Accesorios"
+                />
+              </div>
+              <div>
+                <label style={{ display: 'block', marginBottom: '8px', fontWeight: '700', color: '#64748b', fontSize: '13px', textTransform: 'uppercase' }}>Descripción</label>
+                <textarea
+                  name="description"
+                  value={formData.description}
+                  onChange={handleInputChange}
+                  style={{ width: '100%', padding: '14px', borderRadius: '12px', border: '1px solid #e2e8f0', outline: 'none', fontSize: '15px', minHeight: '100px', resize: 'vertical' }}
+                  placeholder="Describe esta categoría..."
+                />
+              </div>
+              <div style={{ display: 'flex', gap: '12px', marginTop: '10px' }}>
+                <button type="button" onClick={handleCancel} style={{ flex: 1, padding: '14px', borderRadius: '12px', border: '1px solid #e2e8f0', background: 'white', fontWeight: '700', cursor: 'pointer' }}>Cancelar</button>
+                <button type="submit" className="btn-add-premium" style={{ flex: 2, justifyContent: 'center' }}>
+                  <FaSave /> {editingCategory ? 'Guardar Cambios' : 'Crear Categoría'}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
 
+      {/* Listado de Categorías */}
       {loading ? (
-        <div style={{ textAlign: 'center', padding: '50px' }}>
-          <div style={{ width: '50px', height: '50px', border: '5px solid #f73194', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 1s linear infinite', margin: '0 auto' }}></div>
-          <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-          <p style={{ marginTop: '15px', color: '#666' }}>Cargando categorías...</p>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '100px 0' }}>
+          <div style={{ width: '40px', height: '40px', border: '4px solid #f73194', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
+          <p style={{ marginTop: '20px', color: '#64748b', fontWeight: '600' }}>Cargando colecciones...</p>
         </div>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '25px' }}>
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))',
+          gap: '24px'
+        }}>
           {filteredCategories.map((cat, index) => (
-            <div key={cat.id} className="category-card" style={{
-              background: 'white',
-              borderRadius: '15px',
-              padding: '25px',
-              boxShadow: '0 4px 6px rgba(0,0,0,0.05)',
+            <div key={cat.id} className="category-card-premium" style={{
+              animationDelay: `${index * 0.05}s`,
               position: 'relative',
               overflow: 'hidden',
-              animationDelay: `${index * 0.05}s`
+              padding: '24px 24px 20px 24px'
             }}>
-              <div style={{ position: 'absolute', top: 0, left: 0, width: '6px', height: '100%', background: cat.status === 'activa' ? '#f73194' : '#6c757d' }}></div>
+              {/* Barra lateral de estado - Estética anterior */}
+              <div style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '6px',
+                height: '100%',
+                background: cat.status === 'activa' ? '#f73194' : '#94a3b8'
+              }}></div>
 
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '15px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
                 <div>
-                  <h3 style={{ margin: 0, fontSize: '20px', color: '#333', fontWeight: '700' }}>{cat.name}</h3>
+                  <h3 style={{ margin: 0, fontSize: '20px', color: '#1e293b', fontWeight: '800' }}>{cat.name}</h3>
                   <span style={{
-                    fontSize: '11px',
+                    fontSize: '10px',
                     padding: '4px 10px',
                     borderRadius: '20px',
-                    background: cat.status === 'activa' ? '#ffeaf3' : '#eee',
-                    color: cat.status === 'activa' ? '#f73194' : '#666',
-                    fontWeight: '700',
+                    background: cat.status === 'activa' ? '#fff0f7' : '#f1f5f9',
+                    color: cat.status === 'activa' ? '#f73194' : '#64748b',
+                    fontWeight: '800',
                     textTransform: 'uppercase',
-                    marginTop: '5px',
+                    marginTop: '6px',
                     display: 'inline-block'
                   }}>
                     {cat.status}
                   </span>
                 </div>
                 <div style={{ display: 'flex', gap: '8px' }}>
-                  <button onClick={() => handleEdit(cat)} style={{ background: '#f8f9fa', border: 'none', padding: '8px', borderRadius: '8px', color: '#f73194', cursor: 'pointer', transition: '0.3s' }} className="btn-outline-pink"><FaEdit /></button>
-                  <button onClick={() => handleDelete(cat.id)} style={{ background: '#f8f9fa', border: 'none', padding: '8px', borderRadius: '8px', color: '#dc3545', cursor: 'pointer', transition: '0.3s' }}><FaTrash /></button>
+                  <button className="btn-action-premium" onClick={() => handleEdit(cat)} title="Editar"><FaEdit /></button>
+                  <button className="btn-action-premium btn-delete-premium" onClick={() => handleDelete(cat.id)} title="Eliminar"><FaTrash /></button>
                 </div>
               </div>
 
-              <p style={{ color: '#666', fontSize: '14px', marginBottom: '20px', minHeight: '40px', lineHeight: '1.5' }}>
-                {cat.description || <em style={{ color: '#ccc' }}>Sin descripción disponible</em>}
+              <p style={{ margin: '0 0 20px 0', color: '#64748b', fontSize: '14px', lineHeight: '1.6', minHeight: '44px' }}>
+                {cat.description || <em style={{ color: '#cbd5e1' }}>Sin descripción detallada.</em>}
               </p>
 
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #f0f0f0', paddingTop: '15px' }}>
-                <span style={{ fontSize: '12px', color: '#999', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                  <FaCalendarAlt /> {new Date(cat.created_at).toLocaleDateString()}
-                </span>
-                <button
+              <div style={{
+                marginTop: 'auto',
+                paddingTop: '16px',
+                borderTop: '1px solid #f1f5f9',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#94a3b8', fontSize: '12px', fontWeight: '600' }}>
+                  <FaCalendarAlt size={14} />
+                  {new Date(cat.created_at).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })}
+                </div>
+
+                <div
                   onClick={() => handleToggleStatus(cat)}
                   style={{
-                    background: 'none',
-                    border: 'none',
                     cursor: 'pointer',
-                    color: cat.status === 'activa' ? '#f73194' : '#999',
-                    fontSize: '24px',
+                    color: cat.status === 'activa' ? '#f73194' : '#cbd5e1',
+                    fontSize: '28px',
                     display: 'flex',
                     alignItems: 'center',
-                    transition: '0.3s'
+                    transition: 'all 0.3s'
                   }}
                 >
                   {cat.status === 'activa' ? <FaToggleOn /> : <FaToggleOff />}
-                </button>
+                </div>
               </div>
             </div>
           ))}
+
+          {/* Tarjeta de Acceso Rápido para Añadir */}
+          <div
+            onClick={() => setShowForm(true)}
+            className="category-card-premium"
+            style={{
+              border: '2px dashed #e2e8f0',
+              background: '#f8fafc',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              minHeight: '210px',
+              padding: '24px',
+              boxShadow: 'none'
+            }}
+          >
+            <div style={{ textAlign: 'center' }}>
+              <div style={{
+                width: '50px',
+                height: '50px',
+                borderRadius: '50%',
+                background: 'white',
+                border: '1px solid #e2e8f0',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '0 auto 12px',
+                color: '#f73194',
+                fontSize: '20px'
+              }}>
+                <FaPlus />
+              </div>
+              <h4 style={{ margin: 0, color: '#1e293b', fontWeight: '800' }}>Nueva Categoría</h4>
+              <p style={{ margin: '4px 0 0', color: '#94a3b8', fontSize: '13px', fontWeight: '500' }}>Click para empezar</p>
+            </div>
+          </div>
         </div>
       )}
     </div>

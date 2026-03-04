@@ -73,9 +73,9 @@ const Sidebar = () => {
             title="Cerrar sesión"
           >
             <FaSignOutAlt />
-            <span>Salir</span>
+            <span>Cerrar Sesión</span>
           </button>
-          <div style={{ marginTop: '6px', fontSize: '13px' }}>Sistema Nita Clothing</div>
+          <div className="sidebar-footer-info">Sistema Nita Clothing</div>
         </div>
       </aside>
       {modalOpen && (
