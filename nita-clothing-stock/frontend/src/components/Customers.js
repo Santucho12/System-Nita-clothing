@@ -91,95 +91,76 @@ export default function Customers() {
     customer.phone?.includes(searchTerm)
   );
 
+  const getSegmentClass = (segment) => {
+    if (segment === 'VIP') return 'segment-vip';
+    if (segment === 'Regular') return 'segment-regular';
+    return 'segment-new';
+  };
+
   return (
-    <div className="customers-container" style={{ padding: '30px', background: 'var(--bg-gradient)', minHeight: '100vh' }}>
-      <style>
-        {`
-          @keyframes perspective3DFlip {
-            0% {
-              opacity: 0;
-              transform: perspective(1000px) rotateY(-15deg) rotateX(10deg);
-            }
-            100% {
-              opacity: 1;
-              transform: perspective(1000px) rotateY(0deg) rotateX(0deg);
-            }
-          }
+    <div className="customers-container" style={{ padding: '30px', background: 'var(--bg-secondary)', minHeight: '100vh' }}>
+      {/* ═══════ HERO HEADER ═══════ */}
+      <div className="products-hero" style={{
+        background: 'white',
+        borderRadius: '20px',
+        padding: '28px 36px',
+        marginBottom: '24px',
+        boxShadow: '0 4px 20px rgba(0,0,0,0.04)',
+        border: '1px solid rgba(0,0,0,0.04)',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '18px' }}>
+          <div style={{
+            background: 'linear-gradient(135deg, #fff0f7, #ffe0ef)',
+            padding: '14px',
+            borderRadius: '16px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}>
+            <FaUsers style={{ color: '#f73194', fontSize: '26px' }} />
+          </div>
+          <div>
+            <h1 style={{ margin: 0, fontSize: '24px', fontWeight: '800', color: '#1e293b', letterSpacing: '-0.02em' }}>
+              Gestión de Clientes
+            </h1>
+            <p style={{ margin: '2px 0 0', fontSize: '14px', color: '#94a3b8', fontWeight: '500' }}>
+              {view === 'list' ? `${customers.length} clientes en tu base de datos` : 'Análisis inteligente del comportamiento de compra'}
+            </p>
+          </div>
+        </div>
 
-          .page-header {
-            animation: perspective3DFlip 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-          }
-
-          .search-bar {
-            animation: perspective3DFlip 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 0.15s both;
-          }
-
-          .customer-card {
-            animation: perspective3DFlip 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) both;
-            transition: all 0.3s ease;
-          }
-
-          .customer-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 16px rgba(247, 49, 148, 0.2) !important;
-          }
-
-          .empty-state {
-            animation: perspective3DFlip 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s both;
-          }
-
-          .btn-pink {
-            background: #f73194;
-            transition: all 0.3s ease;
-          }
-          .btn-pink:hover {
-            transform: scale(1.1) !important;
-            background: #f73194 !important;
-          }
-          .btn-segmentation {
-            background: #c5a572;
-            transition: all 0.3s ease;
-          }
-          .btn-segmentation:hover {
-            transform: scale(1.1) !important;
-            background: #c5a572 !important;
-          }
-          .btn-secondary {
-            background: #6c757d;
-            transition: all 0.3s ease;
-          }
-          .btn-secondary:hover {
-            transform: scale(1.1) !important;
-            background: #6c757d !important;
-          }
-          .search-input {
-            transition: all 0.3s ease;
-          }
-          .search-input:focus {
-            border-color: #f73194 !important;
-            box-shadow: 0 0 0 3px rgba(247, 49, 148, 0.1) !important;
-            outline: none !important;
-          }
-        `}
-      </style>
-      <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px', background: 'white', padding: '25px', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
-        <h1 style={{ display: 'flex', alignItems: 'center', margin: 0, fontSize: '28px', color: '#333', fontWeight: '600' }}>
-          <FaUsers style={{ marginRight: '12px', color: '#f73194', fontSize: '32px' }} />
-          Gestión de Clientes
-        </h1>
         <div style={{ display: 'flex', gap: '10px' }}>
           <button
-            className={view === 'list' ? 'btn-pink' : 'btn-secondary'}
             onClick={() => { setView('list'); fetchCustomers(); }}
-            style={{ padding: '12px 24px', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '15px', fontWeight: '500' }}
+            style={{
+              padding: '11px 22px',
+              color: view === 'list' ? 'white' : '#475569',
+              background: view === 'list' ? '#f73194' : '#f1f5f9',
+              border: 'none',
+              borderRadius: '12px', cursor: 'pointer',
+              display: 'flex', alignItems: 'center', gap: '8px',
+              fontSize: '14px', fontWeight: '700', transition: 'all 0.2s',
+              boxShadow: view === 'list' ? '0 4px 14px rgba(247,49,148,0.25)' : 'none'
+            }}
           >
             <FaUsers />
-            Lista de Clientes
+            Lista
           </button>
           <button
-            className={view === 'segmentation' ? 'btn-pink' : 'btn-secondary'}
             onClick={fetchSegmentation}
-            style={{ padding: '12px 24px', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '15px', fontWeight: '500' }}
+            style={{
+              padding: '11px 22px',
+              color: view === 'segmentation' ? 'white' : '#475569',
+              background: view === 'segmentation' ? '#f73194' : '#f1f5f9',
+              border: 'none',
+              borderRadius: '12px', cursor: 'pointer',
+              display: 'flex', alignItems: 'center', gap: '8px',
+              fontSize: '14px', fontWeight: '700', transition: 'all 0.2s',
+              boxShadow: view === 'segmentation' ? '0 4px 14px rgba(247,49,148,0.25)' : 'none'
+            }}
           >
             <FaChartPie />
             Segmentación
@@ -187,133 +168,129 @@ export default function Customers() {
         </div>
       </div>
 
-      {loading ? (
-        <div style={{ textAlign: 'center', padding: '80px', background: 'white', borderRadius: '16px' }}>
-          <div style={{ fontSize: '48px', color: '#f73194', marginBottom: '20px' }}>⏳</div>
-          <p style={{ fontSize: '18px', color: '#666' }}>Cargando...</p>
+      {loading && !showModal ? (
+        <div className="animate-fade-in" style={{ textAlign: 'center', padding: '100px', background: 'var(--bg-card)', borderRadius: '24px', boxShadow: 'var(--shadow)' }}>
+          <div style={{ position: 'relative', width: '80px', height: '80px', margin: '0 auto 25px' }}>
+            <div className="loading-pulse" style={{ position: 'absolute', width: '100%', height: '100%', borderRadius: '50%', background: 'var(--accent-pink-light)', animation: 'pulse 2s infinite' }}></div>
+            <div style={{ position: 'absolute', width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '32px', color: 'var(--accent-pink)' }}>⏳</div>
+          </div>
+          <p style={{ fontSize: '18px', color: 'var(--text-secondary)', fontWeight: '500' }}>Sincronizando base de datos...</p>
         </div>
       ) : (
         <>
           {view === 'list' && (
-            <>
-              <div className="search-bar" style={{ marginBottom: '30px', display: 'flex', gap: '15px' }}>
-                <div style={{ position: 'relative', flex: 1 }}>
-                  <FaSearch style={{ position: 'absolute', left: '15px', top: '50%', transform: 'translateY(-50%)', color: '#999', fontSize: '16px' }} />
+            <div className="animate-fade-in">
+              <div className="products-filters-bar" style={{
+                background: 'white',
+                borderRadius: '20px',
+                padding: '20px 28px',
+                marginBottom: '28px',
+                boxShadow: '0 4px 20px rgba(0,0,0,0.04)',
+                border: '1px solid rgba(0,0,0,0.04)'
+              }}>
+                <div style={{ position: 'relative' }}>
+                  <FaSearch style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', fontSize: '15px', zIndex: 1, pointerEvents: 'none' }} />
                   <input
                     type="text"
-                    placeholder="Buscar por nombre, email o teléfono..."
+                    placeholder="Buscar por nombre, email o teléfono de cliente..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="search-input"
-                    style={{ width: '100%', padding: '14px 14px 14px 45px', border: '2px solid #e0e0e0', borderRadius: '10px', fontSize: '15px', background: 'white', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}
+                    className="nita-search-input"
                   />
                 </div>
-
               </div>
 
-              <div className="customers-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '24px' }}>
+              <div className="customers-grid">
                 {filteredCustomers.length === 0 ? (
-                  <div className="empty-state" style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '80px 40px', background: 'white', borderRadius: '16px', boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }}>
-                    <div style={{ background: 'linear-gradient(135deg, #ffeef8 0%, #ffe0f0 100%)', width: '120px', height: '120px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 30px' }}>
-                      <FaUsers style={{ fontSize: '60px', color: '#f73194' }} />
+                  <div className="empty-state animate-fade-in" style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '100px 40px', background: 'var(--bg-card)', borderRadius: '20px', boxShadow: 'var(--shadow)' }}>
+                    <div style={{ background: 'var(--accent-pink-light)', width: '120px', height: '120px', borderRadius: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 30px', transform: 'rotate(-5deg)' }}>
+                      <FaUsers style={{ fontSize: '60px', color: 'var(--accent-pink)' }} />
                     </div>
-                    <h3 style={{ fontSize: '24px', color: '#333', margin: '0 0 12px 0', fontWeight: '600' }}>No hay clientes</h3>
-                    <p style={{ color: '#666', fontSize: '16px', margin: '0', maxWidth: '400px', marginLeft: 'auto', marginRight: 'auto' }}>Los clientes se crearán automáticamente al realizar ventas</p>
+                    <h3 style={{ fontSize: '26px', color: 'var(--text-heading)', margin: '0 0 12px 0', fontWeight: '700' }}>Sin resultados</h3>
+                    <p style={{ color: 'var(--text-secondary)', fontSize: '16px', margin: '0', maxWidth: '450px', marginLeft: 'auto', marginRight: 'auto', lineHeight: '1.6' }}>No pudimos encontrar clientes que coincidan con tu búsqueda. Prueba con otros términos.</p>
                   </div>
                 ) : (
                   filteredCustomers.map((customer, index) => (
-                    <React.Fragment key={customer.email}>
-                      <style>
-                        {`
-                          .customer-card:nth-child(${index + 1}) {
-                            animation-delay: ${0.3 + index * 0.1}s;
-                          }
-                        `}
-                      </style>
-                      <div className="customer-card" style={{ border: 'none', borderRadius: '12px', padding: '24px', background: 'white', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', borderTop: '4px solid #f73194' }}>
-                        <div className="customer-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px', paddingBottom: '15px', borderBottom: '2px solid #f5f5f5' }}>
-                          <h3 style={{ margin: 0, fontSize: '20px', color: '#333', fontWeight: '600' }}>{customer.name}</h3>
+                    <div key={customer.email} className="premium-customer-card" style={{ animationDelay: `${index * 0.05}s` }}>
+                      <div className="card-top-accent"></div>
+                      <div className="card-content">
+                        <div className="card-header">
+                          <h3 className="customer-name">{customer.name || 'Cliente Sin Nombre'}</h3>
                           <button
+                            className="view-detail-btn"
                             onClick={() => fetchCustomerDetail(customer.email)}
-                            style={{ background: '#f73194', border: 'none', color: 'white', cursor: 'pointer', fontSize: '13px', display: 'flex', alignItems: 'center', padding: '8px 16px', borderRadius: '6px', transition: 'all 0.3s ease', fontWeight: '500' }}
-                            onMouseOver={(e) => { e.currentTarget.style.transform = 'scale(1.1)'; }}
-                            onMouseOut={(e) => { e.currentTarget.style.transform = 'scale(1)'; }}
                           >
-                            Ver Detalle
+                            Ver Perfil
                           </button>
                         </div>
 
-                        <div className="customer-details" style={{ fontSize: '14px', color: '#555' }}>
-                          <p style={{ margin: '8px 0', display: 'flex', alignItems: 'center' }}>
-                            <FaEnvelope style={{ marginRight: '10px', color: '#f73194', fontSize: '14px', minWidth: '14px' }} />
+                        <div className="customer-details">
+                          <div className="customer-info-row">
+                            <FaEnvelope className="info-icon" />
                             <span style={{ wordBreak: 'break-all' }}>{customer.email}</span>
-                          </p>
+                          </div>
                           {customer.phone && (
-                            <p style={{ margin: '8px 0', display: 'flex', alignItems: 'center' }}>
-                              <FaPhone style={{ marginRight: '10px', color: '#f73194', fontSize: '14px', minWidth: '14px' }} />
+                            <div className="customer-info-row">
+                              <FaPhone className="info-icon" />
                               <span>{customer.phone}</span>
-                            </p>
+                            </div>
                           )}
                           {customer.address && (
-                            <p style={{ margin: '8px 0', display: 'flex', alignItems: 'center' }}>
-                              <FaMapMarkerAlt style={{ marginRight: '10px', color: '#f73194', fontSize: '14px', minWidth: '14px' }} />
+                            <div className="customer-info-row">
+                              <FaMapMarkerAlt className="info-icon" />
                               <span>{customer.address}</span>
-                            </p>
+                            </div>
                           )}
                         </div>
                       </div>
-                    </React.Fragment>
+                    </div>
                   ))
                 )}
               </div>
-            </>
+            </div>
           )}
 
           {view === 'segmentation' && (
-            <div style={{ background: 'white', borderRadius: '12px', padding: '24px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
-              <h3 style={{ margin: '0 0 24px 0', fontSize: '22px', color: '#333', fontWeight: '600' }}>Segmentación de Clientes</h3>
-              <div style={{ overflowX: 'auto' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <div className="segmentation-container animate-fade-in">
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
+                <h3 style={{ margin: 0, fontSize: '22px', color: 'var(--text-heading)', fontWeight: '700' }}>Segmentación de Inteligencia de Clientes</h3>
+                <div style={{ fontSize: '13px', color: 'var(--text-muted)', background: 'var(--bg-tertiary)', padding: '6px 12px', borderRadius: '8px' }}>
+                  Total Clientes: {sortedSegmentation.length}
+                </div>
+              </div>
+              <div className="table-wrapper">
+                <table className="premium-table">
                   <thead>
-                    <tr style={{ background: '#f8f9fa', borderBottom: '2px solid #f73194' }}>
-                      <th onClick={() => requestSortSeg('email')} style={{ padding: '12px', textAlign: 'left', fontWeight: '600', color: '#333', cursor: 'pointer' }}>
-                        Email {sortConfigSeg?.key === 'email' && (sortConfigSeg.direction === 'ascending' ? <FaSortUp /> : <FaSortDown />)}
+                    <tr>
+
+                      <th onClick={() => requestSortSeg('email')} style={{ cursor: 'pointer' }}>
+                        Contacto {sortConfigSeg?.key === 'email' && (sortConfigSeg.direction === 'ascending' ? <FaSortUp /> : <FaSortDown />)}
                       </th>
-                      <th onClick={() => requestSortSeg('name')} style={{ padding: '12px', textAlign: 'left', fontWeight: '600', color: '#333', cursor: 'pointer' }}>
-                        Nombre {sortConfigSeg?.key === 'name' && (sortConfigSeg.direction === 'ascending' ? <FaSortUp /> : <FaSortDown />)}
-                      </th>
-                      <th onClick={() => requestSortSeg('purchase_count')} style={{ padding: '12px', textAlign: 'left', fontWeight: '600', color: '#333', cursor: 'pointer' }}>
+                      <th onClick={() => requestSortSeg('purchase_count')} style={{ cursor: 'pointer', textAlign: 'center' }}>
                         Compras {sortConfigSeg?.key === 'purchase_count' && (sortConfigSeg.direction === 'ascending' ? <FaSortUp /> : <FaSortDown />)}
                       </th>
-                      <th onClick={() => requestSortSeg('total_spent')} style={{ padding: '12px', textAlign: 'left', fontWeight: '600', color: '#333', cursor: 'pointer' }}>
-                        Total Gastado {sortConfigSeg?.key === 'total_spent' && (sortConfigSeg.direction === 'ascending' ? <FaSortUp /> : <FaSortDown />)}
+                      <th onClick={() => requestSortSeg('total_spent')} style={{ cursor: 'pointer', textAlign: 'right' }}>
+                        Inversión Total {sortConfigSeg?.key === 'total_spent' && (sortConfigSeg.direction === 'ascending' ? <FaSortUp /> : <FaSortDown />)}
                       </th>
-                      <th onClick={() => requestSortSeg('last_purchase')} style={{ padding: '12px', textAlign: 'left', fontWeight: '600', color: '#333', cursor: 'pointer' }}>
-                        Última Compra {sortConfigSeg?.key === 'last_purchase' && (sortConfigSeg.direction === 'ascending' ? <FaSortUp /> : <FaSortDown />)}
+                      <th onClick={() => requestSortSeg('last_purchase')} style={{ cursor: 'pointer', textAlign: 'center' }}>
+                        Última Actividad {sortConfigSeg?.key === 'last_purchase' && (sortConfigSeg.direction === 'ascending' ? <FaSortUp /> : <FaSortDown />)}
                       </th>
-                      <th onClick={() => requestSortSeg('segment')} style={{ padding: '12px', textAlign: 'left', fontWeight: '600', color: '#333', cursor: 'pointer' }}>
+                      <th onClick={() => requestSortSeg('segment')} style={{ cursor: 'pointer', textAlign: 'center' }}>
                         Segmento {sortConfigSeg?.key === 'segment' && (sortConfigSeg.direction === 'ascending' ? <FaSortUp /> : <FaSortDown />)}
                       </th>
                     </tr>
                   </thead>
                   <tbody>
                     {sortedSegmentation.map(c => (
-                      <tr key={c.email} style={{ borderBottom: '1px solid #f0f0f0' }}>
-                        <td style={{ padding: '12px', fontSize: '14px' }}>{c.email}</td>
-                        <td style={{ padding: '12px', fontSize: '14px', fontWeight: '500' }}>{c.name}</td>
-                        <td style={{ padding: '12px', fontSize: '14px' }}>{c.purchase_count || 0}</td>
-                        <td style={{ padding: '12px', fontSize: '14px', fontWeight: '600', color: '#f73194' }}>{formatCurrency(c.total_spent || 0)}</td>
-                        <td style={{ padding: '12px', fontSize: '14px' }}>{c.last_purchase?.slice(0, 10) || 'N/A'}</td>
-                        <td style={{ padding: '12px' }}>
-                          <span style={{
-                            display: 'inline-block',
-                            padding: '6px 16px',
-                            borderRadius: '20px',
-                            fontSize: '13px',
-                            fontWeight: '600',
-                            background: c.segment === 'VIP' ? '#d4edda' : c.segment === 'Regular' ? '#fff3cd' : '#f8d7da',
-                            color: c.segment === 'VIP' ? '#155724' : c.segment === 'Regular' ? '#856404' : '#721c24'
-                          }}>
+                      <tr key={c.email}>
+
+                        <td style={{ fontSize: '13px', opacity: 0.8 }}>{c.email}</td>
+                        <td style={{ textAlign: 'center', fontWeight: '700' }}>{c.purchase_count || 0}</td>
+                        <td style={{ textAlign: 'right', fontWeight: '700', color: 'var(--accent-pink)' }}>{formatCurrency(c.total_spent || 0)}</td>
+                        <td style={{ textAlign: 'center', fontSize: '13px' }}>{c.last_purchase?.slice(0, 10) || 'Sin compras'}</td>
+                        <td style={{ textAlign: 'center' }}>
+                          <span className={`segment-pill ${getSegmentClass(c.segment)}`}>
+                            {c.segment === 'VIP' && <FaDollarSign style={{ fontSize: '10px' }} />}
                             {c.segment}
                           </span>
                         </td>
@@ -326,154 +303,127 @@ export default function Customers() {
           )}
 
           {showModal && (
-            <>
-              {/* Overlay */}
-              <div
-                onClick={closeModal}
-                style={{
-                  position: 'fixed',
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  backgroundColor: 'rgba(0, 0, 0, 0.5)',
-                  zIndex: 1000,
-                  animation: 'fadeIn 0.3s ease-in-out'
-                }}
-              />
-
-              {/* Modal Content */}
-              <div style={{
-                position: 'fixed',
-                top: '50%',
-                left: '50%',
-                transform: 'translate(-50%, -50%)',
-                background: 'white',
-                borderRadius: '12px',
-                padding: '30px',
-                boxShadow: '0 10px 40px rgba(0,0,0,0.2)',
-                zIndex: 1001,
-                maxWidth: '900px',
-                width: '90%',
-                maxHeight: '90vh',
-                overflowY: 'auto',
-                animation: 'fadeIn 0.3s ease-in-out'
-              }}>
-                {/* Close Button */}
-                <button
-                  onClick={closeModal}
-                  style={{
-                    position: 'absolute',
-                    top: '20px',
-                    right: '20px',
-                    background: 'transparent',
-                    border: 'none',
-                    fontSize: '24px',
-                    color: '#666',
-                    cursor: 'pointer',
-                    width: '32px',
-                    height: '32px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    borderRadius: '50%',
-                    transition: 'all 0.3s ease'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.target.style.background = '#f5f5f5';
-                    e.target.style.color = '#f73194';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.target.style.background = 'transparent';
-                    e.target.style.color = '#666';
-                  }}
-                >
-                  ✕
-                </button>
+            <div className="modal-overlay" onClick={closeModal}>
+              <div className="premium-modal" onClick={e => e.stopPropagation()}>
+                <button className="close-modal-btn" onClick={closeModal}>✕</button>
 
                 {!selectedCustomer ? (
-                  <div style={{ textAlign: 'center', padding: '60px 20px' }}>
-                    <div style={{ fontSize: '48px', color: '#f73194', marginBottom: '20px' }}>⏳</div>
-                    <p style={{ fontSize: '18px', color: '#666' }}>Cargando información del cliente...</p>
+                  <div style={{ textAlign: 'center', padding: '100px 40px' }}>
+                    <div style={{ fontSize: '48px', color: 'var(--accent-pink)', marginBottom: '20px', animation: 'pulse 1.5s infinite' }}>⏳</div>
+                    <p style={{ fontSize: '18px', color: 'var(--text-secondary)' }}>Compilando historial detallado...</p>
                   </div>
                 ) : (
                   <>
-                    <div style={{ display: 'flex', alignItems: 'center', marginBottom: '30px', paddingBottom: '20px', borderBottom: '2px solid #f5f5f5' }}>
-                      <div style={{ background: 'linear-gradient(135deg, #ffeef8 0%, #ffe0f0 100%)', width: '80px', height: '80px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', marginRight: '20px' }}>
-                        <FaUser style={{ fontSize: '40px', color: '#f73194' }} />
+                    <div className="modal-header-hero">
+                      <div className="customer-avatar-large">
+                        <FaUser />
                       </div>
-                      <div>
-                        <h2 style={{ margin: '0 0 8px 0', fontSize: '28px', color: '#333', fontWeight: '600' }}>Detalle de Cliente</h2>
-                        <p style={{ margin: 0, fontSize: '16px', color: '#666' }}>Información completa y estadísticas</p>
-                      </div>
-                    </div>
-
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '20px', marginBottom: '30px' }}>
-                      <div style={{ padding: '20px', background: '#f8f9fa', borderRadius: '8px', borderLeft: '4px solid #f73194' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
-                          <FaEnvelope style={{ marginRight: '8px', color: '#f73194' }} />
-                          <span style={{ fontSize: '12px', color: '#666', textTransform: 'uppercase', fontWeight: '600' }}>Email</span>
+                      <div className="hero-text">
+                        <h2>{selectedCustomer.name || selectedCustomer.email.split('@')[0]}</h2>
+                        <p>{selectedCustomer.email}</p>
+                        <div style={{ marginTop: '15px', display: 'flex', gap: '10px' }}>
+                          {selectedCustomer.phone && (
+                            <span style={{ background: 'rgba(255,255,255,0.2)', padding: '5px 12px', borderRadius: '20px', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                              <FaPhone style={{ fontSize: '10px' }} /> {selectedCustomer.phone}
+                            </span>
+                          )}
+                          <span style={{ background: 'var(--accent-pink)', border: '1px solid rgba(255,255,255,0.4)', padding: '5px 12px', borderRadius: '20px', fontSize: '12px', fontWeight: '700' }}>
+                            {customerStats?.segment || 'CLIENTE'}
+                          </span>
                         </div>
-                        <p style={{ margin: 0, fontSize: '16px', color: '#333', fontWeight: '500' }}>{selectedCustomer.email}</p>
                       </div>
                     </div>
 
-                    <h3 style={{ margin: '30px 0 20px 0', fontSize: '22px', color: '#333', fontWeight: '600' }}>Estadísticas</h3>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px', marginBottom: '30px' }}>
-                      <div style={{ padding: '24px', background: 'linear-gradient(135deg, #ffeef8 0%, #ffe0f0 100%)', borderRadius: '12px', textAlign: 'center' }}>
-                        <FaShoppingBag style={{ fontSize: '36px', color: '#f73194', marginBottom: '12px' }} />
-                        <p style={{ margin: '0 0 8px 0', fontSize: '32px', fontWeight: '600', color: '#f73194' }}>{customerStats?.purchase_count || 0}</p>
-                        <p style={{ margin: 0, fontSize: '14px', color: '#666', fontWeight: '500' }}>Total de Compras</p>
+                    <div className="modal-body">
+                      <div className="stats-grid">
+                        <div className="stat-premium-card" style={{ background: 'rgba(247, 49, 148, 0.03)' }}>
+                          <div className="stat-icon-circle" style={{ background: 'var(--accent-pink-light)', color: 'var(--accent-pink)' }}>
+                            <FaShoppingBag />
+                          </div>
+                          <span className="val-large">{customerStats?.purchase_count || 0}</span>
+                          <span className="label-muted">Compras Realizadas</span>
+                        </div>
+
+                        <div className="stat-premium-card" style={{ background: 'rgba(40, 167, 69, 0.03)' }}>
+                          <div className="stat-icon-circle" style={{ background: 'rgba(40, 167, 69, 0.1)', color: '#28a745' }}>
+                            <FaDollarSign />
+                          </div>
+                          <span className="val-large" style={{ color: '#28a745' }}>{formatCurrency(customerStats?.total_spent || 0)}</span>
+                          <span className="label-muted">Inversión Acumulada</span>
+                        </div>
+
+                        <div className="stat-premium-card" style={{ background: 'rgba(255, 193, 7, 0.03)' }}>
+                          <div className="stat-icon-circle" style={{ background: 'rgba(255, 193, 7, 0.1)', color: '#ffc107' }}>
+                            <FaCalendarAlt />
+                          </div>
+                          <span className="val-large" style={{ fontSize: '18px', color: '#856404' }}>{customerStats?.last_purchase?.slice(0, 10) || 'N/A'}</span>
+                          <span className="label-muted">Última Visita</span>
+                        </div>
                       </div>
 
-                      <div style={{ padding: '24px', background: 'linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%)', borderRadius: '12px', textAlign: 'center' }}>
-                        <FaDollarSign style={{ fontSize: '36px', color: '#155724', marginBottom: '12px' }} />
-                        <p style={{ margin: '0 0 8px 0', fontSize: '32px', fontWeight: '600', color: '#155724' }}>{formatCurrency(customerStats?.total_spent || 0)}</p>
-                        <p style={{ margin: 0, fontSize: '14px', color: '#666', fontWeight: '500' }}>Total Gastado</p>
+                      <div className="modal-section-title">
+                        <FaShoppingBag />
+                        <h3>Historial de Movimientos</h3>
                       </div>
 
-                      <div style={{ padding: '24px', background: 'linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%)', borderRadius: '12px', textAlign: 'center' }}>
-                        <FaCalendarAlt style={{ fontSize: '36px', color: '#856404', marginBottom: '12px' }} />
-                        <p style={{ margin: '0 0 8px 0', fontSize: '18px', fontWeight: '600', color: '#856404' }}>{customerStats?.last_purchase?.slice(0, 10) || 'N/A'}</p>
-                        <p style={{ margin: 0, fontSize: '14px', color: '#666', fontWeight: '500' }}>Última Compra</p>
-                      </div>
-                    </div>
-
-                    <h3 style={{ margin: '30px 0 20px 0', fontSize: '22px', color: '#333', fontWeight: '600' }}>Historial de Compras</h3>
-                    <div style={{ overflowX: 'auto' }}>
-                      <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                        <thead>
-                          <tr style={{ background: '#f8f9fa', borderBottom: '2px solid #f73194' }}>
-                            <th style={{ padding: '12px', textAlign: 'left', fontWeight: '600', color: '#333' }}>Fecha</th>
-                            <th style={{ padding: '12px', textAlign: 'left', fontWeight: '600', color: '#333' }}>Productos</th>
-                            <th style={{ padding: '12px', textAlign: 'right', fontWeight: '600', color: '#333' }}>Total</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {purchaseHistory.map(s => (
-                            <tr key={s.id} style={{ borderBottom: '1px solid #f0f0f0' }}>
-                              <td style={{ padding: '12px', fontSize: '14px' }}>{s.sale_date?.slice(0, 10)}</td>
-                              <td style={{ padding: '12px', fontSize: '14px' }}>{s.items}</td>
-                              <td style={{ padding: '12px', fontSize: '14px', fontWeight: '600', color: '#f73194', textAlign: 'right' }}>{formatCurrency(s.total || 0)}</td>
+                      <div className="table-wrapper" style={{ boxShadow: 'none', border: '1px solid var(--border-color)', background: 'var(--bg-tertiary)' }}>
+                        <table className="premium-table">
+                          <thead>
+                            <tr>
+                              <th style={{ background: 'transparent' }}>Fecha de Compra</th>
+                              <th style={{ background: 'transparent' }}>Resumen de Productos</th>
+                              <th style={{ background: 'transparent', textAlign: 'right' }}>Total Transacción</th>
                             </tr>
-                          ))}
-                        </tbody>
-                      </table>
+                          </thead>
+                          <tbody>
+                            {purchaseHistory.length === 0 ? (
+                              <tr>
+                                <td colSpan="3" style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>
+                                  No se registran compras previas para este cliente.
+                                </td>
+                              </tr>
+                            ) : (
+                              purchaseHistory.map(s => (
+                                <tr key={s.id}>
+                                  <td style={{ fontWeight: '600' }}>{s.sale_date?.slice(0, 10)}</td>
+                                  <td style={{ fontSize: '13px' }}>{s.items}</td>
+                                  <td style={{ textAlign: 'right', fontWeight: '700', color: 'var(--accent-pink)' }}>{formatCurrency(s.total || 0)}</td>
+                                </tr>
+                              ))
+                            )}
+                          </tbody>
+                        </table>
+                      </div>
+
+                      {selectedCustomer.address && (
+                        <>
+                          <div className="modal-section-title">
+                            <FaMapMarkerAlt />
+                            <h3>Información de Entrega</h3>
+                          </div>
+                          <div style={{ padding: '20px', background: 'var(--bg-tertiary)', borderRadius: '15px', border: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', gap: '15px' }}>
+                            <div style={{ background: 'var(--bg-card)', width: '40px', height: '40px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                              <FaMapMarkerAlt style={{ color: 'var(--accent-pink)' }} />
+                            </div>
+                            <span style={{ fontSize: '15px', fontWeight: '500' }}>{selectedCustomer.address}</span>
+                          </div>
+                        </>
+                      )}
                     </div>
                   </>
                 )}
               </div>
-            </>
+            </div>
           )}
         </>
       )}
       {/* Modal de funcionalidad próxima a implementar */}
       {showComingSoon && (
         <div className="sidebar-modal-overlay" onClick={() => setShowComingSoon(false)}>
-          <div className="sidebar-modal" onClick={e => e.stopPropagation()}>
-            <div className="sidebar-modal-title">Funcionalidad Próxima a implementar</div>
-            <div className="sidebar-modal-desc">La sección <b>Segmentación</b> estará disponible próximamente.</div>
-            <button className="sidebar-modal-btn" onClick={() => setShowComingSoon(false)}>Cerrar</button>
+          <div className="sidebar-modal animate-fade-in" onClick={e => e.stopPropagation()}>
+            <div className="sidebar-modal-title">Actualización de Sistema</div>
+            <div className="sidebar-modal-desc">La sección de inteligencia de datos se está optimizando para brindarte mejores métricas.</div>
+            <button className="sidebar-modal-btn" onClick={() => setShowComingSoon(false)}>Entendido</button>
           </div>
         </div>
       )}

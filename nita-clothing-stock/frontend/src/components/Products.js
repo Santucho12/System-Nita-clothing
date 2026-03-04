@@ -8,6 +8,8 @@ import {
   FaTimesCircle, FaEye, FaSave, FaBoxes, FaUser, FaCamera
 } from 'react-icons/fa';
 
+import './Sidebar.css';
+
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 const BASE_URL = API_URL.replace('/api', '');
 
@@ -407,176 +409,211 @@ const Products = () => {
   };
 
   return (
-    <div style={{ padding: '30px', background: 'var(--bg-gradient)', minHeight: '100vh' }}>
+    <div style={{ padding: '30px', background: 'var(--bg-secondary)', minHeight: '100vh' }}>
       <style>
         {`
+          @keyframes fadeSlideUp {
+            from { opacity: 0; transform: translateY(16px); }
+            to { opacity: 1; transform: translateY(0); }
+          }
+
           @keyframes perspective3DFlip {
-            0% {
-              opacity: 0;
-              transform: perspective(1000px) rotateY(-15deg) rotateX(10deg);
-            }
-            100% {
-              opacity: 1;
-              transform: perspective(1000px) rotateY(0deg) rotateX(0deg);
-            }
+            0% { opacity: 0; transform: perspective(1000px) rotateY(-15deg) rotateX(10deg); }
+            100% { opacity: 1; transform: perspective(1000px) rotateY(0deg) rotateX(0deg); }
           }
 
-          .page-header {
-            animation: perspective3DFlip 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+          .products-hero {
+            animation: fadeSlideUp 0.6s ease both;
           }
 
-          .filters-section {
-            animation: perspective3DFlip 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 0.15s both;
+          .products-filters-bar {
+            animation: fadeSlideUp 0.6s ease 0.12s both;
           }
 
-          .product-card {
-            animation: perspective3DFlip 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) both;
-            transition: all 0.3s ease;
-          }
-
-          .product-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 16px rgba(247, 49, 148, 0.2) !important;
+          .product-card-premium {
+            animation: fadeSlideUp 0.5s ease both;
           }
 
           .empty-state {
-            animation: perspective3DFlip 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s both;
+            animation: fadeSlideUp 0.6s ease 0.3s both;
           }
 
-          .btn-pink {
-            background: #f73194;
-            transition: all 0.3s ease;
+          /* ---- Buttons ---- */
+          .btn-pink { background: #f73194; transition: all 0.3s ease; }
+          .btn-pink:hover { transform: translateY(-2px) !important; box-shadow: 0 6px 20px rgba(247,49,148,0.35) !important; background: #f73194 !important; }
+
+          .btn-gray { background: #6c757d; transition: all 0.3s ease; }
+          .btn-gray:hover { transform: translateY(-2px) !important; background: #5a6268 !important; }
+
+          .btn-green { background: #495057; transition: all 0.3s ease; }
+          .btn-green:hover { transform: translateY(-2px) !important; background: #3d4349 !important; }
+
+          .btn-red { background: #dc3545; transition: all 0.3s ease; }
+          .btn-red:hover { transform: translateY(-2px) !important; background: #c82333 !important; }
+
+          /* ---- Search / Filter inputs ---- */
+          .nita-search-input {
+            width: 100%;
+            padding: 13px 18px 13px 44px;
+            border: 2px solid #e2e8f0;
+            border-radius: 14px;
+            font-size: 15px;
+            font-weight: 500;
+            color: #1e293b;
+            background: #f8fafc;
+            transition: all 0.25s ease;
+            box-sizing: border-box;
+          }
+          .nita-search-input:focus {
+            outline: none;
+            border-color: #f73194;
+            background: #fff;
+            box-shadow: 0 0 0 4px rgba(247,49,148,0.08);
+          }
+          .nita-search-input::placeholder { color: #94a3b8; font-weight: 400; }
+
+          .nita-filter-select {
+            width: 100%;
+            padding: 13px 14px;
+            border: 2px solid #e2e8f0;
+            border-radius: 14px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #1e293b;
+            background: #f8fafc;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            box-sizing: border-box;
+            appearance: none;
+            -webkit-appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M6 8L1 3h10z' fill='%2394a3b8'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+            padding-right: 36px;
+          }
+          .nita-filter-select:focus {
+            outline: none;
+            border-color: #f73194;
+            background-color: #fff;
+            box-shadow: 0 0 0 4px rgba(247,49,148,0.08);
           }
 
-          .btn-pink:hover {
-            transform: scale(1.1) !important;
-            background: #f73194 !important;
+          /* ---- Clear filter chip ---- */
+          .clear-filters-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            border-radius: 50px;
+            border: 1px solid #e2e8f0;
+            background: white;
+            color: #64748b;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+          }
+          .clear-filters-chip:hover {
+            background: #fee2e2;
+            border-color: #fecaca;
+            color: #dc2626;
           }
 
-          .btn-gray {
-            background: #6c757d;
-            transition: all 0.3s ease;
-          }
-
-          .btn-gray:hover {
-            transform: scale(1.1) !important;
-            background: #6c757d !important;
-          }
-
-          .btn-green {
-            background: #495057;
-            transition: all 0.3s ease;
-          }
-
-          .btn-green:hover {
-            transform: scale(1.1) !important;
-            background: #495057 !important;
-          }
-
-          .btn-red {
-            background: #dc3545;
-            transition: all 0.3s ease;
-          }
-
-          .btn-red:hover {
-            transform: scale(1.1) !important;
-            background: #dc3545 !important;
-          }
-
-          .search-input, .filter-input, .filter-select {
-            transition: all 0.3s ease;
-          }
-
-          .search-input:focus, .filter-input:focus, .filter-select:focus {
-            border-color: #f73194 !important;
-            box-shadow: 0 0 0 3px rgba(247, 49, 148, 0.1) !important;
-            outline: none !important;
-          }
-
+          /* ---- Form Styles ---- */
           .form-input:focus {
             border-color: #f73194 !important;
             box-shadow: 0 0 0 3px rgba(247, 49, 148, 0.1) !important;
             outline: none !important;
           }
 
-          /* Premium Form Styles */
-          .form-group-premium {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-          }
+          .form-group-premium { display: flex; flex-direction: column; gap: 8px; }
 
           .label-premium {
-            font-size: 13px;
-            font-weight: 700;
-            color: #64748b;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            text-transform: uppercase;
-            letter-spacing: 0.02em;
+            font-size: 13px; font-weight: 700; color: #64748b;
+            display: flex; align-items: center; gap: 8px;
+            text-transform: uppercase; letter-spacing: 0.02em;
           }
-
-          .label-premium svg {
-            color: #f73194;
-            font-size: 14px;
-          }
+          .label-premium svg { color: #f73194; font-size: 14px; }
 
           .input-premium {
-            width: 100%;
-            padding: 12px 16px;
-            border: 2px solid #f1f5f9;
-            border-radius: 12px;
-            font-size: 15px;
-            font-weight: 500;
-            color: #1e293b;
-            transition: all 0.2s ease;
-            background: #f8fafc;
+            width: 100%; padding: 12px 16px;
+            border: 2px solid #f1f5f9; border-radius: 12px;
+            font-size: 15px; font-weight: 500; color: #1e293b;
+            transition: all 0.2s ease; background: #f8fafc;
           }
-
           .input-premium:focus {
-            outline: none;
-            border-color: #f73194;
-            background: white;
-            box-shadow: 0 0 0 4px rgba(247, 49, 148, 0.1);
+            outline: none; border-color: #f73194;
+            background: white; box-shadow: 0 0 0 4px rgba(247,49,148,0.1);
           }
-
-          .input-premium::placeholder {
-            color: #94a3b8;
-          }
+          .input-premium::placeholder { color: #94a3b8; }
 
           @keyframes modalSlideUp {
-            from {
-              opacity: 0;
-              transform: translateY(20px) scale(0.98);
-            }
-            to {
-              opacity: 1;
-              transform: translateY(0) scale(1);
-            }
+            from { opacity: 0; transform: translateY(20px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
           }
         `}
       </style>
 
-      {/* Header */}
-      <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px', background: 'white', padding: '25px', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
-        <h1 style={{ display: 'flex', alignItems: 'center', margin: 0, fontSize: '28px', color: '#333', fontWeight: '600' }}>
-          <FaTshirt style={{ marginRight: '12px', color: '#f73194', fontSize: '32px' }} />
-          Stock de Ropa
-        </h1>
+      {/* ═══════ HERO HEADER ═══════ */}
+      <div className="products-hero" style={{
+        background: 'white',
+        borderRadius: '20px',
+        padding: '28px 36px',
+        marginBottom: '24px',
+        boxShadow: '0 4px 20px rgba(0,0,0,0.04)',
+        border: '1px solid rgba(0,0,0,0.04)',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '18px' }}>
+          <div style={{
+            background: 'linear-gradient(135deg, #fff0f7, #ffe0ef)',
+            padding: '14px',
+            borderRadius: '16px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}>
+            <FaTshirt style={{ color: '#f73194', fontSize: '26px' }} />
+          </div>
+          <div>
+            <h1 style={{ margin: 0, fontSize: '24px', fontWeight: '800', color: '#1e293b', letterSpacing: '-0.02em' }}>
+              Stock de Ropa
+            </h1>
+            <p style={{ margin: '2px 0 0', fontSize: '14px', color: '#94a3b8', fontWeight: '500' }}>
+              {products.filter(p => (Number(p.stock) || 0) > 0).length} en stock y {products.filter(p => (Number(p.stock) || 0) <= 0).length} sin stock
+            </p>
+          </div>
+        </div>
+
         <div style={{ display: 'flex', gap: '10px' }}>
           <button
-            className="btn-green"
             onClick={handleExport}
-            style={{ padding: '12px 24px', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '15px', fontWeight: '500' }}
+            style={{
+              padding: '11px 22px', color: '#475569', background: '#f1f5f9',
+              border: '1px solid #e2e8f0', borderRadius: '12px', cursor: 'pointer',
+              display: 'flex', alignItems: 'center', gap: '8px',
+              fontSize: '14px', fontWeight: '600', transition: 'all 0.2s'
+            }}
+            onMouseOver={(e) => { e.currentTarget.style.background = '#e2e8f0'; }}
+            onMouseOut={(e) => { e.currentTarget.style.background = '#f1f5f9'; }}
           >
             <FaFileExcel />
-            Exportar Excel
+            Exportar
           </button>
           <button
-            className="btn-pink"
             onClick={() => setShowForm(true)}
-            style={{ padding: '12px 24px', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '15px', fontWeight: '500' }}
+            style={{
+              padding: '11px 24px', color: 'white', background: '#f73194',
+              border: 'none', borderRadius: '12px', cursor: 'pointer',
+              display: 'flex', alignItems: 'center', gap: '8px',
+              fontSize: '14px', fontWeight: '700', transition: 'all 0.2s',
+              boxShadow: '0 4px 14px rgba(247,49,148,0.25)'
+            }}
+            onMouseOver={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 20px rgba(247,49,148,0.35)'; }}
+            onMouseOut={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(247,49,148,0.25)'; }}
           >
             <FaPlus />
             Nuevo Producto
@@ -584,106 +621,101 @@ const Products = () => {
         </div>
       </div>
 
-      <div className="filters-section" style={{ background: 'white', padding: '24px 32px', borderRadius: '14px', boxShadow: '0 2px 12px rgba(0,0,0,0.10)', marginBottom: '32px' }}>
-        <div style={{ display: 'flex', gap: '18px', alignItems: 'flex-end', width: '100%' }}>
-          {/* Buscar */}
-          <div style={{ flex: '2.5 1 0', minWidth: 0 }}>
-            <label style={{ display: 'flex', alignItems: 'center', marginBottom: '5px', fontSize: '12px', fontWeight: '600', color: '#555', whiteSpace: 'nowrap' }}>
-              <FaSearch style={{ marginRight: '4px', color: '#f73194', fontSize: '11px' }} />
-              Buscar
-            </label>
+      {/* ═══════ FILTERS BAR ═══════ */}
+      <div className="products-filters-bar" style={{
+        background: 'white',
+        borderRadius: '20px',
+        padding: '20px 28px',
+        marginBottom: '28px',
+        boxShadow: '0 4px 20px rgba(0,0,0,0.04)',
+        border: '1px solid rgba(0,0,0,0.04)'
+      }}>
+        <div style={{ display: 'flex', gap: '14px', alignItems: 'center', flexWrap: 'wrap' }}>
+
+          {/* Buscador con ícono integrado */}
+          <div style={{ flex: '2.5 1 220px', position: 'relative' }}>
+            <FaSearch style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', fontSize: '15px', zIndex: 1, pointerEvents: 'none' }} />
             <input
               type="text"
-              placeholder="Nombre, SKU o color..."
+              placeholder="Buscar por nombre, SKU o color..."
               value={searchTerm}
               onChange={(e) => handleSearchInput(e.target.value)}
-              className="filter-input"
-              style={{ width: '100%', padding: '14px 18px', border: '2px solid #e0e0e0', borderRadius: '10px', fontSize: '16px', boxSizing: 'border-box' }}
+              className="nita-search-input"
             />
           </div>
 
+          {/* Separador vertical */}
+          <div style={{ width: '1px', height: '36px', background: '#e2e8f0', flexShrink: 0 }} />
+
           {/* Categoría */}
-          <div style={{ flex: '1.5 1 0', minWidth: 0 }}>
-            <label style={{ display: 'flex', alignItems: 'center', marginBottom: '5px', fontSize: '12px', fontWeight: '600', color: '#555', whiteSpace: 'nowrap' }}>
-              <FaTag style={{ marginRight: '4px', color: '#f73194', fontSize: '11px' }} />
-              Categoría
-            </label>
-            <div style={{ display: 'flex', gap: '5px' }}>
-              <select
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-                className="filter-input"
-                style={{ flex: 1, minWidth: 0, padding: '14px 10px', border: '2px solid #e0e0e0', borderRadius: '10px', fontSize: '16px', cursor: 'pointer', boxSizing: 'border-box' }}
-              >
-                <option value="">Todas</option>
-                {categories.map(category => (
-                  <option key={category.id} value={category.id}>
-                    {category.name}
-                  </option>
-                ))}
-              </select>
-              <button
-                onClick={() => setShowCategoryForm(true)}
-                title="Nueva categoría"
-                style={{ padding: '14px 14px', background: '#f73194', color: 'white', border: 'none', borderRadius: '10px', cursor: 'pointer', fontSize: '18px', fontWeight: 'bold', transition: 'all 0.3s', flexShrink: 0 }}
-                onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
-                onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
-              >
-                +
-              </button>
-            </div>
+          <div style={{ flex: '1 1 140px', display: 'flex', gap: '6px', alignItems: 'center' }}>
+            <select
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+              className="nita-filter-select"
+            >
+              <option value="">Categoría</option>
+              {categories.map(category => (
+                <option key={category.id} value={category.id}>
+                  {category.name}
+                </option>
+              ))}
+            </select>
+            <button
+              onClick={() => setShowCategoryForm(true)}
+              title="Nueva categoría"
+              style={{
+                width: '42px', height: '42px', flexShrink: 0,
+                background: '#f73194', color: 'white', border: 'none',
+                borderRadius: '12px', cursor: 'pointer', fontSize: '16px',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                transition: 'all 0.2s', fontWeight: 'bold'
+              }}
+              onMouseOver={(e) => { e.currentTarget.style.transform = 'scale(1.08)'; }}
+              onMouseOut={(e) => { e.currentTarget.style.transform = 'scale(1)'; }}
+            >
+              +
+            </button>
           </div>
 
           {/* Talle */}
-          <div style={{ flex: '1.2 1 0', minWidth: 0 }}>
-            <label style={{ display: 'flex', alignItems: 'center', marginBottom: '5px', fontSize: '12px', fontWeight: '600', color: '#555', whiteSpace: 'nowrap' }}>
-              <FaRulerVertical style={{ marginRight: '4px', color: '#f73194', fontSize: '11px' }} />
-              Talle
-            </label>
+          <div style={{ flex: '0.8 1 110px' }}>
             <select
               value={selectedSize}
               onChange={e => setSelectedSize(e.target.value)}
-              className="filter-input"
-              style={{ width: '100%', padding: '14px 10px', border: '2px solid #e0e0e0', borderRadius: '10px', fontSize: '16px', cursor: 'pointer', boxSizing: 'border-box' }}
+              className="nita-filter-select"
             >
-              <option value="">Todos</option>
+              <option value="">Talle</option>
               <option value="Talle único">Talle único</option>
               <option value="S">S</option>
               <option value="M">M</option>
               <option value="L">L</option>
+              <option value="XL">XL</option>
               <option value="36">36</option>
               <option value="38">38</option>
               <option value="40">40</option>
               <option value="42">42</option>
+              <option value="44">44</option>
             </select>
           </div>
 
-
-
           {/* Estado */}
-          <div style={{ flex: '1.2 1 0', minWidth: 0 }}>
-            <label style={{ display: 'flex', alignItems: 'center', marginBottom: '5px', fontSize: '12px', fontWeight: '600', color: '#555', whiteSpace: 'nowrap' }}>
-              <FaCheckCircle style={{ marginRight: '4px', color: '#f73194', fontSize: '11px' }} />
-              Estado
-            </label>
+          <div style={{ flex: '0.8 1 110px' }}>
             <select
               value={selectedStatus}
               onChange={e => setSelectedStatus(e.target.value)}
-              className="filter-input"
-              style={{ width: '100%', padding: '14px 10px', border: '2px solid #e0e0e0', borderRadius: '10px', fontSize: '16px', cursor: 'pointer', boxSizing: 'border-box' }}
+              className="nita-filter-select"
             >
-              <option value="">Todos</option>
+              <option value="">Estado</option>
               <option value="activo">Activo</option>
               <option value="sin_stock">Sin stock</option>
             </select>
           </div>
 
-
-
           {/* Limpiar filtros */}
           {(selectedCategory || searchTerm || selectedSize || selectedStatus) && (
             <button
-              className="btn-secondary"
+              className="clear-filters-chip"
               onClick={() => {
                 setSelectedCategory('');
                 setSearchTerm('');
@@ -691,9 +723,8 @@ const Products = () => {
                 setSelectedSize('');
                 loadProducts();
               }}
-              style={{ padding: '8px 14px', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px', fontSize: '13px', fontWeight: '500', background: '#343a40', whiteSpace: 'nowrap', flexShrink: 0, alignSelf: 'flex-end' }}
             >
-              <FaTimes />
+              <FaTimes style={{ fontSize: '11px' }} />
               Limpiar
             </button>
           )}
@@ -1043,27 +1074,53 @@ const Products = () => {
 
                 {/* Información */}
                 <div className="product-info-premium">
-                  <span className="product-category-tag">{getCategoryName(product.categoria_id || product.category_id)}</span>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                    <span className="product-category-tag">{getCategoryName(product.categoria_id || product.category_id)}</span>
+                    <span style={{ fontSize: '11px', color: '#94a3b8', fontWeight: '600' }}>
+                      SKU {product.sku || product.codigo || '-'}
+                    </span>
+                  </div>
                   <h3 className="product-name-premium">{product.name}</h3>
 
-                  <div style={{ display: 'flex', gap: '8px', marginBottom: '15px', flexWrap: 'wrap' }}>
-                    <span style={{ fontSize: '12px', background: '#f8fafc', padding: '4px 8px', borderRadius: '4px', color: '#64748b', border: '1px solid #e2e8f0' }}>
-                      <b>SKU:</b> {product.sku || product.codigo || '-'}
-                    </span>
-                    {product.tallas && (
-                      <span style={{ fontSize: '12px', background: '#f8fafc', padding: '4px 8px', borderRadius: '4px', color: '#64748b', border: '1px solid #e2e8f0' }}>
-                        <b>Talle:</b> {product.tallas}
+                  {/* Chips de Talle y Color */}
+                  <div style={{ display: 'flex', gap: '6px', marginBottom: '14px', flexWrap: 'wrap' }}>
+                    {(product.tallas || product.size) && (
+                      <span style={{
+                        fontSize: '11px', background: '#f1f5f9', padding: '3px 10px',
+                        borderRadius: '6px', color: '#475569', fontWeight: '600',
+                        display: 'inline-flex', alignItems: 'center', gap: '4px'
+                      }}>
+                        <FaRulerVertical style={{ fontSize: '9px', color: '#94a3b8' }} />
+                        {product.tallas || product.size}
+                      </span>
+                    )}
+                    {(product.colores || product.color) && (
+                      <span style={{
+                        fontSize: '11px', background: '#f1f5f9', padding: '3px 10px',
+                        borderRadius: '6px', color: '#475569', fontWeight: '600',
+                        display: 'inline-flex', alignItems: 'center', gap: '4px'
+                      }}>
+                        <FaPalette style={{ fontSize: '9px', color: '#94a3b8' }} />
+                        {product.colores || product.color}
                       </span>
                     )}
                   </div>
 
+                  {/* Precio y Stock */}
                   <div className="product-details-row">
                     <div className="product-price-premium">
-                      <span className="price-label-premium">Precio Venta</span>
                       <span className="price-value-premium">${product.precio || product.sale_price}</span>
                     </div>
 
-
+                    <div style={{
+                      display: 'flex', alignItems: 'center', gap: '6px',
+                      padding: '5px 12px', borderRadius: '8px', fontSize: '12px', fontWeight: '700',
+                      background: isSinStock ? '#fef2f2' : product.quantity <= 3 ? '#fffbeb' : '#f0fdf4',
+                      color: isSinStock ? '#dc2626' : product.quantity <= 3 ? '#d97706' : '#16a34a'
+                    }}>
+                      <FaBox style={{ fontSize: '10px' }} />
+                      {product.quantity} uds
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1180,11 +1237,11 @@ const Products = () => {
 
       {/* Modal de funcionalidad próxima */}
       {showExportModal && (
-        <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.18)', zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={() => setShowExportModal(false)}>
-          <div style={{ background: '#fff', borderRadius: '14px', boxShadow: '0 8px 32px rgba(0,0,0,0.18)', padding: '32px 28px 24px 28px', minWidth: '320px', maxWidth: '90vw', textAlign: 'center', animation: 'sidebarModalIn 0.18s cubic-bezier(.4,1.4,.6,1) both' }} onClick={e => e.stopPropagation()}>
-            <div style={{ fontSize: '1.25rem', fontWeight: '700', marginBottom: '12px', color: '#c8b273', letterSpacing: '0.5px' }}>Funcionalidad Próxima a implementar</div>
-            <div style={{ fontSize: '1rem', color: '#444', marginBottom: '22px' }}>La sección <b>Exportar a Excel</b> estará disponible próximamente.</div>
-            <button style={{ background: '#c8b273', color: '#fff', border: 'none', borderRadius: '6px', padding: '8px 22px', fontSize: '1rem', fontWeight: '500', cursor: 'pointer', transition: 'background 0.18s' }} onClick={() => setShowExportModal(false)} onMouseOver={(e) => e.currentTarget.style.background = '#a08d5c'} onMouseOut={(e) => e.currentTarget.style.background = '#c8b273'}>Cerrar</button>
+        <div className="sidebar-modal-overlay" onClick={() => setShowExportModal(false)}>
+          <div className="sidebar-modal" onClick={e => e.stopPropagation()}>
+            <div className="sidebar-modal-title">Funcionalidad Próxima a implementar</div>
+            <div className="sidebar-modal-desc">La sección <b>Exportar a Excel</b> estará disponible próximamente.</div>
+            <button className="sidebar-modal-btn" onClick={() => setShowExportModal(false)}>Cerrar</button>
           </div>
         </div>
       )}

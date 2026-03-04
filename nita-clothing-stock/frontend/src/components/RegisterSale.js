@@ -2,11 +2,11 @@ import React, { useState, useEffect } from 'react';
 import api from '../services/api';
 import { productService, categoryService } from '../services/api';
 import { formatCurrency, formatNumber } from '../utils/formatters';
-import { FaShoppingCart, FaPlus, FaTrash, FaBox, FaHashtag, FaDollarSign, FaEnvelope, FaCreditCard, FaPercent, FaCheckCircle, FaTimesCircle, FaBarcode, FaTshirt, FaPalette, FaRulerVertical, FaTag } from 'react-icons/fa';
+import { FaShoppingCart, FaPlus, FaTrash, FaBox, FaHashtag, FaDollarSign, FaEnvelope, FaCreditCard, FaPercent, FaCheckCircle, FaTimesCircle, FaBarcode, FaTshirt, FaPalette, FaRulerVertical, FaTag, FaArrowRight } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 
 const initialItem = {
-  searchMethod: 'sku', // 'sku' o 'details'
+  searchMethod: 'details', // 'sku' o 'details'
   sku: '',
   category_id: '',
   product_name: '',
@@ -29,9 +29,43 @@ export default function RegisterSale() {
   const [discountAmount, setDiscountAmount] = useState(0);
   const [loading, setLoading] = useState(false);
 
+  const scrollContainerRef = React.useRef(null);
+
+  const customSlowScroll = (targetY, duration) => {
+    const startingY = window.pageYOffset;
+    const diff = targetY - startingY;
+    let start;
+
+    window.requestAnimationFrame(function step(timestamp) {
+      if (!start) start = timestamp;
+      const time = timestamp - start;
+      const percent = Math.min(time / duration, 1);
+
+      // Easing function (easeInOutCubic)
+      const easing = percent < 0.5
+        ? 4 * percent * percent * percent
+        : 1 - Math.pow(-2 * percent + 2, 3) / 2;
+
+      window.scrollTo(0, startingY + diff * easing);
+
+      if (time < duration) {
+        window.requestAnimationFrame(step);
+      }
+    });
+  };
+
   useEffect(() => {
-    loadCategories();
-    loadProducts();
+    const initData = async () => {
+      await Promise.all([loadCategories(), loadProducts()]);
+
+      setTimeout(() => {
+        if (scrollContainerRef.current) {
+          customSlowScroll(205, 1500); // 2.0 segundos para desplazarse 200px
+        }
+      }, 400);
+    };
+
+    initData();
   }, []);
 
   const loadCategories = async () => {
@@ -218,591 +252,592 @@ export default function RegisterSale() {
   };
 
   return (
-    <div style={{ padding: '30px', background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)', minHeight: '100vh' }}>
+    <div ref={scrollContainerRef} style={{ padding: '30px', background: 'var(--bg-secondary)', minHeight: '100vh' }}>
       <style>
         {`
-          @keyframes perspective3DFlip {
-            0% {
-              opacity: 0;
-              transform: perspective(1000px) rotateY(-15deg) rotateX(10deg);
-            }
-            100% {
-              opacity: 1;
-              transform: perspective(1000px) rotateY(0deg) rotateX(0deg);
-            }
+          @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
           }
 
-          .page-header {
-            animation: perspective3DFlip 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+          .animate-fade-in {
+            animation: fadeInUp 0.5s ease forwards;
           }
 
-          .sale-form-card {
-            animation: perspective3DFlip 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 0.15s both;
+          .nita-card {
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.04);
+            border: 1px solid rgba(0,0,0,0.03);
+            overflow: hidden;
+            transition: all 0.3s ease;
           }
 
-          .total-card {
-            animation: perspective3DFlip 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 0.25s both;
+          .nita-input-group {
+            margin-bottom: 20px;
           }
 
-          .btn-pink {
-            background: #f73194;
+          .nita-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            font-weight: 700;
+            color: #475569;
+            margin-bottom: 10px;
+            letter-spacing: -0.01em;
+          }
+
+          .nita-input {
+            width: 100%;
+            padding: 14px 18px;
+            border-radius: 12px;
+            border: 1.5px solid #e2e8f0;
+            background: #f8fafc;
+            font-size: 15px;
+            font-weight: 500;
+            color: #1e293b;
+            transition: all 0.2s ease;
+          }
+
+          .nita-input:focus {
+            outline: none;
+            border-color: #f73194;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(247, 49, 148, 0.08);
+          }
+
+          .nita-select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2394a3b8'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+            background-size: 16px;
+          }
+
+          .method-card {
+            flex: 1;
+            padding: 20px 10px;
+            border: 2px solid #f1f5f9;
+            border-radius: 18px;
+            background: white;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          }
+
+          .method-card:hover {
+            border-color: #f73194;
+            transform: translateY(-4px);
+            background: #fff0f7;
+          }
+
+          .method-card.active {
+            border-color: #f73194;
+            background: #fff0f7;
+            box-shadow: 0 8px 16px rgba(247, 49, 148, 0.1);
+          }
+
+          .method-card .icon-placeholder {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f8fafc;
+            border-radius: 10px;
+            margin-bottom: 2px;
+          }
+
+          .method-card.active .icon-placeholder {
+            background: white;
+            color: #f73194;
+          }
+
+          .method-name {
+            font-size: 11px;
+            font-weight: 850;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #64748b;
+          }
+
+          .method-card.active .method-name {
+            color: #f73194;
+          }
+
+          .btn-add-item {
+            width: 100%;
+            padding: 16px;
+            border: 2px dashed #e2e8f0;
+            border-radius: 16px;
+            background: rgba(248, 250, 252, 0.5);
+            color: #64748b;
+            font-weight: 700;
+            font-size: 15px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.2s ease;
+            margin-top: 10px;
+          }
+
+          .btn-add-item:hover {
+            border-color: #f73194;
+            color: #f73194;
+            background: #fff0f7;
+          }
+
+          .product-item-card {
+            position: relative;
+            padding: 25px;
+            background: white;
+            border-radius: 20px;
+            margin-bottom: 25px;
+            border: 1px solid #f1f5f9;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.02);
             transition: all 0.3s ease;
           }
-          .btn-pink:hover {
-            transform: scale(1.1);
+
+          .product-item-card:hover {
+            box-shadow: 0 8px 24px rgba(0,0,0,0.05);
+            border-color: #e2e8f0;
           }
-          .btn-secondary {
-            background: #2d2d2d;
-            transition: all 0.6s ease;
+
+          .remove-item-btn {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            width: 32px;
+            height: 32px;
+            border-radius: 10px;
+            background: #fee2e2;
+            color: #ef4444;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(239, 68, 68, 0.2);
+            transition: all 0.2s ease;
+            z-index: 10;
           }
-          .btn-secondary:hover {
-            transform: scale(1.1);
+
+          .remove-item-btn:hover {
+            background: #ef4444;
+            color: white;
+            transform: rotate(90deg) scale(1.1);
           }
-          .btn-danger {
-            background: #dc3545;
-            transition: all 0.3s ease;
+
+          .btn-register-sale {
+            width: 100%;
+            padding: 20px;
+            border-radius: 20px;
+            background: linear-gradient(135deg, #f73194 0%, #ff6b9d 100%);
+            color: white;
+            font-size: 20px;
+            font-weight: 900;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            box-shadow: 0 10px 25px rgba(247, 49, 148, 0.3);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
           }
-          .btn-danger:hover {
-            transform: scale(1.1);
+
+          .btn-register-sale:hover:not(:disabled) {
+            transform: translateY(-4px);
+            box-shadow: 0 15px 35px rgba(247, 49, 148, 0.4);
           }
-          .form-input {
-            transition: all 0.3s ease;
+
+          .btn-register-sale:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            filter: grayscale(0.5);
           }
-          .form-input:focus {
-            border-color: #f73194 !important;
-            box-shadow: 0 0 0 3px rgba(247, 49, 148, 0.1) !important;
-            outline: none !important;
+
+          .summary-header {
+            background: #283344;
+            padding: 30px;
+            color: white;
+            text-align: center;
           }
-          .item-card {
-            transition: all 0.3s ease;
+
+          .summary-total {
+            font-size: 48px;
+            font-weight: 800;
+            margin: 15px 0;
+            display: block;
+            letter-spacing: -0.03em;
           }
-          .item-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important;
+
+          .search-method-toggle {
+            display: flex;
+            background: #f1f5f9;
+            padding: 5px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+          }
+
+          .toggle-btn {
+            flex: 1;
+            padding: 10px;
+            border-radius: 9px;
+            border: none;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            color: #64748b;
+            background: transparent;
+          }
+
+          .toggle-btn.active {
+            background: white;
+            color: #f73194;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
           }
         `}
       </style>
 
-      <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px', background: 'white', padding: '25px', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
-        <h1 style={{ display: 'flex', alignItems: 'center', margin: 0, fontSize: '28px', color: '#333', fontWeight: '600' }}>
-          <FaShoppingCart style={{ marginRight: '12px', color: '#f73194', fontSize: '32px' }} />
-          Registrar Venta
-        </h1>
+      {/* ═══════ HERO HEADER ═══════ */}
+      <div className="animate-fade-in" style={{
+        background: 'white',
+        borderRadius: '24px',
+        padding: '30px 40px',
+        marginBottom: '30px',
+        boxShadow: '0 4px 25px rgba(0,0,0,0.03)',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '22px' }}>
+          <div style={{
+            background: 'linear-gradient(135deg, #f73194, #ff6b9d)',
+            width: '60px', height: '60px',
+            borderRadius: '20px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: '0 8px 20px rgba(247, 49, 148, 0.2)'
+          }}>
+            <FaShoppingCart style={{ color: 'white', fontSize: '26px' }} />
+          </div>
+          <div>
+            <h1 style={{ margin: 0, fontSize: '28px', fontWeight: '900', color: '#1e293b', letterSpacing: '-0.02em' }}>
+              Registrar Venta
+            </h1>
+            <p style={{ margin: '4px 0 0', fontSize: '15px', color: '#64748b', fontWeight: '500' }}>
+              Nueva transacción para Nita Clothing
+            </p>
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', gap: '15px' }}>
+          <div style={{
+            padding: '12px 24px', color: '#f73194', background: '#fff0f7',
+            borderRadius: '14px',
+            display: 'flex', alignItems: 'center', gap: '10px',
+            fontSize: '14px', fontWeight: '800', border: '1px solid #ffe0ef'
+          }}>
+            <FaCheckCircle style={{ fontSize: '16px' }} />
+            SISTEMA OPERATIVO
+          </div>
+        </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '30px' }}>
-        <div className="sale-form-card" style={{ background: 'white', padding: '30px', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
-          <form onSubmit={handleSubmit}>
-            <h3 style={{ margin: '0 0 20px 0', fontSize: '20px', color: '#333', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '10px', borderBottom: '2px solid #f5f5f5', paddingBottom: '15px' }}>
-              <FaBox style={{ color: '#f73194' }} />
-              Productos
+      <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 380px', gap: '35px' }}>
+        <div className="animate-fade-in" style={{ animationDelay: '0.1s' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '25px' }}>
+            <h3 style={{ margin: 0, fontSize: '20px', fontWeight: '850', color: '#1e293b', letterSpacing: '-0.02em' }}>
+              Detalle de Productos
             </h3>
+            <div style={{ height: '3px', flex: 1, background: 'linear-gradient(90deg, #f1f5f9 0%, transparent 100%)', borderRadius: '10px' }}></div>
+          </div>
 
+          <div style={{ marginBottom: '30px' }}>
             {items.map((item, idx) => (
-              <div key={idx} className="item-card" style={{ background: '#f8f9fa', padding: '20px', borderRadius: '10px', marginBottom: '15px', border: '2px solid #e0e0e0', display: 'flex', flexDirection: 'column' }}>
-                {/* Div superior: Botones de método */}
-                <div style={{ background: 'white', padding: '15px', borderRadius: '8px', marginBottom: '20px', boxShadow: '0 1px 4px rgba(0,0,0,0.08)', width: '100%' }}>
-                  <div style={{ display: 'flex', justifyContent: 'center', gap: '12px' }}>
-                    <button
-                      type="button"
-                      onClick={() => handleItemChange(idx, 'searchMethod', 'sku')}
-                      style={{
-                        flex: 1,
-                        maxWidth: '240px',
-                        padding: '14px 20px',
-                        background: item.searchMethod === 'sku' ? '#f73194' : 'white',
-                        color: item.searchMethod === 'sku' ? 'white' : '#666',
-                        border: `2px solid ${item.searchMethod === 'sku' ? '#f73194' : '#e0e0e0'}`,
-                        borderRadius: '8px',
-                        cursor: 'pointer',
-                        fontSize: '15px',
-                        fontWeight: '600',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: '8px',
-                        transition: 'all 0.3s',
-                        boxShadow: item.searchMethod === 'sku' ? '0 2px 8px rgba(247, 49, 148, 0.3)' : 'none'
-                      }}
-                    >
-                      <FaBarcode />
-                      SKU
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleItemChange(idx, 'searchMethod', 'details')}
-                      style={{
-                        flex: 1,
-                        maxWidth: '240px',
-                        padding: '14px 20px',
-                        background: item.searchMethod === 'details' ? '#f73194' : 'white',
-                        color: item.searchMethod === 'details' ? 'white' : '#666',
-                        border: `2px solid ${item.searchMethod === 'details' ? '#f73194' : '#e0e0e0'}`,
-                        borderRadius: '8px',
-                        cursor: 'pointer',
-                        fontSize: '15px',
-                        fontWeight: '600',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: '8px',
-                        transition: 'all 0.3s',
-                        boxShadow: item.searchMethod === 'details' ? '0 2px 8px rgba(247, 49, 148, 0.3)' : 'none'
-                      }}
-                    >
-                      <FaTshirt />
-                      Categoría + Detalles
-                    </button>
-                  </div>
+              <div key={idx} className="product-item-card">
+                {items.length > 1 && (
+                  <button type="button" onClick={() => removeItem(idx)} className="remove-item-btn" title="Eliminar ítem">
+                    <FaTimesCircle />
+                  </button>
+                )}
+
+                <div className="search-method-toggle">
+                  <button
+                    type="button"
+                    className={`toggle-btn ${item.searchMethod === 'sku' ? 'active' : ''}`}
+                    onClick={() => handleItemChange(idx, 'searchMethod', 'sku')}
+                  >
+                    <FaBarcode /> BUSCAR POR SKU
+                  </button>
+                  <button
+                    type="button"
+                    className={`toggle-btn ${item.searchMethod === 'details' ? 'active' : ''}`}
+                    onClick={() => handleItemChange(idx, 'searchMethod', 'details')}
+                  >
+                    <FaTshirt /> CATEGORÍA Y DETALLES
+                  </button>
                 </div>
 
-                {/* Div inferior: Campos y subtotal */}
-                <div style={{ background: 'white', padding: '20px', borderRadius: '8px', boxShadow: '0 1px 4px rgba(0,0,0,0.08)', width: '100%' }}>
-                  {/* Campos según el método seleccionado */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px' }}>
                   {item.searchMethod === 'sku' ? (
-                    // Búsqueda por SKU
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginBottom: '20px' }}>
-                      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '20px' }}>
-                        <div>
-                          <label style={{ display: 'block', marginBottom: '10px', fontSize: '14px', fontWeight: '600', color: '#555' }}>
-                            <FaBarcode style={{ marginRight: '8px', color: '#f73194' }} />
-                            SKU
-                          </label>
-                          <input
-                            type="text"
-                            placeholder="1,2,3,etc"
-                            value={item.sku}
-                            onChange={e => handleItemChange(idx, 'sku', e.target.value)}
-                            required
-                            className="form-input"
-                            style={{ width: '100%', padding: '14px', border: '2px solid #e0e0e0', borderRadius: '8px', fontSize: '15px' }}
-                          />
-                        </div>
-                        <div>
-                          <label style={{ display: 'block', marginBottom: '10px', fontSize: '14px', fontWeight: '600', color: '#555' }}>
-                            <FaBox style={{ marginRight: '8px', color: '#f73194' }} />
-                            Cantidad
-                          </label>
-                          <div style={{ position: 'relative' }}>
-                            <input
-                              type="number"
-                              min="1"
-                              max={item.stock_available}
-                              placeholder="Ej: 2"
-                              value={item.quantity}
-                              onChange={e => handleItemChange(idx, 'quantity', e.target.value)}
-                              required
-                              className="form-input"
-                              style={{
-                                width: '100%',
-                                padding: '14px 85px 14px 14px',
-                                border: '2px solid #e0e0e0',
-                                borderRadius: '8px',
-                                fontSize: '15px',
-                                borderColor: item.quantity > item.stock_available ? '#dc3545' : '#e0e0e0'
-                              }}
-                            />
-                            {item.product_id && (
-                              <div style={{
-                                position: 'absolute',
-                                right: '12px',
-                                top: '50%',
-                                transform: 'translateY(-50%)',
-                                fontSize: '11px',
-                                fontWeight: '800',
-                                color: item.stock_available <= 0 ? '#dc3545' : item.stock_available <= 5 ? '#ff8c00' : '#4CAF50',
-                                pointerEvents: 'none',
-                                background: item.stock_available <= 5 ? '#fff3e0' : '#e8f5e9',
-                                padding: '2px 6px',
-                                borderRadius: '4px',
-                                border: `1px solid ${item.stock_available <= 5 ? '#ffe0b2' : '#c8e6c9'}`
-                              }}>
-                                Stock: {item.stock_available}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                        <div>
-                          <label style={{ display: 'block', marginBottom: '10px', fontSize: '14px', fontWeight: '600', color: '#555' }}>
-                            <FaDollarSign style={{ marginRight: '8px', color: '#f73194' }} />
-                            Precio
-                          </label>
-                          <input
-                            type="number"
-                            min="0"
-                            step="0.01"
-                            placeholder="0.00"
-                            value={item.unit_price}
-                            onChange={e => handleItemChange(idx, 'unit_price', e.target.value)}
-                            required
-                            className="form-input"
-                            style={{ width: '100%', padding: '14px', border: '2px solid #e0e0e0', borderRadius: '8px', fontSize: '15px' }}
-                          />
-                        </div>
+                    <div className="nita-input-group" style={{ gridColumn: 'span 2' }}>
+                      <label className="nita-label"><FaBarcode /> Código SKU</label>
+                      <input
+                        type="text"
+                        placeholder="Ingresa el código del producto..."
+                        value={item.sku}
+                        onChange={e => handleItemChange(idx, 'sku', e.target.value)}
+                        required
+                        className="nita-input"
+                      />
+                    </div>
+                  ) : (
+                    <>
+                      <div className="nita-input-group">
+                        <label className="nita-label"><FaTag /> Categoría</label>
+                        <select
+                          value={item.category_id}
+                          onChange={e => handleItemChange(idx, 'category_id', e.target.value)}
+                          required
+                          className="nita-input nita-select"
+                        >
+                          <option value="">Seleccionar...</option>
+                          {categories.map(cat => (
+                            <option key={cat.id} value={cat.id}>{cat.name}</option>
+                          ))}
+                        </select>
                       </div>
+                      <div className="nita-input-group">
+                        <label className="nita-label"><FaBox /> Producto</label>
+                        <select
+                          value={item.product_name}
+                          onChange={e => handleItemChange(idx, 'product_name', e.target.value)}
+                          required
+                          disabled={!item.category_id}
+                          className="nita-input nita-select"
+                        >
+                          <option value="">Seleccionar...</option>
+                          {getProductNamesForCategory(item.category_id).map((name, i) => (
+                            <option key={i} value={name}>{name}</option>
+                          ))}
+                        </select>
+                      </div>
+                      <div className="nita-input-group">
+                        <label className="nita-label"><FaPalette /> Color</label>
+                        <select
+                          value={item.color}
+                          onChange={e => handleItemChange(idx, 'color', e.target.value)}
+                          required
+                          disabled={!item.product_name}
+                          className="nita-input nita-select"
+                        >
+                          <option value="">Color...</option>
+                          {getColorsForProduct(item.category_id, item.product_name).map((color, i) => (
+                            <option key={i} value={color}>{color}</option>
+                          ))}
+                        </select>
+                      </div>
+                      <div className="nita-input-group">
+                        <label className="nita-label"><FaRulerVertical /> Talle</label>
+                        <select
+                          value={item.size}
+                          onChange={e => handleItemChange(idx, 'size', e.target.value)}
+                          required
+                          disabled={!item.color}
+                          className="nita-input nita-select"
+                        >
+                          <option value="">Talle...</option>
+                          {getSizesForProductColor(item.category_id, item.product_name, item.color).map((size, i) => (
+                            <option key={i} value={size}>{size}</option>
+                          ))}
+                        </select>
+                      </div>
+                    </>
+                  )}
 
-                      {/* Visualización de detalles del producto encontrado por SKU */}
+                  <div className="nita-input-group">
+                    <label className="nita-label"><FaPlus /> Cantidad</label>
+                    <div style={{ position: 'relative' }}>
+                      <input
+                        type="number"
+                        min="1"
+                        max={item.stock_available}
+                        value={item.quantity}
+                        onChange={e => handleItemChange(idx, 'quantity', e.target.value)}
+                        required
+                        className="nita-input"
+                        style={{ paddingRight: '100px' }}
+                      />
                       {item.product_id && (
                         <div style={{
-                          display: 'grid',
-                          gridTemplateColumns: '1fr 2fr 1fr',
-                          gap: '12px',
-                          padding: '12px',
-                          background: '#f0f4f8',
-                          borderRadius: '8px',
-                          borderLeft: '4px solid #f73194'
+                          position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)',
+                          fontSize: '11px', fontWeight: '800', background: '#f1f5f9',
+                          padding: '6px 12px', borderRadius: '8px', color: '#475569'
                         }}>
-                          <div>
-                            <span style={{ fontSize: '11px', color: '#888', display: 'block', textTransform: 'uppercase', fontWeight: 'bold' }}>Categoría</span>
-                            <span style={{ fontSize: '14px', fontWeight: '600', color: '#333' }}>
-                              {categories.find(c => c.id == item.category_id)?.name || 'Cargando...'}
-                            </span>
-                          </div>
-                          <div>
-                            <span style={{ fontSize: '11px', color: '#888', display: 'block', textTransform: 'uppercase', fontWeight: 'bold' }}>Producto</span>
-                            <span style={{ fontSize: '14px', fontWeight: '600', color: '#333' }}>{item.product_name}</span>
-                          </div>
-                          <div>
-                            <span style={{ fontSize: '11px', color: '#888', display: 'block', textTransform: 'uppercase', fontWeight: 'bold' }}>Talle</span>
-                            <span style={{ fontSize: '14px', fontWeight: '600', color: '#333' }}>{item.size || 'N/A'}</span>
-                          </div>
+                          MÁX: {item.stock_available}
                         </div>
                       )}
                     </div>
-                  ) : (
-                    // Búsqueda por categoría + detalles (en 3 filas más espaciosas)
-                    <div style={{ marginBottom: '20px' }}>
-                      {/* Fila 1: Categoría y Producto */}
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
-                        <div>
-                          <label style={{ display: 'block', marginBottom: '10px', fontSize: '14px', fontWeight: '600', color: '#555' }}>
-                            <FaTag style={{ marginRight: '8px', color: '#f73194' }} />
-                            Categoría
-                          </label>
-                          <select
-                            value={item.category_id}
-                            onChange={e => handleItemChange(idx, 'category_id', e.target.value)}
-                            required
-                            className="form-input"
-                            style={{ width: '100%', padding: '14px', border: '2px solid #e0e0e0', borderRadius: '8px', fontSize: '15px', cursor: 'pointer' }}
-                          >
-                            <option value="">Selecciona categoría</option>
-                            {categories.map(cat => (
-                              <option key={cat.id} value={cat.id}>{cat.name}</option>
-                            ))}
-                          </select>
-                        </div>
-                        <div>
-                          <label style={{ display: 'block', marginBottom: '10px', fontSize: '14px', fontWeight: '600', color: '#555' }}>
-                            <FaTshirt style={{ marginRight: '8px', color: '#f73194' }} />
-                            Producto
-                          </label>
-                          <select
-                            value={item.product_name}
-                            onChange={e => handleItemChange(idx, 'product_name', e.target.value)}
-                            required
-                            disabled={!item.category_id}
-                            className="form-input"
-                            style={{ width: '100%', padding: '14px', border: '2px solid #e0e0e0', borderRadius: '8px', fontSize: '15px', cursor: item.category_id ? 'pointer' : 'not-allowed', opacity: item.category_id ? 1 : 0.6 }}
-                          >
-                            <option value="">Selecciona producto</option>
-                            {getProductNamesForCategory(item.category_id).map((name, i) => (
-                              <option key={i} value={name}>{name}</option>
-                            ))}
-                          </select>
-                        </div>
-                      </div>
+                  </div>
 
-                      {/* Fila 2: Color y Talle */}
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
-                        <div>
-                          <label style={{ display: 'block', marginBottom: '10px', fontSize: '14px', fontWeight: '600', color: '#555' }}>
-                            <FaPalette style={{ marginRight: '8px', color: '#f73194' }} />
-                            Color
-                          </label>
-                          <select
-                            value={item.color}
-                            onChange={e => handleItemChange(idx, 'color', e.target.value)}
-                            required
-                            disabled={!item.product_name}
-                            className="form-input"
-                            style={{ width: '100%', padding: '14px', border: '2px solid #e0e0e0', borderRadius: '8px', fontSize: '15px', cursor: item.product_name ? 'pointer' : 'not-allowed', opacity: item.product_name ? 1 : 0.6 }}
-                          >
-                            <option value="">Selecciona color</option>
-                            {getColorsForProduct(item.category_id, item.product_name).map((color, i) => (
-                              <option key={i} value={color}>{color}</option>
-                            ))}
-                          </select>
-                        </div>
-                        <div>
-                          <label style={{ display: 'block', marginBottom: '10px', fontSize: '14px', fontWeight: '600', color: '#555' }}>
-                            <FaRulerVertical style={{ marginRight: '8px', color: '#f73194' }} />
-                            Talle
-                          </label>
-                          <select
-                            value={item.size}
-                            onChange={e => handleItemChange(idx, 'size', e.target.value)}
-                            required
-                            disabled={!item.color}
-                            className="form-input"
-                            style={{ width: '100%', padding: '14px', border: '2px solid #e0e0e0', borderRadius: '8px', fontSize: '15px', cursor: item.color ? 'pointer' : 'not-allowed', opacity: item.color ? 1 : 0.6 }}
-                          >
-                            <option value="">Selecciona talle</option>
-                            {getSizesForProductColor(item.category_id, item.product_name, item.color).map((size, i) => (
-                              <option key={i} value={size}>{size}</option>
-                            ))}
-                          </select>
-                        </div>
-                      </div>
-
-                      {/* Fila 3: Cantidad y Precio */}
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-                        <div>
-                          <label style={{ display: 'block', marginBottom: '10px', fontSize: '14px', fontWeight: '600', color: '#555' }}>
-                            <FaBox style={{ marginRight: '8px', color: '#f73194' }} />
-                            Cantidad
-                          </label>
-                          <div style={{ position: 'relative' }}>
-                            <input
-                              type="number"
-                              min="1"
-                              max={item.stock_available}
-                              placeholder="Ej: 2"
-                              value={item.quantity}
-                              onChange={e => handleItemChange(idx, 'quantity', e.target.value)}
-                              required
-                              className="form-input"
-                              style={{
-                                width: '100%',
-                                padding: '14px 85px 14px 14px',
-                                border: '2px solid #e0e0e0',
-                                borderRadius: '8px',
-                                fontSize: '15px',
-                                borderColor: item.quantity > item.stock_available ? '#dc3545' : '#e0e0e0'
-                              }}
-                            />
-                            {item.product_id && (
-                              <div style={{
-                                position: 'absolute',
-                                right: '12px',
-                                top: '50%',
-                                transform: 'translateY(-50%)',
-                                fontSize: '11px',
-                                fontWeight: '800',
-                                color: item.stock_available <= 0 ? '#dc3545' : item.stock_available <= 5 ? '#ff8c00' : '#4CAF50',
-                                pointerEvents: 'none',
-                                background: item.stock_available <= 5 ? '#fff3e0' : '#e8f5e9',
-                                padding: '2px 6px',
-                                borderRadius: '4px',
-                                border: `1px solid ${item.stock_available <= 5 ? '#ffe0b2' : '#c8e6c9'}`
-                              }}>
-                                Stock: {item.stock_available}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                        <div>
-                          <label style={{ display: 'block', marginBottom: '10px', fontSize: '14px', fontWeight: '600', color: '#555' }}>
-                            <FaDollarSign style={{ marginRight: '8px', color: '#f73194' }} />
-                            Precio
-                          </label>
-                          <input
-                            type="number"
-                            min="0"
-                            step="0.01"
-                            placeholder="0.00"
-                            value={item.unit_price}
-                            onChange={e => handleItemChange(idx, 'unit_price', e.target.value)}
-                            required
-                            className="form-input"
-                            style={{ width: '100%', padding: '14px', border: '2px solid #e0e0e0', borderRadius: '8px', fontSize: '15px' }}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Fila final: Subtotal y botón eliminar */}
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '15px', paddingTop: '15px', borderTop: '2px dashed #e0e0e0' }}>
-                    {items.length > 1 && (
-                      <button
-                        type="button"
-                        onClick={() => removeItem(idx)}
-                        className="btn-danger"
-                        style={{ padding: '10px 16px', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', fontWeight: '500' }}
-                      >
-                        <FaTrash />
-                        Eliminar
-                      </button>
-                    )}
-                    <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '10px' }}>
-                      <span style={{ fontSize: '14px', color: '#666', fontWeight: '500' }}>Subtotal:</span>
-                      <span style={{ fontSize: '20px', fontWeight: '700', color: '#4CAF50' }}>
-                        {formatCurrency(Number(item.quantity) * Number(item.unit_price))}
-                      </span>
+                  <div className="nita-input-group">
+                    <label className="nita-label"><FaDollarSign /> Precio Unitario</label>
+                    <div style={{ position: 'relative' }}>
+                      <span style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', fontWeight: '600' }}>$</span>
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={item.unit_price}
+                        onChange={e => handleItemChange(idx, 'unit_price', e.target.value)}
+                        required
+                        className="nita-input"
+                        style={{ paddingLeft: '32px' }}
+                      />
                     </div>
                   </div>
                 </div>
+
+                {item.product_id && (
+                  <div style={{
+                    marginTop: '15px', padding: '15px 20px', background: '#f8fafc',
+                    borderRadius: '14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                    border: '1px solid #f1f5f9'
+                  }}>
+                    <div style={{ display: 'flex', gap: '20px' }}>
+                      <span style={{ fontSize: '13px', color: '#64748b', fontWeight: '600' }}>
+                        ID: <span style={{ color: '#1e293b' }}>#{item.product_id}</span>
+                      </span>
+                      <span style={{ fontSize: '13px', color: '#64748b', fontWeight: '600' }}>
+                        Nombre: <span style={{ color: '#1e293b' }}>{item.product_name}</span>
+                      </span>
+                    </div>
+                    <div style={{ fontSize: '18px', fontWeight: '850', color: '#f73194' }}>
+                      {formatCurrency(Number(item.quantity) * Number(item.unit_price))}
+                    </div>
+                  </div>
+                )}
               </div>
             ))}
+          </div>
 
-            <button
-              type="button"
-              onClick={addItem}
-              className="btn-secondary"
-              style={{ padding: '12px 24px', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '15px', fontWeight: '500', marginBottom: '30px', width: '100%', justifyContent: 'center' }}
-            >
-              <FaPlus />
-              Agregar Producto
-            </button>
+          <button type="button" onClick={addItem} className="btn-add-item">
+            <FaPlus /> AGREGAR OTRO PRODUCTO AL CARRITO
+          </button>
+        </div>
 
-            <h3 style={{ margin: '0 0 20px 0', fontSize: '20px', color: '#333', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '10px', borderBottom: '2px solid #f5f5f5', paddingBottom: '15px' }}>
-              <FaEnvelope style={{ color: '#f73194' }} />
-              Datos del Cliente
-            </h3>
-
-            <div style={{ marginBottom: '20px' }}>
-              <div>
-                <label style={{ display: 'block', marginBottom: '6px', fontSize: '14px', fontWeight: '500', color: '#555' }}>
-                  <FaEnvelope style={{ marginRight: '6px', color: '#f73194' }} />
-                  Email del Cliente
-                </label>
-                <input
-                  type="email"
-                  placeholder="cliente@ejemplo.com"
-                  value={customerEmail}
-                  onChange={e => setCustomerEmail(e.target.value)}
-                  className="form-input"
-                  style={{ width: '100%', padding: '12px', border: '2px solid #e0e0e0', borderRadius: '8px', fontSize: '14px' }}
-                />
+        <div className="animate-fade-in" style={{ animationDelay: '0.2s' }}>
+          <div className="nita-card" style={{ position: 'sticky', top: '30px' }}>
+            <div className="summary-header">
+              <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', opacity: 0.8, marginBottom: '5px' }}>
+                <FaCheckCircle style={{ color: '#f73194', fontSize: '12px' }} />
+                <span style={{ fontSize: '11px', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Resumen de Pago</span>
               </div>
+              <span style={{ fontSize: '15px', color: 'rgba(255,255,255,0.7)', fontWeight: '500' }}>Total a pagar</span>
+              <span className="summary-total">{formatCurrency(calculateTotal())}</span>
             </div>
 
-            <div style={{ marginBottom: '20px' }}>
-              <label style={{ display: 'block', marginBottom: '6px', fontSize: '14px', fontWeight: '500', color: '#555' }}>
-                <FaCreditCard style={{ marginRight: '6px', color: '#f73194' }} />
-                Método de Pago
-              </label>
-              <select
-                value={paymentMethod}
-                onChange={e => setPaymentMethod(e.target.value)}
-                className="form-input"
-                style={{ width: '100%', padding: '12px', border: '2px solid #e0e0e0', borderRadius: '8px', fontSize: '14px', cursor: 'pointer' }}
-              >
-                <option value="efectivo">💵 Efectivo</option>
-                <option value="tarjeta">💳 Tarjeta</option>
-                <option value="transferencia">🏦 Transferencia</option>
-              </select>
-            </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '25px' }}>
-              <div>
-                <label style={{ display: 'block', marginBottom: '6px', fontSize: '14px', fontWeight: '500', color: '#555' }}>
-                  <FaPercent style={{ marginRight: '6px', color: '#f73194' }} />
-                  Descuento %
-                </label>
-                <input
-                  type="number"
-                  min="0"
-                  max="100"
-                  placeholder="0"
-                  value={discountPercent}
-                  onChange={e => setDiscountPercent(e.target.value)}
-                  className="form-input"
-                  style={{ width: '100%', padding: '10px', border: '2px solid #e0e0e0', borderRadius: '8px', fontSize: '14px' }}
-                />
+            <div style={{ padding: '30px' }}>
+              <div className="nita-input-group">
+                <label className="nita-label"><FaEnvelope /> Email del Cliente</label>
+                <div style={{ position: 'relative' }}>
+                  <FaEnvelope style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+                  <input
+                    type="email"
+                    placeholder="ejemplo@cliente.com"
+                    value={customerEmail}
+                    onChange={e => setCustomerEmail(e.target.value)}
+                    className="nita-input"
+                    style={{ paddingLeft: '45px' }}
+                  />
+                </div>
               </div>
-              <div>
-                <label style={{ display: 'block', marginBottom: '6px', fontSize: '14px', fontWeight: '500', color: '#555' }}>
-                  <FaDollarSign style={{ marginRight: '6px', color: '#f73194' }} />
-                  Descuento $
-                </label>
-                <input
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  placeholder="0.00"
-                  value={discountAmount}
-                  onChange={e => setDiscountAmount(e.target.value)}
-                  className="form-input"
-                  style={{ width: '100%', padding: '10px', border: '2px solid #e0e0e0', borderRadius: '8px', fontSize: '14px' }}
-                />
-              </div>
-            </div>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="btn-pink"
-              style={{ padding: '16px', color: 'white', border: 'none', borderRadius: '8px', cursor: loading ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: '10px', fontSize: '16px', fontWeight: '600', width: '100%', justifyContent: 'center', opacity: loading ? 0.7 : 1 }}
-            >
-              {loading ? (
-                <>
-                  <div style={{ width: '20px', height: '20px', border: '3px solid white', borderTop: '3px solid transparent', borderRadius: '50%', animation: 'spin 1s linear infinite' }}>
-                    <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); }}`}</style>
+              <div className="nita-input-group">
+                <label className="nita-label"><FaCreditCard /> Método de Pago</label>
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  {[
+                    { id: 'efectivo', icon: '💵', label: 'Efectivo' },
+                    { id: 'tarjeta', icon: '💳', label: 'Tarjeta' },
+                    { id: 'transferencia', icon: '🏦', label: 'Banco' }
+                  ].map(method => (
+                    <div
+                      key={method.id}
+                      className={`method-card ${paymentMethod === method.id ? 'active' : ''}`}
+                      onClick={() => setPaymentMethod(method.id)}
+                    >
+                      <div className="icon-placeholder">{method.icon}</div>
+                      <span className="method-name">{method.label}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '30px' }}>
+                <div className="nita-input-group">
+                  <label className="nita-label"><FaPercent /> Desc. %</label>
+                  <div style={{ position: 'relative' }}>
+                    <input
+                      type="number"
+                      min="0" max="100"
+                      value={discountPercent}
+                      onChange={e => setDiscountPercent(e.target.value)}
+                      className="nita-input"
+                      style={{ paddingRight: '35px' }}
+                    />
+                    <span style={{ position: 'absolute', right: '16px', top: '50%', transform: 'translateY(-50%)', color: '#f73194', fontWeight: '800', fontSize: '13px' }}>%</span>
                   </div>
-                  Registrando...
-                </>
-              ) : (
-                <>
-                  <FaCheckCircle />
-                  Registrar Venta
-                </>
-              )}
-            </button>
-          </form>
-        </div>
-
-        <div className="total-card" style={{ background: 'white', padding: '30px', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)', height: 'fit-content', position: 'sticky', top: '30px' }}>
-          <h3 style={{ margin: '0 0 20px 0', fontSize: '20px', color: '#333', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '10px', borderBottom: '2px solid #f5f5f5', paddingBottom: '15px' }}>
-            <FaDollarSign style={{ color: '#f73194' }} />
-            Resumen
-          </h3>
-
-          <div style={{ marginBottom: '15px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', background: '#f8f9fa', borderRadius: '8px', marginBottom: '10px' }}>
-              <span style={{ fontSize: '14px', color: '#666' }}>Productos:</span>
-              <span style={{ fontSize: '16px', fontWeight: '600', color: '#333' }}>{items.length}</span>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', background: '#f8f9fa', borderRadius: '8px', marginBottom: '10px' }}>
-              <span style={{ fontSize: '14px', color: '#666' }}>Subtotal:</span>
-              <span style={{ fontSize: '16px', fontWeight: '600', color: '#333' }}>
-                {formatCurrency(items.reduce((sum, item) => sum + (Number(item.quantity) * Number(item.unit_price)), 0))}
-              </span>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', background: '#ffe0f0', borderRadius: '8px', marginBottom: '10px' }}>
-              <span style={{ fontSize: '14px', color: '#f73194' }}>Descuento:</span>
-              <span style={{ fontSize: '16px', fontWeight: '600', color: '#f73194' }}>
-                -{formatCurrency(
-                  items.reduce((sum, item) => sum + (Number(item.quantity) * Number(item.unit_price)), 0) * (Number(discountPercent) / 100) +
-                  Number(discountAmount)
-                )}
-              </span>
-            </div>
-          </div>
-
-          <div style={{ borderTop: '3px solid #f73194', paddingTop: '20px', marginTop: '20px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '18px', background: 'linear-gradient(135deg, #ffeef8 0%, #ffe0f0 100%)', borderRadius: '10px' }}>
-              <span style={{ fontSize: '18px', fontWeight: '600', color: '#333' }}>Total:</span>
-              <span style={{ fontSize: '32px', fontWeight: '700', color: '#f73194' }}>
-                {formatCurrency(calculateTotal())}
-              </span>
-            </div>
-          </div>
-
-          <div style={{ marginTop: '20px', padding: '15px', background: '#e3f2fd', borderRadius: '8px', borderLeft: '4px solid #2196F3' }}>
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
-              <FaCheckCircle style={{ color: '#2196F3', fontSize: '18px', marginTop: '2px' }} />
-              <div>
-                <p style={{ margin: '0 0 5px 0', fontSize: '13px', fontWeight: '600', color: '#1976D2' }}>Información</p>
-                <p style={{ margin: 0, fontSize: '12px', color: '#555', lineHeight: '1.5' }}>
-                  Completa todos los campos y presiona "Registrar Venta" para finalizar la transacción.
-                </p>
+                </div>
+                <div className="nita-input-group">
+                  <label className="nita-label"><FaDollarSign /> Desc. $</label>
+                  <div style={{ position: 'relative' }}>
+                    <span style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: '#f73194', fontWeight: '800', fontSize: '13px' }}>$</span>
+                    <input
+                      type="number"
+                      min="0"
+                      value={discountAmount}
+                      onChange={e => setDiscountAmount(e.target.value)}
+                      className="nita-input"
+                      style={{ paddingLeft: '28px' }}
+                    />
+                  </div>
+                </div>
               </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="btn-register-sale"
+              >
+                {loading ? 'REGISTRANDO...' : (
+                  <>
+                    Registrar Venta
+                    <FaArrowRight style={{ fontSize: '18px' }} />
+                  </>
+                )}
+              </button>
+
+              <p style={{ marginTop: '20px', fontSize: '12px', color: '#94a3b8', textAlign: 'center', fontWeight: '600' }}>
+                Al registrar, el stock se descontará automáticamente.
+              </p>
             </div>
           </div>
         </div>
-      </div >
-    </div >
+      </form>
+    </div>
   );
 }

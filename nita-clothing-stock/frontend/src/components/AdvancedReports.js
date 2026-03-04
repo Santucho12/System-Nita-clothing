@@ -227,7 +227,7 @@ function AdvancedReports() {
   }
 
   return (
-    <div className="advanced-reports-container" style={{ padding: '30px', background: 'var(--bg-gradient)', minHeight: '100vh' }}>
+    <div className="advanced-reports-container" style={{ padding: '30px', background: 'var(--bg-secondary)', minHeight: '100vh' }}>
       <style>
         {`
           @keyframes perspective3DFlip {
@@ -275,80 +275,96 @@ function AdvancedReports() {
         `}
       </style>
       {/* Header del Dashboard */}
-      <div className="dashboard-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px', background: 'white', padding: '25px', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
-        <div className="header-left">
-          <h1 style={{ display: 'flex', alignItems: 'center', margin: 0, fontSize: '28px', color: '#333', fontWeight: '600' }}>
-            <FaChartBar style={{ marginRight: '12px', color: '#f73194', fontSize: '32px' }} />
-            Reportes y Estadísticas
-          </h1>
-          <p className="subtitle" style={{ margin: '8px 0 0 0', color: '#666', fontSize: '14px' }}>Análisis integral del negocio</p>
+      {/* ═══════ HERO HEADER ═══════ */}
+      <div className="products-hero" style={{
+        background: 'white',
+        borderRadius: '20px',
+        padding: '28px 36px',
+        marginBottom: '24px',
+        boxShadow: '0 4px 20px rgba(0,0,0,0.04)',
+        border: '1px solid rgba(0,0,0,0.04)',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '18px' }}>
+          <div style={{
+            background: 'linear-gradient(135deg, #fff0f7, #ffe0ef)',
+            padding: '14px',
+            borderRadius: '16px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}>
+            <FaChartBar style={{ color: '#f73194', fontSize: '26px' }} />
+          </div>
+          <div>
+            <h1 style={{ margin: 0, fontSize: '24px', fontWeight: '800', color: '#1e293b', letterSpacing: '-0.02em' }}>
+              Reportes y Estadísticas
+            </h1>
+            <p style={{ margin: '2px 0 0', fontSize: '14px', color: '#94a3b8', fontWeight: '500' }}>
+              Análisis integral del rendimiento de tu negocio
+            </p>
+          </div>
         </div>
 
-        <div className="header-actions" style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
-          <div className="period-selector" style={{ display: 'flex', gap: '8px', background: '#f5f5f5', padding: '4px', borderRadius: '8px' }}>
-            {['today', 'week', 'month', 'quarter', 'year'].map(period => (
-              <button
-                key={period}
-                className={selectedPeriod === period ? 'btn-pink' : ''}
-                onClick={() => handlePeriodChange(period)}
-                style={{ padding: '8px 16px', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '13px', fontWeight: '500', background: selectedPeriod === period ? '#f73194' : 'transparent', color: selectedPeriod === period ? 'white' : '#666', transition: 'all 0.3s ease' }}
-                onMouseOver={(e) => { if (selectedPeriod !== period) e.currentTarget.style.background = '#e0e0e0'; }}
-                onMouseOut={(e) => { if (selectedPeriod !== period) e.currentTarget.style.background = 'transparent'; }}
-              >
-                {period === 'today' && 'Hoy'}
-                {period === 'week' && 'Semana'}
-                {period === 'month' && 'Mes'}
-                {period === 'quarter' && 'Trimestre'}
-                {period === 'year' && 'Año'}
-              </button>
-            ))}
-          </div>
-
+        <div style={{ display: 'flex', gap: '8px', background: '#f8fafc', padding: '6px', borderRadius: '14px', border: '1px solid #e2e8f0' }}>
+          {['today', 'week', 'month', 'quarter', 'year'].map(period => (
+            <button
+              key={period}
+              onClick={() => handlePeriodChange(period)}
+              style={{
+                padding: '8px 16px', border: 'none', borderRadius: '10px', cursor: 'pointer',
+                fontSize: '13px', fontWeight: '600',
+                background: selectedPeriod === period ? '#f73194' : 'transparent',
+                color: selectedPeriod === period ? 'white' : '#64748b',
+                transition: 'all 0.2s ease',
+                boxShadow: selectedPeriod === period ? '0 4px 10px rgba(247,49,148,0.2)' : 'none'
+              }}
+            >
+              {period === 'today' && 'Hoy'}
+              {period === 'week' && 'Semana'}
+              {period === 'month' && 'Mes'}
+              {period === 'quarter' && 'Trimestre'}
+              {period === 'year' && 'Año'}
+            </button>
+          ))}
         </div>
       </div>
 
       {/* Navegación de vistas */}
-      <div className="view-tabs" style={{ display: 'flex', gap: '10px', marginBottom: '30px', background: 'white', padding: '15px', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)', flexWrap: 'wrap' }}>
-        <button
-          className={activeView === 'overview' ? 'btn-pink' : ''}
-          onClick={() => setActiveView('overview')}
-          style={{ padding: '10px 20px', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '14px', fontWeight: '500', background: activeView === 'overview' ? '#f73194' : '#f5f5f5', color: activeView === 'overview' ? 'white' : '#666', display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.3s ease' }}
-          onMouseOver={(e) => { if (activeView !== 'overview') { e.currentTarget.style.background = '#e0e0e0'; e.currentTarget.style.transform = 'scale(1.05)'; } }}
-          onMouseOut={(e) => { if (activeView !== 'overview') { e.currentTarget.style.background = '#f5f5f5'; e.currentTarget.style.transform = 'scale(1)'; } }}
-        >
-          <FaTachometerAlt /> General
-        </button>
-        <button
-          className={activeView === 'sales' ? 'btn-pink' : ''}
-          onClick={() => setActiveView('sales')}
-          style={{ padding: '10px 20px', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '14px', fontWeight: '500', background: activeView === 'sales' ? '#f73194' : '#f5f5f5', color: activeView === 'sales' ? 'white' : '#666', display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.3s ease' }}
-          onMouseOver={(e) => { if (activeView !== 'sales') { e.currentTarget.style.background = '#e0e0e0'; e.currentTarget.style.transform = 'scale(1.05)'; } }}
-          onMouseOut={(e) => { if (activeView !== 'sales') { e.currentTarget.style.background = '#f5f5f5'; e.currentTarget.style.transform = 'scale(1)'; } }}
-        >
-          <FaShoppingCart /> Ventas
-        </button>
-        <button
-          className={activeView === 'products' ? 'btn-pink' : ''}
-          onClick={() => setActiveView('products')}
-          style={{ padding: '10px 20px', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '14px', fontWeight: '500', background: activeView === 'products' ? '#f73194' : '#f5f5f5', color: activeView === 'products' ? 'white' : '#666', display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.3s ease' }}
-          onMouseOver={(e) => { if (activeView !== 'products') { e.currentTarget.style.background = '#e0e0e0'; e.currentTarget.style.transform = 'scale(1.05)'; } }}
-          onMouseOut={(e) => { if (activeView !== 'products') { e.currentTarget.style.background = '#f5f5f5'; e.currentTarget.style.transform = 'scale(1)'; } }}
-        >
-          <FaTags /> Categorías
-        </button>
-        <button
-          className={activeView === 'profits' ? 'btn-pink' : ''}
-          onClick={() => setActiveView('profits')}
-          style={{ padding: '10px 20px', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '14px', fontWeight: '500', background: activeView === 'profits' ? '#f73194' : '#f5f5f5', color: activeView === 'profits' ? 'white' : '#666', display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.3s ease' }}
-          onMouseOver={(e) => { if (activeView !== 'profits') { e.currentTarget.style.background = '#e0e0e0'; e.currentTarget.style.transform = 'scale(1.05)'; } }}
-          onMouseOut={(e) => { if (activeView !== 'profits') { e.currentTarget.style.background = '#f5f5f5'; e.currentTarget.style.transform = 'scale(1)'; } }}
-        >
-          <FaDollarSign /> Rentabilidad
-        </button>
-
+      <div className="view-tabs" style={{
+        display: 'flex', gap: '12px', marginBottom: '28px',
+        background: 'white', padding: '12px 20px', borderRadius: '20px',
+        boxShadow: '0 4px 20px rgba(0,0,0,0.04)', border: '1px solid rgba(0,0,0,0.04)',
+        flexWrap: 'wrap'
+      }}>
+        {[
+          { id: 'overview', icon: FaTachometerAlt, label: 'General' },
+          { id: 'sales', icon: FaShoppingCart, label: 'Ventas' },
+          { id: 'products', icon: FaTags, label: 'Categorías' },
+          { id: 'profits', icon: FaDollarSign, label: 'Rentabilidad' }
+        ].map(tab => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveView(tab.id)}
+            style={{
+              padding: '10px 20px', border: 'none', borderRadius: '12px', cursor: 'pointer',
+              fontSize: '14px', fontWeight: '700',
+              background: activeView === tab.id ? '#f73194' : '#f1f5f9',
+              color: activeView === tab.id ? 'white' : '#64748b',
+              display: 'flex', alignItems: 'center', gap: '8px',
+              transition: 'all 0.2s ease',
+              boxShadow: activeView === tab.id ? '0 4px 12px rgba(247,49,148,0.2)' : 'none'
+            }}
+            onMouseOver={(e) => { if (activeView !== tab.id) { e.currentTarget.style.background = '#e2e8f0'; e.currentTarget.style.transform = 'translateY(-1px)'; } }}
+            onMouseOut={(e) => { if (activeView !== tab.id) { e.currentTarget.style.background = '#f1f5f9'; e.currentTarget.style.transform = 'translateY(0)'; } }}
+          >
+            <tab.icon /> {tab.label}
+          </button>
+        ))}
       </div>
 
-      {/* Vista General */}
       {activeView === 'overview' && (
         <div className="view-content">
           {/* KPIs Principales - Fila superior: 3 cards */}
@@ -438,11 +454,9 @@ function AdvancedReports() {
               />
             </div>
           </div>
-
         </div>
       )}
 
-      {/* Vista de Ventas Detallada */}
       {activeView === 'sales' && (
         <div className="view-content">
           <div className="section-header" style={{ marginBottom: '24px', padding: '20px', background: 'white', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', animationDelay: '0.25s' }}>
@@ -490,7 +504,6 @@ function AdvancedReports() {
         </div>
       )}
 
-      {/* Vista de Productos */}
       {activeView === 'products' && (
         <div className="view-content">
           <div className="section-header" style={{ marginBottom: '24px', padding: '20px', background: 'white', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', animationDelay: '0.25s' }}>
@@ -531,7 +544,6 @@ function AdvancedReports() {
         </div>
       )}
 
-      {/* Vista de Rentabilidad */}
       {activeView === 'profits' && (
         <div className="view-content">
           <div className="section-header" style={{ marginBottom: '24px', padding: '20px', background: 'white', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', animationDelay: '0.25s' }}>
@@ -569,8 +581,6 @@ function AdvancedReports() {
           </div>
         </div>
       )}
-
-
     </div>
   );
 }

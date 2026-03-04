@@ -16,7 +16,7 @@
   padding: 30px;
   background: var(--bg-card, white);
   border-radius: 16px;
-  box-shadow: var(--shadow-lg, 0 10px 40px rgba(0,0,0,0.1));
+  box-shadow: var(--shadow-lg, 0 10px 40px rgba(0, 0, 0, 0.1));
 }
 
 .header-left h1 {
@@ -130,12 +130,12 @@
   align-items: center;
   gap: 10px;
   white-space: nowrap;
-  box-shadow: var(--shadow, 0 4px 15px rgba(0,0,0,0.1));
+  box-shadow: var(--shadow, 0 4px 15px rgba(0, 0, 0, 0.1));
 }
 
 .view-tabs button:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
 }
 
 .view-tabs button.active {
@@ -157,7 +157,7 @@
   background: var(--bg-card, white);
   padding: 25px;
   border-radius: 16px;
-  box-shadow: var(--shadow, 0 4px 20px rgba(0,0,0,0.08));
+  box-shadow: var(--shadow, 0 4px 20px rgba(0, 0, 0, 0.08));
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
@@ -178,7 +178,7 @@
 
 .kpi-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
 }
 
 .kpi-header {
@@ -259,12 +259,12 @@
   background: var(--bg-card, white);
   padding: 25px;
   border-radius: 16px;
-  box-shadow: var(--shadow, 0 4px 20px rgba(0,0,0,0.08));
+  box-shadow: var(--shadow, 0 4px 20px rgba(0, 0, 0, 0.08));
   transition: all 0.3s ease;
 }
 
 .chart-card:hover {
-  box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
 }
 
 .chart-card.large {
@@ -320,7 +320,7 @@
   background: var(--bg-card, rgba(255, 255, 255, 0.98));
   padding: 15px;
   border-radius: 12px;
-  box-shadow: var(--shadow-lg, 0 8px 25px rgba(0,0,0,0.2));
+  box-shadow: var(--shadow-lg, 0 8px 25px rgba(0, 0, 0, 0.2));
   border: 1px solid var(--border-color, #e0e0e0);
 }
 
@@ -637,7 +637,7 @@
   padding: 25px 30px;
   border-radius: 16px;
   margin-bottom: 25px;
-  box-shadow: var(--shadow, 0 4px 20px rgba(0,0,0,0.08));
+  box-shadow: var(--shadow, 0 4px 20px rgba(0, 0, 0, 0.08));
 }
 
 .section-header h2 {
@@ -664,7 +664,7 @@
 .spinner-large {
   width: 80px;
   height: 80px;
-  border: 6px solid rgba(255,255,255,0.3);
+  border: 6px solid rgba(255, 255, 255, 0.3);
   border-top-color: white;
   border-radius: 50%;
   animation: spin 1s linear infinite;
@@ -677,7 +677,9 @@
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* ==================== VIEW CONTENT ==================== */
@@ -691,6 +693,7 @@
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -727,7 +730,7 @@
   .charts-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .chart-card.large {
     grid-column: span 1;
   }
@@ -738,31 +741,31 @@
     flex-direction: column;
     gap: 20px;
   }
-  
+
   .header-actions {
     width: 100%;
     flex-direction: column;
   }
-  
+
   .period-selector {
     width: 100%;
     justify-content: space-between;
   }
-  
+
   .period-selector button {
     flex: 1;
     padding: 10px;
     font-size: 0.85rem;
   }
-  
+
   .kpis-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .view-tabs {
     gap: 10px;
   }
-  
+
   .view-tabs button {
     padding: 12px 20px;
     font-size: 0.9rem;

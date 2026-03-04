@@ -9,7 +9,7 @@ import { formatCurrency, formatInteger, formatNumber } from '../utils/formatters
 import {
   FaHome, FaTshirt, FaDollarSign, FaShoppingCart, FaChartLine,
   FaTrophy, FaStar, FaPlus, FaSync, FaBox, FaMoneyBillWave,
-  FaStore, FaArrowRight, FaTag, FaPalette
+  FaStore, FaArrowRight, FaTag, FaPalette, FaChevronRight, FaBolt, FaUsers
 } from 'react-icons/fa';
 
 const Dashboard = () => {
@@ -197,22 +197,29 @@ const Dashboard = () => {
 
           .btn-pink {
             background: #f73194;
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 12px !important;
           }
 
           .btn-pink:hover {
-            transform: scale(1.1) !important;
-            background: #f73194 !important;
+            background: #d6237c !important;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(247, 49, 148, 0.3);
           }
 
           .btn-gray {
-            background: #343a40;
+            background: #f1f5f9;
+            color: #475569 !important;
+            border: 1px solid #e2e8f0 !important;
             transition: all 0.3s ease;
+            border-radius: 12px !important;
           }
 
           .btn-gray:hover {
-            transform: scale(1.1) !important;
-            background: #23272b !important;
+            background: #e2e8f0 !important;
+            border-color: #cbd5e1 !important;
+            color: #1e293b !important;
+            transform: translateY(-2px);
           }
 
           .product-item {
@@ -249,8 +256,12 @@ const Dashboard = () => {
             borderRadius: '100px',
             fontSize: '11px',
             fontWeight: '800',
-            letterSpacing: '0.04em'
+            letterSpacing: '0.04em',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px'
           }}>
+            <FaChartLine style={{ fontSize: '16px' }} />
             PANEL DE CONTROL
           </div>
           <span style={{ color: '#cbd5e1', fontSize: '18px' }}>•</span>
@@ -381,10 +392,10 @@ const Dashboard = () => {
             <Link
               to="/reports/advanced"
               className="btn-gray"
-              style={{ padding: '10px 20px', color: 'white', border: 'none', borderRadius: '8px', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', fontWeight: '500' }}
+              style={{ padding: '11px 24px', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '10px', fontSize: '14px', fontWeight: '700' }}
             >
               Ver reportes completos
-              <FaChartLine />
+              <FaChartLine style={{ fontSize: '16px' }} />
             </Link>
           </div>
 
@@ -445,10 +456,22 @@ const Dashboard = () => {
                 <Link
                   to="/categories"
                   className="btn-pink"
-                  style={{ padding: '10px 20px', color: 'white', border: 'none', borderRadius: '8px', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', fontWeight: '500', whiteSpace: 'nowrap' }}
+                  style={{
+                    padding: '12px 24px',
+                    color: 'white',
+                    border: 'none',
+                    textDecoration: 'none',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '10px',
+                    fontSize: '14px',
+                    fontWeight: '750',
+                    whiteSpace: 'nowrap',
+                    boxShadow: '0 4px 14px rgba(247,49,148,0.2)'
+                  }}
                 >
                   Ver Categoría
-                  <FaArrowRight />
+                  <FaArrowRight style={{ fontSize: '12px' }} />
                 </Link>
               </div>
             ))}
@@ -459,32 +482,42 @@ const Dashboard = () => {
       {/* Acciones rápidas */}
       <div className="quick-actions-section" style={{ background: 'white', borderRadius: '12px', padding: '30px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
         <h2 style={{ margin: '0 0 25px 0', fontSize: '24px', fontWeight: '600', color: '#333', display: 'flex', alignItems: 'center', gap: '10px', paddingBottom: '15px', borderBottom: '2px solid #f0f0f0' }}>
-          <FaChartLine style={{ color: '#f73194', fontSize: '28px' }} />
+          <FaBolt style={{ color: '#f59e0b', fontSize: '28px' }} />
           Acciones Rápidas
         </h2>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '20px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '20px' }}>
           {/* Nueva Venta */}
           <Link
             to="/sales/register"
             className="action-card"
             style={{
               display: 'flex',
-              flexDirection: 'column',
               alignItems: 'center',
-              padding: '30px 20px',
-              background: 'linear-gradient(135deg, #fff5f7 0%, #ffe0e8 100%)',
-              borderRadius: '12px',
+              padding: '24px 28px',
+              background: 'white',
+              borderRadius: '24px',
               textDecoration: 'none',
-              border: '2px solid #ffcdd2',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
+              border: '1px solid #f1f5f9',
+              boxShadow: '0 4px 20px rgba(0,0,0,0.03)',
+              gap: '20px',
+              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
             }}
           >
-            <div style={{ background: 'linear-gradient(135deg, #f73194 0%, #ff6b9d 100%)', width: '64px', height: '64px', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '15px' }}>
-              <FaShoppingCart style={{ fontSize: '32px', color: 'white' }} />
+            <div style={{
+              background: '#fff0f7',
+              width: '56px', height: '56px', borderRadius: '18px',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              flexShrink: 0,
+              boxShadow: '0 4px 12px rgba(247,49,148,0.1)'
+            }}>
+              <FaShoppingCart style={{ fontSize: '24px', color: '#f73194' }} />
             </div>
-            <h3 style={{ margin: '0 0 8px 0', fontSize: '18px', fontWeight: '600', color: '#333' }}>Nueva Venta</h3>
-            <p style={{ margin: 0, fontSize: '14px', color: '#666', textAlign: 'center' }}>Registrar una nueva venta</p>
+            <div style={{ flex: 1 }}>
+              <h3 style={{ margin: '0 0 4px 0', fontSize: '18px', fontWeight: '850', color: '#1e293b', letterSpacing: '-0.01em' }}>Nueva Venta</h3>
+              <p style={{ margin: 0, fontSize: '13px', color: '#64748b', fontWeight: '500', lineHeight: '1.4' }}>Registrar una venta ahora</p>
+            </div>
+            <FaChevronRight style={{ color: '#cbd5e1', fontSize: '14px' }} />
           </Link>
 
           {/* Nuevo Producto */}
@@ -493,45 +526,65 @@ const Dashboard = () => {
             className="action-card"
             style={{
               display: 'flex',
-              flexDirection: 'column',
               alignItems: 'center',
-              padding: '30px 20px',
-              background: 'linear-gradient(135deg, #fff5f7 0%, #ffe0e8 100%)',
-              borderRadius: '12px',
+              padding: '24px 28px',
+              background: 'white',
+              borderRadius: '24px',
               textDecoration: 'none',
-              border: '2px solid #ffcdd2',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
+              border: '1px solid #f1f5f9',
+              boxShadow: '0 4px 20px rgba(0,0,0,0.03)',
+              gap: '20px',
+              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
             }}
           >
-            <div style={{ background: 'linear-gradient(135deg, #f73194 0%, #ff6b9d 100%)', width: '64px', height: '64px', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '15px' }}>
-              <FaPlus style={{ fontSize: '32px', color: 'white' }} />
+            <div style={{
+              background: '#fff0f7',
+              width: '56px', height: '56px', borderRadius: '18px',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              flexShrink: 0,
+              boxShadow: '0 4px 12px rgba(247,49,148,0.1)'
+            }}>
+              <FaPlus style={{ fontSize: '24px', color: '#f73194' }} />
             </div>
-            <h3 style={{ margin: '0 0 8px 0', fontSize: '18px', fontWeight: '600', color: '#333' }}>Nuevo Producto</h3>
-            <p style={{ margin: 0, fontSize: '14px', color: '#666', textAlign: 'center' }}>Agregar un producto al inventario</p>
+            <div style={{ flex: 1 }}>
+              <h3 style={{ margin: '0 0 4px 0', fontSize: '18px', fontWeight: '850', color: '#1e293b', letterSpacing: '-0.01em' }}>Nuevo Producto</h3>
+              <p style={{ margin: 0, fontSize: '13px', color: '#64748b', fontWeight: '500', lineHeight: '1.4' }}>Agregar producto al stock</p>
+            </div>
+            <FaChevronRight style={{ color: '#cbd5e1', fontSize: '14px' }} />
           </Link>
 
-          {/* Actualizar Datos */}
-          <button
+          {/* Clientes */}
+          <Link
+            to="/customers"
             className="action-card"
-            onClick={loadDashboardData}
             style={{
               display: 'flex',
-              flexDirection: 'column',
               alignItems: 'center',
-              padding: '30px 20px',
-              background: 'linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%)',
-              borderRadius: '12px',
-              border: '2px solid #bdbdbd',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
-              cursor: 'pointer'
+              padding: '24px 28px',
+              background: 'white',
+              borderRadius: '24px',
+              textDecoration: 'none',
+              border: '1px solid #f1f5f9',
+              boxShadow: '0 4px 20px rgba(0,0,0,0.03)',
+              gap: '20px',
+              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
             }}
           >
-            <div style={{ background: 'linear-gradient(135deg, #9e9e9e 0%, #757575 100%)', width: '64px', height: '64px', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '15px' }}>
-              <FaSync style={{ fontSize: '32px', color: 'white' }} />
+            <div style={{
+              background: '#fff0f7',
+              width: '56px', height: '56px', borderRadius: '18px',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              flexShrink: 0,
+              boxShadow: '0 4px 12px rgba(247,49,148,0.1)'
+            }}>
+              <FaUsers style={{ fontSize: '24px', color: '#f73194' }} />
             </div>
-            <h3 style={{ margin: '0 0 8px 0', fontSize: '18px', fontWeight: '600', color: '#333' }}>Actualizar Datos</h3>
-            <p style={{ margin: 0, fontSize: '14px', color: '#666', textAlign: 'center' }}>Refrescar información del dashboard</p>
-          </button>
+            <div style={{ flex: 1 }}>
+              <h3 style={{ margin: '0 0 4px 0', fontSize: '18px', fontWeight: '850', color: '#1e293b', letterSpacing: '-0.01em' }}>Clientes</h3>
+              <p style={{ margin: 0, fontSize: '13px', color: '#64748b', fontWeight: '500', lineHeight: '1.4' }}>Base de datos de fidelidad</p>
+            </div>
+            <FaChevronRight style={{ color: '#cbd5e1', fontSize: '14px' }} />
+          </Link>
         </div>
       </div>
     </div>

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import useSortableData from '../hooks/useSortableData';
-import { FaTruck, FaPlus, FaEdit, FaTrash, FaPhone, FaMapMarkerAlt, FaGlobe, FaShoppingCart, FaStickyNote, FaSearch } from 'react-icons/fa';
+import { FaTruck, FaPlus, FaEdit, FaTrash, FaPhone, FaMapMarkerAlt, FaGlobe, FaShoppingCart, FaStickyNote, FaSearch, FaTimes, FaUser, FaEnvelope } from 'react-icons/fa';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
@@ -133,211 +133,431 @@ const Suppliers = () => {
 
   if (loading) {
     return (
-      <div className="loading" style={{ textAlign: 'center', padding: '40px' }}>
-        <i className="fas fa-spinner fa-spin" style={{ fontSize: '2em' }}></i>
-        <p>Cargando proveedores...</p>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', flexDirection: 'column', gap: '20px' }}>
+        <div style={{
+          width: '56px', height: '56px', border: '4px solid #f1f5f9',
+          borderTop: '4px solid #f73194', borderRadius: '50%',
+          animation: 'spin 0.8s linear infinite'
+        }} />
+        <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
+        <p style={{ color: '#64748b', fontSize: '16px', fontWeight: '500' }}>Cargando proveedores...</p>
       </div>
     );
   }
 
   return (
-    <div className="suppliers-container" style={{ padding: '30px', background: 'var(--bg-gradient)', minHeight: '100vh' }}>
+    <div className="suppliers-container" style={{ padding: '30px', background: 'var(--bg-secondary)', minHeight: '100vh' }}>
       <style>
         {`
-          @keyframes perspective3DFlip {
-            0% {
-              opacity: 0;
-              transform: perspective(1000px) rotateY(-15deg) rotateX(10deg);
-            }
-            100% {
-              opacity: 1;
-              transform: perspective(1000px) rotateY(0deg) rotateX(0deg);
-            }
+          @keyframes fadeSlideUp {
+            from { opacity: 0; transform: translateY(16px); }
+            to { opacity: 1; transform: translateY(0); }
           }
 
-          .page-header {
-            animation: perspective3DFlip 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+          @keyframes modalSlideUp {
+            from { opacity: 0; transform: translateY(20px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
           }
 
-          .search-bar {
-            animation: perspective3DFlip 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 0.15s both;
+          .suppliers-hero { animation: fadeSlideUp 0.6s ease both; }
+          .suppliers-filters-bar { animation: fadeSlideUp 0.6s ease 0.12s both; }
+          .supplier-card-premium { animation: fadeSlideUp 0.5s ease both; }
+          .empty-state { animation: fadeSlideUp 0.6s ease 0.3s both; }
+
+          /* ---- Inputs ---- */
+          .nita-search-input {
+            width: 100%;
+            padding: 13px 18px 13px 44px;
+            border: 2px solid #e2e8f0;
+            border-radius: 14px;
+            font-size: 15px;
+            font-weight: 500;
+            color: #1e293b;
+            background: #f8fafc;
+            transition: all 0.25s ease;
+            box-sizing: border-box;
+          }
+          .nita-search-input:focus {
+            outline: none;
+            border-color: #f73194;
+            background: #fff;
+            box-shadow: 0 0 0 4px rgba(247,49,148,0.08);
+          }
+          .nita-search-input::placeholder { color: #94a3b8; font-weight: 400; }
+
+          .nita-filter-select {
+            width: 100%;
+            padding: 13px 36px 13px 14px;
+            border: 2px solid #e2e8f0;
+            border-radius: 14px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #1e293b;
+            background: #f8fafc;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            box-sizing: border-box;
+            appearance: none;
+            -webkit-appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M6 8L1 3h10z' fill='%2394a3b8'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+          }
+          .nita-filter-select:focus {
+            outline: none;
+            border-color: #f73194;
+            background-color: #fff;
+            box-shadow: 0 0 0 4px rgba(247,49,148,0.08);
           }
 
-          .supplier-card {
-            animation: perspective3DFlip 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) both;
-            transition: all 0.3s ease;
+          /* ---- Form Premium ---- */
+          .form-input-premium {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #f1f5f9;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 500;
+            color: #1e293b;
+            transition: all 0.2s ease;
+            background: #f8fafc;
+            box-sizing: border-box;
+          }
+          .form-input-premium:focus {
+            outline: none;
+            border-color: #f73194;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(247,49,148,0.08);
+          }
+          .form-input-premium::placeholder { color: #94a3b8; }
+
+          .form-label-premium {
+            font-size: 13px;
+            font-weight: 700;
+            color: #475569;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+          }
+          .form-label-premium svg { color: #f73194; font-size: 13px; }
+
+          /* ---- Card Premium ---- */
+          .supplier-card-premium {
+            background: white;
+            border-radius: 20px;
+            padding: 0;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+            border: 1px solid rgba(0,0,0,0.04);
+            transition: all 0.35s cubic-bezier(0.165, 0.84, 0.44, 1);
+            position: relative;
+          }
+          .supplier-card-premium:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 16px 40px rgba(247, 49, 148, 0.12);
+            border-color: rgba(247, 49, 148, 0.15);
           }
 
-          .supplier-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 16px rgba(247, 49, 148, 0.2) !important;
+          .supplier-card-premium .card-accent {
+            height: 4px;
+            background: linear-gradient(90deg, #f73194, #ff6fb8, #f73194);
+            background-size: 200% 100%;
+          }
+          .supplier-card-premium:hover .card-accent {
+            animation: shimmer 1.5s linear infinite;
+          }
+          @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
           }
 
-          .empty-state {
-            animation: perspective3DFlip 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s both;
+          /* ---- Clear filter chip ---- */
+          .clear-filters-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            border-radius: 50px;
+            border: 1px solid #e2e8f0;
+            background: white;
+            color: #64748b;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
           }
-          .btn-pink {
-            background: #f73194;
-            transition: all 0.3s ease;
-          }
-          .btn-pink:hover {
-            transform: scale(1.1) !important;
-            background: #f73194 !important;
-          }
-          .search-input {
-            transition: all 0.3s ease;
-          }
-          .search-input:focus {
-            border-color: #f73194 !important;
-            box-shadow: 0 0 0 3px rgba(247, 49, 148, 0.1) !important;
-            outline: none !important;
+          .clear-filters-chip:hover {
+            background: #fee2e2;
+            border-color: #fecaca;
+            color: #dc2626;
           }
         `}
       </style>
-      <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px', background: 'white', padding: '25px', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
-        <h1 style={{ display: 'flex', alignItems: 'center', margin: 0, fontSize: '28px', color: '#333', fontWeight: '600' }}>
-          <FaTruck style={{ marginRight: '12px', color: '#f73194', fontSize: '32px' }} />
-          Proveedores
-        </h1>
+
+      {/* ═══════ HERO HEADER ═══════ */}
+      <div className="products-hero" style={{
+        background: 'white',
+        borderRadius: '20px',
+        padding: '28px 36px',
+        marginBottom: '24px',
+        boxShadow: '0 4px 20px rgba(0,0,0,0.04)',
+        border: '1px solid rgba(0,0,0,0.04)',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '18px' }}>
+          <div style={{
+            background: 'linear-gradient(135deg, #fff0f7, #ffe0ef)',
+            padding: '14px',
+            borderRadius: '16px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}>
+            <FaTruck style={{ color: '#f73194', fontSize: '26px' }} />
+          </div>
+          <div>
+            <h1 style={{ margin: 0, fontSize: '24px', fontWeight: '800', color: '#1e293b', letterSpacing: '-0.02em' }}>
+              Proveedores
+            </h1>
+            <p style={{ margin: '2px 0 0', fontSize: '14px', color: '#94a3b8', fontWeight: '500' }}>
+              {suppliers.length} proveedor{suppliers.length !== 1 ? 'es' : ''} registrado{suppliers.length !== 1 ? 's' : ''} en el sistema
+            </p>
+          </div>
+        </div>
+
         <button
-          className="btn-pink"
           onClick={() => setShowForm(true)}
-          style={{ padding: '12px 24px', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '15px', fontWeight: '500' }}
+          style={{
+            padding: '11px 24px', color: 'white', background: '#f73194',
+            border: 'none', borderRadius: '12px', cursor: 'pointer',
+            display: 'flex', alignItems: 'center', gap: '8px',
+            fontSize: '14px', fontWeight: '700', transition: 'all 0.2s',
+            boxShadow: '0 4px 14px rgba(247,49,148,0.25)'
+          }}
+          onMouseOver={(e) => {
+            e.currentTarget.style.transform = 'translateY(-2px)';
+            e.currentTarget.style.boxShadow = '0 8px 20px rgba(247,49,148,0.35)';
+          }}
+          onMouseOut={(e) => {
+            e.currentTarget.style.transform = 'translateY(0)';
+            e.currentTarget.style.boxShadow = '0 4px 14px rgba(247,49,148,0.25)';
+          }}
         >
           <FaPlus />
           Nuevo Proveedor
         </button>
       </div>
 
-      <div className="search-bar" style={{ marginBottom: '30px', display: 'flex', gap: '15px' }}>
-        <div style={{ position: 'relative', flex: 1 }}>
-          <FaSearch style={{ position: 'absolute', left: '15px', top: '50%', transform: 'translateY(-50%)', color: '#999', fontSize: '16px' }} />
-          <input
-            type="text"
-            placeholder="Buscar por nombre o teléfono..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="search-input"
-            style={{ width: '100%', padding: '14px 14px 14px 45px', border: '2px solid #e0e0e0', borderRadius: '10px', fontSize: '15px', background: 'white', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}
-          />
-        </div>
-        <select
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-          style={{ padding: '0 20px', borderRadius: '10px', border: '2px solid #e0e0e0', background: 'white', color: '#666', fontSize: '15px', fontWeight: '500', cursor: 'pointer', outline: 'none' }}
-        >
-          <option value="all">Todos los estados</option>
-          <option value="active">Activos</option>
-          <option value="inactive">Inactivos</option>
-        </select>
+      {/* ═══════ FILTERS BAR ═══════ */}
+      <div className="products-filters-bar" style={{
+        background: 'white',
+        borderRadius: '20px',
+        padding: '20px 28px',
+        marginBottom: '28px',
+        boxShadow: '0 4px 20px rgba(0,0,0,0.04)',
+        border: '1px solid rgba(0,0,0,0.04)'
+      }}>
+        <div style={{ display: 'flex', gap: '14px', alignItems: 'center', flexWrap: 'wrap' }}>
+          {/* Buscador con ícono integrado */}
+          <div style={{ flex: '2.5 1 220px', position: 'relative' }}>
+            <FaSearch style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', fontSize: '15px', zIndex: 1, pointerEvents: 'none' }} />
+            <input
+              type="text"
+              placeholder="Buscar por nombre o teléfono..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="nita-search-input"
+            />
+          </div>
 
+          <div style={{ flex: '1 1 140px' }}>
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="nita-filter-select"
+            >
+              <option value="all">Todos los Estados</option>
+              <option value="active">Activos</option>
+              <option value="inactive">Inactivos</option>
+            </select>
+          </div>
+
+          {/* Limpiar filtros */}
+          {(searchTerm || statusFilter !== 'all') && (
+            <button
+              className="clear-filters-chip"
+              onClick={() => { setSearchTerm(''); setStatusFilter('all'); }}
+            >
+              <FaTimes style={{ fontSize: '11px' }} />
+              Limpiar
+            </button>
+          )}
+        </div>
       </div>
 
-
+      {/* ═══════ MODAL FORM PREMIUM ═══════ */}
       {showForm && (
-        <div className="modal-overlay" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }} onClick={resetForm}>
-          <style>
-            {`
-              .supplier-form-btn {
-                padding: 10px 20px !important;
-                color: white !important;
-                border: none !important;
-                border-radius: 4px !important;
-                cursor: pointer !important;
-                min-width: 120px !important;
-                transition: transform 0.2s ease !important;
-                font-size: 14px !important;
-                font-weight: 400 !important;
-              }
-              .supplier-form-btn:hover {
-                transform: scale(1.05);
-              }
-            `}
-          </style>
-          <div className="modal-content" style={{ background: 'white', padding: '30px', borderRadius: '8px', maxWidth: '600px', width: '90%' }} onClick={e => e.stopPropagation()}>
-            <div className="form-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-              <h3>{editingSupplier ? 'Editar Proveedor' : 'Nuevo Proveedor'}</h3>
-              <button onClick={resetForm} style={{ background: 'none', border: 'none', fontSize: '24px', cursor: 'pointer' }}>×</button>
+        <div
+          style={{
+            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+            background: 'rgba(15, 23, 42, 0.65)',
+            backdropFilter: 'blur(8px)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            zIndex: 2000, padding: '20px'
+          }}
+          onClick={resetForm}
+        >
+          <div
+            style={{
+              background: 'white', borderRadius: '24px',
+              boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)',
+              width: '100%', maxWidth: '580px',
+              overflow: 'hidden',
+              animation: 'modalSlideUp 0.35s cubic-bezier(0.34, 1.56, 0.64, 1)'
+            }}
+            onClick={e => e.stopPropagation()}
+          >
+            {/* Header del modal */}
+            <div style={{
+              background: 'linear-gradient(135deg, #f73194 0%, #ff6fb8 100%)',
+              padding: '24px 32px',
+              display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                <div style={{
+                  background: 'rgba(255,255,255,0.2)', width: '44px', height: '44px',
+                  borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center'
+                }}>
+                  <FaTruck style={{ color: 'white', fontSize: '20px' }} />
+                </div>
+                <div>
+                  <h3 style={{ margin: 0, color: 'white', fontSize: '18px', fontWeight: '700' }}>
+                    {editingSupplier ? 'Editar Proveedor' : 'Nuevo Proveedor'}
+                  </h3>
+                  <p style={{ margin: '2px 0 0', color: 'rgba(255,255,255,0.8)', fontSize: '13px' }}>
+                    {editingSupplier ? 'Modificá los datos del proveedor' : 'Completá los datos del proveedor'}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={resetForm}
+                style={{
+                  background: 'rgba(255,255,255,0.2)', border: 'none', color: 'white',
+                  width: '36px', height: '36px', borderRadius: '10px',
+                  fontSize: '18px', cursor: 'pointer', display: 'flex',
+                  alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s'
+                }}
+                onMouseOver={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.35)'}
+                onMouseOut={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.2)'}
+              >
+                ×
+              </button>
             </div>
 
-            <form onSubmit={handleSubmit}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+            {/* Body del formulario */}
+            <form onSubmit={handleSubmit} style={{ padding: '28px 32px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+
+                {/* Nombre - Full width */}
                 <div style={{ gridColumn: '1 / -1' }}>
-                  <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Nombre *</label>
+                  <label className="form-label-premium"><FaUser /> Nombre *</label>
                   <input
-                    type="text"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleInputChange}
-                    required
-                    style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '4px' }}
+                    type="text" name="name"
+                    value={formData.name} onChange={handleInputChange}
+                    required placeholder="Nombre del proveedor"
+                    className="form-input-premium"
                   />
                 </div>
 
+                {/* Teléfono */}
                 <div>
-                  <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Teléfono</label>
+                  <label className="form-label-premium"><FaPhone /> Teléfono</label>
                   <input
-                    type="text"
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleInputChange}
-                    style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '4px' }}
+                    type="text" name="phone"
+                    value={formData.phone} onChange={handleInputChange}
+                    placeholder="011 1234-5678"
+                    className="form-input-premium"
                   />
                 </div>
 
+                {/* Sitio Web */}
+                <div>
+                  <label className="form-label-premium"><FaGlobe /> Sitio Web</label>
+                  <input
+                    type="url" name="website"
+                    value={formData.website} onChange={handleInputChange}
+                    placeholder="https://ejemplo.com"
+                    className="form-input-premium"
+                  />
+                </div>
+
+                {/* Dirección - Full width */}
                 <div style={{ gridColumn: '1 / -1' }}>
-                  <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Dirección</label>
+                  <label className="form-label-premium"><FaMapMarkerAlt /> Dirección</label>
                   <input
-                    type="text"
-                    name="address"
-                    value={formData.address}
-                    onChange={handleInputChange}
-                    style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '4px' }}
+                    type="text" name="address"
+                    value={formData.address} onChange={handleInputChange}
+                    placeholder="Calle, Número, Ciudad"
+                    className="form-input-premium"
                   />
                 </div>
 
+                {/* Mínimo de Compra */}
                 <div>
-                  <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Sitio Web</label>
+                  <label className="form-label-premium"><FaShoppingCart /> Mínimo de Compra</label>
                   <input
-                    type="url"
-                    name="website"
-                    value={formData.website}
-                    onChange={handleInputChange}
-                    placeholder="https://"
-                    style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '4px' }}
+                    type="number" name="min_purchase"
+                    value={formData.min_purchase} onChange={handleInputChange}
+                    min="0" placeholder="$0"
+                    className="form-input-premium"
                   />
                 </div>
 
-                <div>
-                  <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Mínimo de Compra</label>
-                  <input
-                    type="number"
-                    name="min_purchase"
-                    value={formData.min_purchase}
-                    onChange={handleInputChange}
-                    min="0"
-                    style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '4px' }}
-                  />
-                </div>
-
+                {/* Notas - Full width */}
                 <div style={{ gridColumn: '1 / -1' }}>
-                  <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Notas</label>
+                  <label className="form-label-premium"><FaStickyNote /> Notas</label>
                   <textarea
                     name="notes"
-                    value={formData.notes}
-                    onChange={handleInputChange}
-                    rows="3"
-                    style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '4px' }}
+                    value={formData.notes} onChange={handleInputChange}
+                    rows="3" placeholder="Anotaciones sobre este proveedor..."
+                    className="form-input-premium"
+                    style={{ resize: 'vertical', minHeight: '80px' }}
                   />
                 </div>
               </div>
 
-              <div className="form-actions" style={{ display: 'flex', gap: '10px', marginTop: '20px', justifyContent: 'flex-end' }}>
-                <button type="button" onClick={resetForm} className="supplier-form-btn" style={{ background: '#3a3a3a' }}>
+              {/* Botones */}
+              <div style={{ display: 'flex', gap: '12px', marginTop: '28px', justifyContent: 'flex-end' }}>
+                <button
+                  type="button" onClick={resetForm}
+                  style={{
+                    padding: '12px 28px', background: '#f1f5f9', color: '#475569',
+                    border: '1px solid #e2e8f0', borderRadius: '12px', cursor: 'pointer',
+                    fontSize: '14px', fontWeight: '600', transition: 'all 0.2s'
+                  }}
+                  onMouseOver={(e) => e.currentTarget.style.background = '#e2e8f0'}
+                  onMouseOut={(e) => e.currentTarget.style.background = '#f1f5f9'}
+                >
                   Cancelar
                 </button>
-                <button type="submit" className="supplier-form-btn" style={{ background: '#f73194' }}>
-                  {editingSupplier ? 'Actualizar' : 'Crear'}
+                <button
+                  type="submit"
+                  style={{
+                    padding: '12px 32px', background: '#f73194', color: 'white',
+                    border: 'none', borderRadius: '12px', cursor: 'pointer',
+                    fontSize: '14px', fontWeight: '700', transition: 'all 0.2s',
+                    boxShadow: '0 4px 14px rgba(247,49,148,0.25)'
+                  }}
+                  onMouseOver={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 20px rgba(247,49,148,0.35)'; }}
+                  onMouseOut={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(247,49,148,0.25)'; }}
+                >
+                  {editingSupplier ? 'Actualizar' : 'Crear Proveedor'}
                 </button>
               </div>
             </form>
@@ -345,18 +565,38 @@ const Suppliers = () => {
         </div>
       )}
 
-      <div className="suppliers-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '24px' }}>
+      {/* ═══════ GRID DE CARDS ═══════ */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '24px' }}>
         {filteredSuppliers.length === 0 ? (
-          <div className="empty-state" style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '80px 40px', background: 'white', borderRadius: '16px', boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }}>
-            <div style={{ background: 'linear-gradient(135deg, #ffeef8 0%, #ffe0f0 100%)', width: '120px', height: '120px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 30px' }}>
-              <FaTruck style={{ fontSize: '60px', color: '#f73194' }} />
+          <div className="empty-state" style={{
+            gridColumn: '1 / -1', textAlign: 'center', padding: '80px 40px',
+            background: 'white', borderRadius: '24px',
+            boxShadow: '0 4px 20px rgba(0,0,0,0.04)', border: '1px solid rgba(0,0,0,0.04)'
+          }}>
+            <div style={{
+              background: 'linear-gradient(135deg, #fff0f7, #ffe0ef)',
+              width: '100px', height: '100px', borderRadius: '24px',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              margin: '0 auto 24px'
+            }}>
+              <FaTruck style={{ fontSize: '44px', color: '#f73194' }} />
             </div>
-            <h3 style={{ fontSize: '24px', color: '#333', margin: '0 0 12px 0', fontWeight: '600' }}>No hay proveedores</h3>
-            <p style={{ color: '#666', fontSize: '16px', margin: '0 0 30px 0', maxWidth: '400px', marginLeft: 'auto', marginRight: 'auto' }}>Crea tu primer proveedor para empezar a gestionar compras y mantener un registro completo</p>
+            <h3 style={{ fontSize: '22px', color: '#1e293b', margin: '0 0 10px 0', fontWeight: '700' }}>No hay proveedores</h3>
+            <p style={{ color: '#94a3b8', fontSize: '15px', margin: '0 0 28px 0', maxWidth: '340px', marginLeft: 'auto', marginRight: 'auto', lineHeight: '1.5' }}>
+              Creá tu primer proveedor para gestionar compras y mantener un registro completo.
+            </p>
             <button
-              className="btn-pink"
               onClick={() => setShowForm(true)}
-              style={{ padding: '14px 28px', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '10px', fontSize: '16px', fontWeight: '500' }}
+              style={{
+                padding: '12px 28px', color: 'white', background: '#f73194',
+                border: 'none', borderRadius: '12px', cursor: 'pointer',
+                display: 'inline-flex', alignItems: 'center', gap: '8px',
+                fontSize: '14px', fontWeight: '700',
+                boxShadow: '0 4px 14px rgba(247,49,148,0.25)',
+                transition: 'all 0.2s'
+              }}
+              onMouseOver={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; }}
+              onMouseOut={(e) => { e.currentTarget.style.transform = 'translateY(0)'; }}
             >
               <FaPlus />
               Crear Primer Proveedor
@@ -366,66 +606,124 @@ const Suppliers = () => {
           filteredSuppliers.map((supplier, index) => (
             <div
               key={supplier.id}
-              className="supplier-card"
-              style={{
-                border: 'none',
-                borderRadius: '12px',
-                padding: '24px',
-                background: 'white',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-                borderTop: '4px solid #f73194'
-              }}
+              className="supplier-card-premium"
+              style={{ animationDelay: `${0.1 + index * 0.06}s` }}
             >
-              <style>
-                {`
-                  .supplier-card:nth-child(${index + 1}) {
-                    animation-delay: ${0.3 + index * 0.1}s;
-                  }
-                `}
-              </style>
-              <div className="supplier-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px', paddingBottom: '15px', borderBottom: '2px solid #f5f5f5' }}>
-                <h3 style={{ margin: 0, fontSize: '20px', color: '#333', fontWeight: '600' }}>{supplier.name}</h3>
-                <div className="supplier-actions" style={{ display: 'flex', gap: '10px' }}>
-                  <button
-                    onClick={() => handleEdit(supplier)}
-                    style={{ background: '#f73194', border: 'none', color: 'white', cursor: 'pointer', fontSize: '14px', display: 'flex', alignItems: 'center', padding: '8px 12px', borderRadius: '6px', transition: 'all 0.3s ease' }}
-                    title="Editar"
-                    onMouseOver={(e) => { e.currentTarget.style.transform = 'scale(1.1)'; }}
-                    onMouseOut={(e) => { e.currentTarget.style.transform = 'scale(1)'; }}
-                  >
-                    <FaEdit />
-                  </button>
-                  <button
-                    onClick={() => handleDelete(supplier.id)}
-                    style={{ background: '#dc3545', border: 'none', color: 'white', cursor: 'pointer', fontSize: '14px', display: 'flex', alignItems: 'center', padding: '8px 12px', borderRadius: '6px', transition: 'all 0.3s ease' }}
-                    title="Eliminar"
-                    onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
-                    onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
-                  >
-                    <FaTrash />
-                  </button>
+              {/* Accent bar */}
+              <div className="card-accent" />
+
+              {/* Card Body */}
+              <div style={{ padding: '24px 28px' }}>
+                {/* Header con nombre y acciones */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flex: 1, minWidth: 0 }}>
+                    <div style={{
+                      background: 'linear-gradient(135deg, #fff0f7, #ffe0ef)',
+                      width: '46px', height: '46px', borderRadius: '14px',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
+                    }}>
+                      <FaTruck style={{ color: '#f73194', fontSize: '18px' }} />
+                    </div>
+                    <div style={{ minWidth: 0 }}>
+                      <h3 style={{ margin: 0, fontSize: '17px', color: '#1e293b', fontWeight: '700', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {supplier.name}
+                      </h3>
+                      <span style={{
+                        display: 'inline-flex', alignItems: 'center', gap: '4px',
+                        padding: '2px 10px', borderRadius: '6px', fontSize: '11px', fontWeight: '700',
+                        marginTop: '4px', textTransform: 'uppercase', letterSpacing: '0.5px',
+                        background: supplier.status === 'active' ? '#f0fdf4' : '#fef2f2',
+                        color: supplier.status === 'active' ? '#16a34a' : '#dc2626'
+                      }}>
+                        <span style={{
+                          width: '6px', height: '6px', borderRadius: '50%',
+                          background: supplier.status === 'active' ? '#16a34a' : '#dc2626'
+                        }} />
+                        {supplier.status === 'active' ? 'Activo' : 'Inactivo'}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Action buttons */}
+                  <div style={{ display: 'flex', gap: '6px', flexShrink: 0 }}>
+                    <button
+                      onClick={() => handleEdit(supplier)}
+                      title="Editar"
+                      style={{
+                        width: '34px', height: '34px', borderRadius: '10px',
+                        background: '#f1f5f9', border: 'none', color: '#64748b',
+                        cursor: 'pointer', display: 'flex', alignItems: 'center',
+                        justifyContent: 'center', fontSize: '13px', transition: 'all 0.2s'
+                      }}
+                      onMouseOver={(e) => { e.currentTarget.style.background = '#f73194'; e.currentTarget.style.color = 'white'; }}
+                      onMouseOut={(e) => { e.currentTarget.style.background = '#f1f5f9'; e.currentTarget.style.color = '#64748b'; }}
+                    >
+                      <FaEdit />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(supplier.id)}
+                      title="Eliminar"
+                      style={{
+                        width: '34px', height: '34px', borderRadius: '10px',
+                        background: '#f1f5f9', border: 'none', color: '#64748b',
+                        cursor: 'pointer', display: 'flex', alignItems: 'center',
+                        justifyContent: 'center', fontSize: '13px', transition: 'all 0.2s'
+                      }}
+                      onMouseOver={(e) => { e.currentTarget.style.background = '#ef4444'; e.currentTarget.style.color = 'white'; }}
+                      onMouseOut={(e) => { e.currentTarget.style.background = '#f1f5f9'; e.currentTarget.style.color = '#64748b'; }}
+                    >
+                      <FaTrash />
+                    </button>
+                  </div>
                 </div>
-              </div>
 
-              <div className="supplier-details" style={{ fontSize: '14px', color: '#555' }}>
-                <p style={{ margin: '8px 0', display: 'flex', alignItems: 'center' }}>
-                  <FaPhone style={{ marginRight: '10px', color: '#f73194', fontSize: '14px', minWidth: '14px' }} />
-                  <span>{supplier.phone || '-'}</span>
-                </p>
-                <p style={{ margin: '8px 0', display: 'flex', alignItems: 'center' }}>
-                  <FaMapMarkerAlt style={{ marginRight: '10px', color: '#f73194', fontSize: '14px', minWidth: '14px' }} />
-                  <span>{supplier.address || '-'}</span>
-                </p>
-                <p style={{ margin: '8px 0', display: 'flex', alignItems: 'center' }}>
-                  <FaShoppingCart style={{ marginRight: '10px', color: '#f73194', fontSize: '14px', minWidth: '14px' }} />
-                  <span><strong>Mín. Compra:</strong> {supplier.min_purchase ? `$${Number(supplier.min_purchase).toLocaleString()}` : '-'}</span>
-                </p>
-              </div>
+                {/* Info items */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  {supplier.phone && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '14px', color: '#475569' }}>
+                      <FaPhone style={{ color: '#94a3b8', fontSize: '13px', flexShrink: 0 }} />
+                      <span>{supplier.phone}</span>
+                    </div>
+                  )}
+                  {supplier.address && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '14px', color: '#475569' }}>
+                      <FaMapMarkerAlt style={{ color: '#94a3b8', fontSize: '13px', flexShrink: 0 }} />
+                      <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{supplier.address}</span>
+                    </div>
+                  )}
+                  {supplier.website && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '14px', color: '#475569' }}>
+                      <FaGlobe style={{ color: '#94a3b8', fontSize: '13px', flexShrink: 0 }} />
+                      <a href={supplier.website} target="_blank" rel="noopener noreferrer"
+                        style={{ color: '#f73194', textDecoration: 'none', fontWeight: '500' }}
+                        onMouseOver={(e) => e.currentTarget.style.textDecoration = 'underline'}
+                        onMouseOut={(e) => e.currentTarget.style.textDecoration = 'none'}
+                      >
+                        {supplier.website.replace(/^https?:\/\//, '')}
+                      </a>
+                    </div>
+                  )}
+                </div>
 
-              <div className="supplier-status" style={{ marginTop: '15px', paddingTop: '15px', borderTop: '1px solid #f0f0f0' }}>
-                <span style={{ display: 'inline-block', padding: '6px 16px', borderRadius: '20px', fontSize: '13px', fontWeight: '600', background: supplier.status === 'active' ? '#d4edda' : '#f8d7da', color: supplier.status === 'active' ? '#155724' : '#721c24' }}>
-                  {supplier.status === 'active' ? '✓ Activo' : '✗ Inactivo'}
-                </span>
+                {/* Footer: Mínimo de compra + Notas */}
+                <div style={{ marginTop: '18px', paddingTop: '16px', borderTop: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div>
+                    <span style={{ fontSize: '11px', color: '#94a3b8', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Mín. Compra</span>
+                    <p style={{ margin: '2px 0 0', fontSize: '18px', fontWeight: '800', color: '#1e293b' }}>
+                      {supplier.min_purchase ? `$${Number(supplier.min_purchase).toLocaleString()}` : '—'}
+                    </p>
+                  </div>
+                  {supplier.notes && (
+                    <div style={{
+                      display: 'flex', alignItems: 'center', gap: '6px',
+                      padding: '6px 12px', background: '#fffbeb', borderRadius: '8px',
+                      fontSize: '12px', color: '#92400e', fontWeight: '500', maxWidth: '160px'
+                    }}>
+                      <FaStickyNote style={{ fontSize: '10px', flexShrink: 0 }} />
+                      <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{supplier.notes}</span>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           ))

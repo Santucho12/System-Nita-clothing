@@ -12,14 +12,25 @@ const useSortableData = (items, config = null) => {
         let sortableItems = [...items];
         if (sortConfig !== null) {
             sortableItems.sort((a, b) => {
-                const aValue = a[sortConfig.key];
-                const bValue = b[sortConfig.key];
+                let aValue = a[sortConfig.key];
+                let bValue = b[sortConfig.key];
+
+                // Manejo de tipos dinámicos si se provee keyTypes
+                if (sortConfig.keyTypes && sortConfig.keyTypes[sortConfig.key]) {
+                    const type = sortConfig.keyTypes[sortConfig.key];
+                    if (type === 'number') {
+                        aValue = Number(aValue) || 0;
+                        bValue = Number(bValue) || 0;
+                    } else if (type === 'date') {
+                        aValue = new Date(aValue).getTime() || 0;
+                        bValue = new Date(bValue).getTime() || 0;
+                    }
+                }
 
                 // Manejar valores nulos o indefinidos
                 if (aValue === null || aValue === undefined) return 1;
                 if (bValue === null || bValue === undefined) return -1;
 
-                // Comparación numérica o de strings
                 if (aValue < bValue) {
                     return sortConfig.direction === 'ascending' ? -1 : 1;
                 }
@@ -41,7 +52,8 @@ const useSortableData = (items, config = null) => {
         ) {
             direction = 'descending';
         }
-        setSortConfig({ key, direction });
+        // Preservamos keyTypes al cambiar la dirección
+        setSortConfig({ ...sortConfig, key, direction });
     };
 
     return { items: sortedItems, requestSort, sortConfig };

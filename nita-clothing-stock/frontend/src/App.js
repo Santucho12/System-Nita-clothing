@@ -7,6 +7,7 @@ import 'react-toastify/dist/ReactToastify.css';
 // import Navigation from './components/Navigation';
 import Sidebar from './components/Sidebar';
 import Dashboard from './components/Dashboard';
+import ScrollToTop from './components/ScrollToTop';
 import Categories from './components/Categories';
 import Products from './components/Products';
 import Reports from './components/Reports';
@@ -55,6 +56,7 @@ function App() {
 
   return (
     <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+      <ScrollToTop />
       <div className="App" style={{ display: 'flex', minHeight: '100vh' }}>
         <Sidebar />
         <div style={{ flex: 1, marginLeft: 230, minHeight: '100vh', background: 'var(--bg-secondary)', display: 'flex', flexDirection: 'column' }}>
