@@ -155,115 +155,131 @@ class ProductController {
 
     static async createProduct(req, res) {
         try {
-            let data = req.body;
-            // Si hay imágenes subidas
-            let imageUrls = [];
+            console.log('\n[DEBUG] === NUEVA PETICIÓN DE CREACIÓN ===');
+            console.log('[DEBUG] Headers:', req.headers['content-type']);
+            console.log('[DEBUG] Body:', req.body);
+            console.log('[DEBUG] Files:', req.files?.length || 0);
             if (req.files && req.files.length > 0) {
-                imageUrls = req.files
-                    .filter(file => file && file.filename)
-                    .map(file => `/uploads/products/${file.filename}`);
+                console.log('[DEBUG] Detalles de archivos:', req.files.map(f => ({ name: f.originalname, size: f.size })));
             }
-            if (imageUrls.length > 0) {
-                data = { ...data, images: imageUrls };
-            }
-            // Validar talles permitidos
-            const allowedSizes = ['Talle único', 'S', 'M', 'L', '36', '38', '40', '42'];
-            if (data.tallas && !allowedSizes.includes(data.tallas)) {
-                return res.status(400).json({ success: false, message: 'Talle inválido. Los valores permitidos son: ' + allowedSizes.join(', ') });
-            }
-            // Log de depuración para ver los datos recibidos
-            console.log('[createProduct] data recibido:', data);
 
-            // Parsear campos numéricos y mapear los campos requeridos por la base de datos (Inglés a Español)
+            const data = req.body;
+
+            // Determinar imágenes finales
+            let imagenesFinal = [];
+
+            // 1. Prioridad: Archivos recién subidos
+            if (req.files && req.files.length > 0) {
+                imagenesFinal = req.files.map(file => `/uploads/products/${file.filename}`);
+            }
+
+            // 2. Fallback/Complemento: URLs existentes enviadas como string o array
+            const imagesInput = data.images || data.imagen_url;
+            if (imagesInput) {
+                try {
+                    const parsed = typeof imagesInput === 'string' ? JSON.parse(imagesInput) : imagesInput;
+                    const urls = Array.isArray(parsed) ? parsed : [parsed];
+                    const validUrls = urls.filter(img => typeof img === 'string' && img.startsWith('/uploads/'));
+                    imagenesFinal = [...imagenesFinal, ...validUrls];
+                } catch (e) {
+                    if (typeof imagesInput === 'string' && imagesInput.startsWith('/uploads/')) {
+                        imagenesFinal.push(imagesInput);
+                    }
+                }
+            }
+
+            console.log('[DEBUG] Imágenes finales a guardar:', imagenesFinal);
+
+            // Normalizar datos
             const mappedData = {
-                nombre: data.name || null,
-                codigo: data.sku || null, // SKU convertido a codigo
-                categoria_id: data.category_id ? parseInt(data.category_id) : null,
+                nombre: data.nombre || data.name || null,
+                codigo: data.codigo || data.sku || null,
+                categoria_id: data.categoria_id || data.category_id ? parseInt(data.categoria_id || data.category_id) : null,
                 supplier_id: data.supplier_id ? parseInt(data.supplier_id) : null,
                 tallas: data.tallas || data.size || null,
                 colores: data.colores || data.color || null,
-                ubicacion: data.ubicacion || null,
-                estado: (parseInt(data.quantity) || 0) > 0 ? 'activo' : 'sin_stock',
-                notas: data.notas || null,
-                imagen_url: (data.images && data.images.length > 0) ? JSON.stringify(data.images) : null,
+                ubicacion: data.ubicacion || data.location || null,
+                notas: data.notas || data.notes || null,
+                stock: parseInt(data.stock || data.quantity || 1),
+                stock_minimo: parseInt(data.stock_minimo || data.min_stock || 0),
+                precio: parseFloat(data.precio || data.sale_price || 0),
+                costo: parseFloat(data.costo || data.cost_price || 0),
+                imagen_url: JSON.stringify(imagenesFinal),
+                fecha_ingreso: data.fecha_ingreso || new Date().toISOString().slice(0, 10),
                 created_at: new Date().toISOString().slice(0, 19).replace('T', ' ')
             };
 
-            // Si cantidad no está presente o es vacío, poner 1
-            if (!('quantity' in data) || data.quantity === '' || data.quantity === undefined || data.quantity === null) {
-                data.quantity = 1;
+            if (!mappedData.nombre) {
+                return res.status(400).json({ success: false, message: 'El nombre es obligatorio' });
             }
-            mappedData.stock = parseInt(data.quantity) || 0;
-            mappedData.stock_minimo = data.min_stock ? parseInt(data.min_stock) : 0;
-            mappedData.precio = data.sale_price ? parseFloat(data.sale_price) : 0;
-            mappedData.costo = data.cost_price ? parseFloat(data.cost_price) : 0;
 
             const newProduct = await Product.create(mappedData);
             res.status(201).json({ success: true, data: newProduct });
         } catch (error) {
-            console.error('Error al crear producto:', error);
-            res.status(400).json({ success: false, message: error.message });
+            console.error('[CRITICAL] Error en createProduct:', error);
+            res.status(500).json({ success: false, message: error.message });
         }
     }
 
     static async updateProduct(req, res) {
-        // Log para ver el contenido real del body recibido
-        console.log('[updateProduct] req.body:', req.body);
+        const { id } = req.params;
         try {
-            const { id } = req.params;
-            let data = req.body;
+            console.log(`\n[DEBUG] === ACTUALIZANDO PRODUCTO ID ${id} ===`);
+            console.log('[DEBUG] Headers:', req.headers['content-type']);
+            console.log('[DEBUG] Body:', req.body);
+            console.log('[DEBUG] Files:', req.files?.length || 0);
+
+            const data = req.body;
             let imagenesFinal = [];
+
+            // 1. Archivos nuevos
             if (req.files && req.files.length > 0) {
-                // Si se subieron nuevas imágenes, usar esas
                 imagenesFinal = req.files.map(file => `/uploads/products/${file.filename}`);
-            } else if (Array.isArray(data.images) && data.images.length > 0) {
-                // Si no se subieron nuevas, usar las existentes
-                imagenesFinal = data.images.filter(img => img && img !== 'undefined');
-            } else if (data.imagen_url) {
-                // Si viene como string, intentar parsear
-                try {
-                    const arr = JSON.parse(data.imagen_url);
-                    if (Array.isArray(arr)) imagenesFinal = arr.filter(img => img && img !== 'undefined');
-                } catch { }
             }
 
-            // Asegurar que armamos el objeto solo con los campos permitidos/necesarios
-            // Mapear todos los campos relevantes directamente desde data
+            // 2. URLs persistentes (evitar pérdida de fotos al editar otras cosas)
+            const imagesInput = data.images || data.imagen_url;
+            if (imagesInput) {
+                try {
+                    const parsed = typeof imagesInput === 'string' ? JSON.parse(imagesInput) : imagesInput;
+                    const urls = Array.isArray(parsed) ? parsed : [parsed];
+                    const validUrls = urls.filter(img => typeof img === 'string' && (img.startsWith('/uploads/') || img.startsWith('http')));
+                    imagenesFinal = [...imagenesFinal, ...validUrls];
+                } catch (e) {
+                    if (typeof imagesInput === 'string' && (imagesInput.startsWith('/uploads/') || imagesInput.startsWith('http'))) {
+                        imagenesFinal.push(imagesInput);
+                    }
+                }
+            }
+
+            console.log('[DEBUG] Imágenes finales a actualizar:', imagenesFinal);
+
+            const stock = parseInt(data.stock || data.quantity || 0);
+
             const mappedData = {
-                nombre: data.nombre,
-                codigo: data.codigo,
-                categoria_id: data.categoria_id,
-                supplier_id: data.supplier_id,
-                tallas: data.tallas,
-                colores: data.colores,
-                ubicacion: data.ubicacion,
-                estado: (parseInt(data.stock) || 0) > 0 ? 'activo' : 'sin_stock',
-                notas: data.notas,
+                nombre: data.nombre || data.name,
+                codigo: data.codigo || data.sku,
+                categoria_id: data.categoria_id || data.category_id ? parseInt(data.categoria_id || data.category_id) : undefined,
+                supplier_id: data.supplier_id ? parseInt(data.supplier_id) : undefined,
+                tallas: data.tallas || data.size,
+                colores: data.colores || data.color,
+                ubicacion: data.ubicacion || data.location,
+                estado: stock > 0 ? 'activo' : 'sin_stock',
+                notas: data.notas || data.notes,
                 imagen_url: JSON.stringify(imagenesFinal),
-                stock: data.stock,
-                stock_minimo: data.stock_minimo,
-                precio: data.precio,
-                costo: data.costo
+                stock,
+                stock_minimo: data.stock_minimo !== undefined ? parseInt(data.stock_minimo) : (data.min_stock !== undefined ? parseInt(data.min_stock) : undefined),
+                precio: data.precio !== undefined ? parseFloat(data.precio) : (data.sale_price !== undefined ? parseFloat(data.sale_price) : undefined),
+                costo: data.costo !== undefined ? parseFloat(data.costo) : (data.cost_price !== undefined ? parseFloat(data.cost_price) : undefined)
             };
 
-            // Validación de campos obligatorios y tipos
-            if (!mappedData.nombre || typeof mappedData.nombre !== 'string' || mappedData.nombre.trim() === '') {
-                return res.status(400).json({ success: false, message: 'El nombre del producto es obligatorio.' });
-            }
-            if (mappedData.precio === undefined || isNaN(mappedData.precio)) {
-                return res.status(400).json({ success: false, message: 'El precio debe ser un número válido.' });
-            }
-            if (mappedData.stock === undefined || isNaN(mappedData.stock)) {
-                return res.status(400).json({ success: false, message: 'El stock debe ser un número entero.' });
-            }
-            if ('imagen_url' in mappedData && typeof mappedData.imagen_url !== 'string') {
-                return res.status(400).json({ success: false, message: 'El campo imagen_url debe ser un string.' });
-            }
-            // Si pasa validación, actualizar
+            Object.keys(mappedData).forEach(key => mappedData[key] === undefined && delete mappedData[key]);
+
             const updatedProduct = await Product.update(id, mappedData);
             res.status(200).json({ success: true, data: updatedProduct });
         } catch (error) {
-            res.status(400).json({ success: false, message: error.message });
+            console.error('[CRITICAL] Error en updateProduct:', error);
+            res.status(500).json({ success: false, message: error.message });
         }
     }
 

@@ -9,7 +9,7 @@ export const formatCurrency = (value) => {
     currency: 'ARS',
     minimumFractionDigits: 2,
     maximumFractionDigits: 2
-  }).format(number).replace('ARS', '$').trim();
+  }).format(number).replace('ARS', '$ ').trim();
 };
 
 /**

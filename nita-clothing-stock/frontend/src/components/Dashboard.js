@@ -99,12 +99,83 @@ const Dashboard = () => {
 
           .stat-card {
             animation: perspective3DFlip 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) both;
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05) !important;
+            height: 250px; /* Altura reducida */
+            padding: 0 !important; /* Elimina el borde blanco del CSS externo */
           }
 
           .stat-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 8px 16px rgba(247, 49, 148, 0.2) !important;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;
+          }
+
+          .stat-card-body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex: 3; /* Ocupa el 75% */
+            background: white;
+            padding: 15px 10px 5px 10px;
+          }
+
+          .stat-icon-wrapper {
+            background: #fff0f7;
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 10px;
+          }
+
+          .stat-value {
+            margin: 0 0 2px 0;
+            font-size: 24px;
+            font-weight: 800;
+            color: #f73194;
+          }
+
+          .stat-label {
+            margin: 0;
+            font-size: 11px;
+            color: #64748b;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+          }
+
+          .stat-card-footer {
+            background: #f1f5f9;
+            border-top: 1px solid #e2e8f0;
+            flex: 1; /* Ocupa el 25% exacto */
+            display: flex;
+            width: 100%;
+          }
+
+          .stat-footer-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            text-decoration: none;
+            color: #f73194;
+            font-weight: 700;
+            font-size: 13px;
+            width: 100%;
+            height: 100%;
+            transition: background 0.2s ease;
+          }
+
+          .stat-footer-link:hover {
+            background: #e2e8f0;
           }
 
           .top-products-section {
@@ -167,83 +238,71 @@ const Dashboard = () => {
       {/* Estadísticas principales */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px', marginBottom: '30px' }}>
         {/* Total Productos */}
-        <div className="stat-card" style={{ background: 'white', borderRadius: '12px', padding: '20px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', animationDelay: '0.1s', textAlign: 'center' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '12px' }}>
-            <div style={{ background: 'linear-gradient(135deg, #f73194 0%, #ff6b9d 100%)', width: '50px', height: '50px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '10px' }}>
-              <FaTshirt style={{ fontSize: '24px', color: 'white' }} />
+        <div className="stat-card" style={{ animationDelay: '0.1s' }}>
+          <div className="stat-card-body">
+            <div className="stat-icon-wrapper">
+              <FaTshirt style={{ fontSize: '20px', color: '#f73194' }} />
             </div>
-            <h3 style={{ margin: '0 0 4px 0', fontSize: '20px', fontWeight: '700', color: '#f73194' }}>{stats.totalProducts}</h3>
-            <p style={{ margin: 0, fontSize: '13px', color: '#666', fontWeight: '500', minHeight: '32px', display: 'flex', alignItems: 'center' }}>Total Productos</p>
+            <h3 className="stat-value">{stats.totalProducts}</h3>
+            <p className="stat-label">TOTAL PRODUCTOS</p>
           </div>
-          <Link
-            to="/products"
-            style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 10px', background: 'rgba(108, 117, 125, 0.14)', borderRadius: '6px', textDecoration: 'none', color: '#f73194', fontWeight: '500', fontSize: '11px', transition: 'all 0.3s' }}
-            onMouseOver={(e) => e.currentTarget.style.background = 'rgba(108, 117, 125, 0.25)'}
-            onMouseOut={(e) => e.currentTarget.style.background = 'rgba(108, 117, 125, 0.14)'}
-          >
-            Ver productos
-            <FaArrowRight style={{ fontSize: '10px' }} />
-          </Link>
+          <div className="stat-card-footer">
+            <Link to="/products" className="stat-footer-link">
+              Ver productos
+              <FaArrowRight style={{ fontSize: '10px' }} />
+            </Link>
+          </div>
         </div>
 
         {/* Capital */}
-        <div className="stat-card" style={{ background: 'white', borderRadius: '12px', padding: '20px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', animationDelay: '0.2s', textAlign: 'center' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '12px' }}>
-            <div style={{ background: 'linear-gradient(135deg, #f73194 0%, #ff6b9d 100%)', width: '50px', height: '50px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '10px' }}>
-              <FaStore style={{ fontSize: '24px', color: 'white' }} />
+        <div className="stat-card" style={{ animationDelay: '0.2s' }}>
+          <div className="stat-card-body">
+            <div className="stat-icon-wrapper">
+              <FaStore style={{ fontSize: '20px', color: '#f73194' }} />
             </div>
-            <h3 style={{ margin: '0 0 4px 0', fontSize: '17px', fontWeight: '700', color: '#f73194' }}>{formatCurrency(stats.inventoryValue || 0)}</h3>
-            <p style={{ margin: 0, fontSize: '13px', color: '#666', fontWeight: '500', minHeight: '32px', display: 'flex', alignItems: 'center' }}>Capital en Ropa</p>
+            <h3 className="stat-value">{formatCurrency(stats.inventoryValue || 0)}</h3>
+            <p className="stat-label">CAPITAL EN ROPA</p>
           </div>
-          <Link
-            to="/products"
-            style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 10px', background: 'rgba(108, 117, 125, 0.14)', borderRadius: '6px', textDecoration: 'none', color: '#f73194', fontWeight: '500', fontSize: '11px', transition: 'all 0.3s' }}
-            onMouseOver={(e) => e.currentTarget.style.background = 'rgba(108, 117, 125, 0.25)'}
-            onMouseOut={(e) => e.currentTarget.style.background = 'rgba(108, 117, 125, 0.14)'}
-          >
-            Ver inventario
-            <FaArrowRight style={{ fontSize: '10px' }} />
-          </Link>
+          <div className="stat-card-footer">
+            <Link to="/products" className="stat-footer-link">
+              Ver inventario
+              <FaArrowRight style={{ fontSize: '10px' }} />
+            </Link>
+          </div>
         </div>
 
         {/* Ventas del Mes */}
-        <div className="stat-card" style={{ background: 'white', borderRadius: '12px', padding: '20px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', animationDelay: '0.3s', textAlign: 'center' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '12px' }}>
-            <div style={{ background: 'linear-gradient(135deg, #f73194 0%, #ff6b9d 100%)', width: '50px', height: '50px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '10px' }}>
-              <FaShoppingCart style={{ fontSize: '24px', color: 'white' }} />
+        <div className="stat-card" style={{ animationDelay: '0.3s' }}>
+          <div className="stat-card-body">
+            <div className="stat-icon-wrapper">
+              <FaShoppingCart style={{ fontSize: '20px', color: '#f73194' }} />
             </div>
-            <h3 style={{ margin: '0 0 4px 0', fontSize: '20px', fontWeight: '700', color: '#f73194' }}>{formatInteger(stats.monthlySales)}</h3>
-            <p style={{ margin: 0, fontSize: '13px', color: '#666', fontWeight: '500', minHeight: '32px', display: 'flex', alignItems: 'center' }}>Ventas del Mes</p>
+            <h3 className="stat-value">{formatInteger(stats.monthlySales)}</h3>
+            <p className="stat-label">VENTAS DEL MES</p>
           </div>
-          <Link
-            to="/sales/history"
-            style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 10px', background: 'rgba(108, 117, 125, 0.14)', borderRadius: '6px', textDecoration: 'none', color: '#f73194', fontWeight: '500', fontSize: '11px', transition: 'all 0.3s' }}
-            onMouseOver={(e) => e.currentTarget.style.background = 'rgba(108, 117, 125, 0.25)'}
-            onMouseOut={(e) => e.currentTarget.style.background = 'rgba(108, 117, 125, 0.14)'}
-          >
-            Ver ventas
-            <FaArrowRight style={{ fontSize: '10px' }} />
-          </Link>
+          <div className="stat-card-footer">
+            <Link to="/sales/history" className="stat-footer-link">
+              Ver ventas
+              <FaArrowRight style={{ fontSize: '10px' }} />
+            </Link>
+          </div>
         </div>
 
         {/* Facturación */}
-        <div className="stat-card" style={{ background: 'white', borderRadius: '12px', padding: '20px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', animationDelay: '0.4s', textAlign: 'center' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '12px' }}>
-            <div style={{ background: 'linear-gradient(135deg, #f73194 0%, #ff6b9d 100%)', width: '50px', height: '50px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '10px' }}>
-              <FaDollarSign style={{ fontSize: '24px', color: 'white' }} />
+        <div className="stat-card" style={{ animationDelay: '0.4s' }}>
+          <div className="stat-card-body">
+            <div className="stat-icon-wrapper">
+              <FaDollarSign style={{ fontSize: '20px', color: '#f73194' }} />
             </div>
-            <h3 style={{ margin: '0 0 4px 0', fontSize: '17px', fontWeight: '700', color: '#f73194' }}>{formatCurrency(stats.monthlyRevenue || 0)}</h3>
-            <p style={{ margin: 0, fontSize: '13px', color: '#666', fontWeight: '500', minHeight: '32px', display: 'flex', alignItems: 'center' }}>Facturación del Mes</p>
+            <h3 className="stat-value">{formatCurrency(stats.monthlyRevenue || 0)}</h3>
+            <p className="stat-label">FACTURACIÓN DEL MES</p>
           </div>
-          <Link
-            to="/reports/advanced"
-            style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 10px', background: 'rgba(108, 117, 125, 0.14)', borderRadius: '6px', textDecoration: 'none', color: '#f73194', fontWeight: '500', fontSize: '11px', transition: 'all 0.3s' }}
-            onMouseOver={(e) => e.currentTarget.style.background = 'rgba(108, 117, 125, 0.25)'}
-            onMouseOut={(e) => e.currentTarget.style.background = 'rgba(108, 117, 125, 0.14)'}
-          >
-            Ver reportes
-            <FaArrowRight style={{ fontSize: '10px' }} />
-          </Link>
+          <div className="stat-card-footer">
+            <Link to="/reports/advanced" className="stat-footer-link">
+              Ver reportes
+              <FaArrowRight style={{ fontSize: '10px' }} />
+            </Link>
+          </div>
         </div>
       </div>
 

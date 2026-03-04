@@ -56,11 +56,14 @@ app.use(cors({
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// DEBUG: Log de TODAS las requests HTTP con status de respuesta
 app.use((req, res, next) => {
     console.log(`[HTTP] --> ${req.method} ${req.originalUrl}`);
+    console.log('[HTTP] Content-Type:', req.get('Content-Type'));
+    if (req.method !== 'GET') {
+        console.log('[HTTP] Body Header:', JSON.stringify(req.body).substring(0, 500));
+    }
     const originalJson = res.json.bind(res);
-    res.json = function(body) {
+    res.json = function (body) {
         console.log(`[HTTP] <-- ${req.method} ${req.originalUrl} [${res.statusCode}]`, JSON.stringify(body).substring(0, 200));
         return originalJson(body);
     };

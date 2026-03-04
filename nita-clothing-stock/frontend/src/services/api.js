@@ -193,51 +193,101 @@ export const productService = {
   // Crear nuevo producto (con imágenes)
   create: async (productData) => {
     try {
+      // Detección más robusta de archivos (File o Blob con propiedades de archivo)
+      const hasFiles = Array.isArray(productData.images) && productData.images.some(img =>
+        (img instanceof File) || (img && img.name && img.size && typeof img.name === 'string')
+      );
+
+      console.log('[API] create productData.images:', productData.images);
+      console.log('[API] hasFiles:', hasFiles);
+
       let dataToSend;
       let headers = {};
-      if (productData.images && productData.images.length > 0 && productData.images[0] instanceof File) {
-        // Si hay archivos, usar FormData
+
+      if (hasFiles) {
         dataToSend = new FormData();
         Object.entries(productData).forEach(([key, value]) => {
           if (key === 'images') {
-            Array.from(value).forEach(img => dataToSend.append('images', img));
-          } else {
+            const files = Array.isArray(value) ? value : [value];
+            const existingUrls = [];
+            files.forEach(img => {
+              if ((img instanceof File) || (img && img.name && img.size)) {
+                console.log('[API] Agregando archivo a FormData:', img.name);
+                dataToSend.append('images', img);
+              } else if (typeof img === 'string' && img.trim() !== '') {
+                existingUrls.push(img);
+              }
+            });
+            if (existingUrls.length > 0) {
+              dataToSend.append('imagen_url', JSON.stringify(existingUrls));
+            }
+          } else if (value !== null && value !== undefined) {
             dataToSend.append(key, value);
           }
         });
-        headers['Content-Type'] = 'multipart/form-data';
+        // IMPORTANTE: NO fijar Content-Type para FormData, Axios lo hará con el boundary correcto
+        headers['Content-Type'] = undefined;
       } else {
-        dataToSend = productData;
+        dataToSend = { ...productData };
+        if (Array.isArray(productData.images)) {
+          dataToSend.imagen_url = JSON.stringify(productData.images.filter(img => typeof img === 'string'));
+        }
       }
+
       const response = await api.post('/productos', dataToSend, { headers });
       return response.data;
     } catch (error) {
-      throw new Error(error.message || error.data?.message || 'Error creando producto');
+      console.error('[API] Error in create:', error.response?.data || error.message);
+      throw new Error(error.response?.data?.message || 'Error creando producto');
     }
   },
 
   // Actualizar producto (con imágenes)
   update: async (id, productData) => {
     try {
+      const hasFiles = Array.isArray(productData.images) && productData.images.some(img =>
+        (img instanceof File) || (img && img.name && img.size && typeof img.name === 'string')
+      );
+
+      console.log('[API] update current images:', productData.images);
+      console.log('[API] hasFiles:', hasFiles);
+
       let dataToSend;
       let headers = {};
-      if (productData.images && productData.images.length > 0 && productData.images[0] instanceof File) {
+
+      if (hasFiles) {
         dataToSend = new FormData();
         Object.entries(productData).forEach(([key, value]) => {
           if (key === 'images') {
-            Array.from(value).forEach(img => dataToSend.append('images', img));
-          } else {
+            const files = Array.isArray(value) ? value : [value];
+            const existingUrls = [];
+            files.forEach(img => {
+              if ((img instanceof File) || (img && img.name && img.size)) {
+                dataToSend.append('images', img);
+              } else if (typeof img === 'string' && img.trim() !== '') {
+                existingUrls.push(img);
+              }
+            });
+            if (existingUrls.length > 0) {
+              dataToSend.append('imagen_url', JSON.stringify(existingUrls));
+            }
+          } else if (value !== null && value !== undefined) {
             dataToSend.append(key, value);
           }
         });
-        headers['Content-Type'] = 'multipart/form-data';
+        headers['Content-Type'] = undefined;
       } else {
-        dataToSend = productData;
+        dataToSend = { ...productData };
+        if (Array.isArray(productData.images)) {
+          dataToSend.imagen_url = JSON.stringify(productData.images.filter(img => typeof img === 'string'));
+        }
       }
+
       const response = await api.put(`/productos/${id}`, dataToSend, { headers });
       return response.data;
     } catch (error) {
-      throw new Error(error.message || error.data?.message || 'Error actualizando producto');
+      console.error('[API] Error in update:', error.response?.data || error.message);
+      throw new Error(error.response?.data?.message || 'Error actualizando producto');
     }
   },
 
