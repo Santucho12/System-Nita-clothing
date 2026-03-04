@@ -45,7 +45,7 @@ class Customer {
 
     // Historial de compras
     static async getPurchaseHistory(email, connection = null) {
-        const sql = `SELECT s.*, (
+        const sql = `SELECT s.*, s.created_at as sale_date, (
             SELECT GROUP_CONCAT(CONCAT(product_name, ' x', quantity) SEPARATOR ', ')
             FROM sale_items si WHERE si.sale_id = s.id
         ) as items

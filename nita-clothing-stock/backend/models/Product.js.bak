@@ -1,0 +1,339 @@
+const db = require('../config/database');
+const { deletePhysicalFile } = require('../utils/fileHelper');
+
+// Helper para parsear imágenes de forma segura
+const safeParseImages = (jsonStr, productId) => {
+    if (!jsonStr) return [];
+    try {
+        return JSON.parse(jsonStr);
+    } catch (e) {
+        console.error(`[ERROR] Error parseando imagen_url para producto ${productId}:`, e);
+        // Si no es JSON, devolvemos el string original en un array si parece una URL
+        return [jsonStr];
+    }
+};
+
+class Product {
+    // Obtener el último SKU numérico
+    static async getLastSku(connection = null) {
+        // Obtenemos el último código numérico para sugerir el siguiente
+        const sql = 'SELECT codigo FROM productos WHERE deleted_at IS NULL AND codigo REGEXP "^[0-9]+$" ORDER BY CAST(codigo AS UNSIGNED) DESC LIMIT 1';
+        const [rows] = await db.query(sql, [], connection);
+        return rows[0]?.codigo || null;
+    }
+
+    // Crear producto
+    static async create(data, connection = null) {
+        const {
+            nombre,
+            descripcion = null,
+            codigo,
+            categoria_id,
+            tallas = null,
+            colores = null,
+            precio,
+            costo,
+            stock,
+            stock_minimo,
+            proveedor,
+            supplier_id = null,
+            ubicacion,
+            estado = 'disponible',
+            fecha_ingreso,
+            imagen_url,
+            notas,
+            created_at,
+            updated_at
+        } = data;
+
+        const sql = `
+            INSERT INTO productos (
+                nombre, descripcion, codigo, categoria_id, tallas, colores, precio, costo, 
+                stock, stock_minimo, proveedor, supplier_id, ubicacion, 
+                estado, fecha_ingreso, imagen_url, notas, created_at, updated_at
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `;
+
+        const values = [
+            nombre !== undefined ? nombre : null,
+            descripcion !== undefined ? descripcion : null,
+            codigo !== undefined ? codigo : null,
+            categoria_id !== undefined ? categoria_id : null,
+            tallas !== undefined ? tallas : null,
+            colores !== undefined ? colores : null,
+            precio !== undefined ? precio : 0,
+            costo !== undefined ? costo : 0,
+            stock !== undefined ? stock : 0,
+            stock_minimo !== undefined ? stock_minimo : 0,
+            proveedor !== undefined ? proveedor : null,
+            supplier_id !== undefined ? supplier_id : null,
+            ubicacion !== undefined ? ubicacion : null,
+            estado !== undefined ? estado : 'disponible',
+            fecha_ingreso !== undefined ? fecha_ingreso : null,
+            imagen_url !== undefined ? imagen_url : null,
+            notas !== undefined ? notas : null,
+            created_at !== undefined ? created_at : null,
+            updated_at !== undefined ? updated_at : null
+        ];
+
+        const [result] = await db.query(sql, values, connection);
+        return { id: result.insertId, ...data };
+    }
+
+    // Obtener todos los productos con paginación y filtros
+    static async getAll(options = {}, connection = null) {
+        const {
+            limit = null,
+            offset = 0,
+            sort = 'id',
+            direction = 'DESC',
+            q = null,
+            category = null,
+            size = null,
+            color = null,
+            status = null
+        } = options;
+
+        let sql = 'SELECT * FROM productos WHERE deleted_at IS NULL';
+        const params = [];
+
+        if (q) {
+            sql += ' AND (nombre LIKE ? OR codigo LIKE ?)';
+            params.push(`%${q}%`, `%${q}%`);
+        }
+        if (category) {
+            sql += ' AND categoria_id = ?';
+            params.push(category);
+        }
+        if (size) {
+            sql += ' AND tallas = ?';
+            params.push(size);
+        }
+        if (color) {
+            sql += ' AND colores LIKE ?';
+            params.push(`%${color}%`);
+        }
+        if (status) {
+            sql += ' AND estado = ?';
+            params.push(status);
+        }
+
+        // Note: In a production app, we should validate 'sort' against a whitelist
+        const ALLOWED_SORT_FIELDS = ['id', 'nombre', 'precio', 'stock', 'created_at'];
+        const validatedSort = ALLOWED_SORT_FIELDS.includes(sort) ? sort : 'id';
+        const validatedDir = direction.toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
+
+        sql += ` ORDER BY ${validatedSort} ${validatedDir}`;
+
+        if (limit !== null) {
+            const safeLimit = parseInt(limit) || 25;
+            const safeOffset = parseInt(offset) || 0;
+            sql += ` LIMIT ${safeLimit} OFFSET ${safeOffset}`;
+        }
+
+        const [rows] = await db.query(sql, params, connection);
+        return rows.map(p => ({ ...p, images: safeParseImages(p.imagen_url, p.id) }));
+    }
+
+    // Obtener conteo filtrado para paginación
+    static async getFilteredCount(options = {}, connection = null) {
+        const {
+            q = null,
+            category = null,
+            size = null,
+            color = null,
+            status = null
+        } = options;
+
+        let sql = 'SELECT COUNT(*) as total FROM productos WHERE deleted_at IS NULL';
+        const params = [];
+
+        if (q) {
+            sql += ' AND (nombre LIKE ? OR codigo LIKE ?)';
+            params.push(`%${q}%`, `%${q}%`);
+        }
+        if (category) {
+            sql += ' AND categoria_id = ?';
+            params.push(category);
+        }
+        if (size) {
+            sql += ' AND tallas = ?';
+            params.push(size);
+        }
+        if (color) {
+            sql += ' AND colores LIKE ?';
+            params.push(`%${color}%`);
+        }
+        if (status) {
+            sql += ' AND estado = ?';
+            params.push(status);
+        }
+
+        const row = await db.get(sql, params, connection);
+        return row ? row.total : 0;
+    }
+
+    // Verificar si un SKU ya existe
+    static async checkSkuExists(sku, excludeId = null, connection = null) {
+        let query = 'SELECT id FROM productos WHERE codigo = ? AND deleted_at IS NULL';
+        const params = [sku];
+
+        if (excludeId) {
+            query += ' AND id != ?';
+            params.push(excludeId);
+        }
+
+        const [rows] = await db.query(query, params, connection);
+        return rows.length > 0;
+    }
+
+    // Obtener producto por ID
+    static async getById(id, connection = null) {
+        const [rows] = await db.query('SELECT * FROM productos WHERE id = ? AND deleted_at IS NULL', [id], connection);
+        if (!rows[0]) return null;
+        return { ...rows[0], images: safeParseImages(rows[0].imagen_url, rows[0].id) };
+    }
+
+    // Buscar productos por nombre o SKU
+    static async search(query, connection = null) {
+        const [rows] = await db.query(
+            `SELECT * FROM productos WHERE (nombre LIKE ? OR codigo LIKE ?) AND deleted_at IS NULL`,
+            [`%${query}%`, `%${query}%`],
+            connection
+        );
+        return rows.map(p => ({ ...p, images: safeParseImages(p.imagen_url, p.id) }));
+    }
+
+    // Filtrar por categoría
+    static async getByCategory(categoryId, connection = null) {
+        const [rows] = await db.query('SELECT * FROM productos WHERE categoria_id = ? AND deleted_at IS NULL', [categoryId], connection);
+        return rows.map(p => ({ ...p, images: safeParseImages(p.imagen_url, p.id) }));
+    }
+
+    // Productos con stock bajo
+    static async getLowStock(connection = null) {
+        const [rows] = await db.query('SELECT * FROM productos WHERE stock < stock_minimo AND stock > 0 AND deleted_at IS NULL', [], connection);
+        return rows.map(p => ({ ...p, images: safeParseImages(p.imagen_url, p.id) }));
+    }
+
+    // Productos sin stock
+    static async getOutOfStock(connection = null) {
+        const [rows] = await db.query('SELECT * FROM productos WHERE stock <= 0 AND deleted_at IS NULL', [], connection);
+        return rows.map(p => ({ ...p, images: safeParseImages(p.imagen_url, p.id) }));
+    }
+
+    // Actualizar producto
+    static async update(id, data, connection = null) {
+        // Whitelist de columnas permitidas para prevenir SQL injection
+        const ALLOWED_FIELDS = [
+            'nombre', 'descripcion', 'codigo', 'categoria_id', 'tallas', 'colores',
+            'precio', 'costo', 'stock', 'stock_minimo', 'proveedor', 'supplier_id',
+            'ubicacion', 'estado', 'imagen_url', 'notas', 'fecha_ingreso'
+        ];
+
+        const fields = [];
+        const values = [];
+        for (const key in data) {
+            if (key === 'id') continue;
+            if (!ALLOWED_FIELDS.includes(key) && key !== 'images') continue;
+
+            if (key === 'images' || key === 'imagen_url') {
+                fields.push('imagen_url = ?');
+                values.push(Array.isArray(data[key]) ? JSON.stringify(data[key]) : data[key]);
+            } else if (key === 'stock') {
+                // Asegurar que el stock no baje de cero
+                fields.push('`stock` = GREATEST(0, ?)');
+                values.push(data[key]);
+            } else {
+                fields.push(`\`${key}\` = ?`);
+                values.push(data[key]);
+            }
+        }
+        if (fields.length === 0) return this.getById(id, connection);
+        await db.query(`UPDATE productos SET ${fields.join(', ')}, updated_at = NOW() WHERE id = ? AND deleted_at IS NULL`, [...values, id], connection);
+        return this.getById(id, connection);
+    }
+
+    // Eliminar producto (Soft Delete)
+    static async delete(id, connection = null) {
+        await db.query('UPDATE productos SET deleted_at = NOW() WHERE id = ?', [id], connection);
+        return true;
+    }
+
+    // Actualizar stock manualmente y sincronizar estado
+    static async updateStock(id, quantity, connection = null) {
+        const estado = quantity > 0 ? 'disponible' : 'sin_stock';
+        await db.query(
+            'UPDATE productos SET stock = ?, estado = ?, updated_at = NOW() WHERE id = ? AND deleted_at IS NULL',
+            [quantity, estado, id],
+            connection
+        );
+        return this.getById(id, connection);
+    }
+
+    // Cambiar estado
+    static async changeStatus(id, status, connection = null) {
+        await db.query('UPDATE productos SET estado = ?, updated_at = NOW() WHERE id = ? AND deleted_at IS NULL', [status, id], connection);
+        return this.getById(id, connection);
+    }
+
+    // Subir imágenes (agrega a las existentes)
+    static async addImages(id, imageUrls, connection = null) {
+        const product = await this.getById(id, connection);
+        const images = product.images.concat(imageUrls);
+        await db.query('UPDATE productos SET imagen_url = ?, updated_at = NOW() WHERE id = ? AND deleted_at IS NULL', [JSON.stringify(images), id], connection);
+        return this.getById(id, connection);
+    }
+
+    // Eliminar imagen
+    static async removeImage(id, imageUrl, connection = null) {
+        const product = await this.getById(id, connection);
+        const images = product.images.filter(img => img !== imageUrl);
+
+        // Eliminar archivo físico
+        deletePhysicalFile(imageUrl);
+
+        await db.query('UPDATE productos SET imagen_url = ?, updated_at = NOW() WHERE id = ? AND deleted_at IS NULL', [JSON.stringify(images), id], connection);
+        return this.getById(id, connection);
+    }
+
+    // Duplicar producto (para variantes)
+    static async duplicate(id, overrides = {}) {
+        const product = await this.getById(id);
+        if (!product) return null;
+
+        const copy = { ...product, ...overrides };
+        delete copy.id;
+        delete copy.images; // Remove virtual field
+        delete copy.created_at;
+        delete copy.updated_at;
+
+        // NOTA DE SEGURIDAD: Al duplicar, evitamos que apunten a los mismos archivos físicos
+        // para que al borrar fotos de uno, no se borren del otro accidentalmente.
+        // Aquí simplemente limpiamos imagen_url, obligando a re-subir o duplicar físicamente.
+        // Por ahora, para evitar confusión, lo dejamos vacío si no hay override de imágenes.
+        if (!overrides.imagen_url && !overrides.images) {
+            copy.imagen_url = null;
+        }
+
+        copy.codigo = (copy.codigo || '') + '-COPY-' + Date.now();
+        return this.create(copy);
+    }
+
+    // Indicador visual de stock
+    static getStockIndicator(product) {
+        if (product.stock <= 0 || product.stock < (product.stock_minimo * 0.5)) return 'critical';
+        if (product.stock < product.stock_minimo && product.stock > 0) return 'low';
+        if (product.stock >= product.stock_minimo) return 'ok';
+        return 'unknown';
+    }
+
+    // Conteo total de productos disponibles
+    static async getCount(connection = null) {
+        const row = await db.get('SELECT COUNT(*) as total FROM productos WHERE deleted_at IS NULL', [], connection);
+        return row ? row.total : 0;
+    }
+}
+
+module.exports = Product;

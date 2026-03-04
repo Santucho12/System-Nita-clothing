@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { productService, categoryService } from '../services/api';
 import { reportsService } from '../services/salesService';
+import axios from 'axios';
+import { format } from 'date-fns';
 import { toast } from 'react-toastify';
 import { Link } from 'react-router-dom';
 import { formatCurrency, formatInteger, formatNumber } from '../utils/formatters';
@@ -29,23 +31,32 @@ const Dashboard = () => {
       setLoading(true);
 
       // Cargar conteo de productos, valor del inventario, estadísticas de ventas y categorías más vendidas
-      const [productsCountResponse, inventoryValueResponse, monthlyStatsResponse, topCategoriesResponse] = await Promise.all([
+
+      // Calcular rango del mes actual
+      const now = new Date();
+      const startDate = format(new Date(now.getFullYear(), now.getMonth(), 1), 'yyyy-MM-dd');
+      const endDate = format(now, 'yyyy-MM-dd');
+
+      const [productsCountResponse, inventoryValueResponse, kpisResponse, topCategoriesResponse] = await Promise.all([
         productService.getCount(),
         reportsService.getInventoryValue(),
-        reportsService.getMonthlyStats(),
+        axios.get(`${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/reportes/kpis-avanzados`, {
+          params: { startDate, endDate },
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        }),
         reportsService.getTopCategories(3)
       ]);
 
       const productsCount = productsCountResponse.count || 0;
       const inventoryData = inventoryValueResponse.data || {};
-      const monthlyStats = monthlyStatsResponse.data || {};
+      const kpis = kpisResponse.data.data || {};
       const topCategoriesData = topCategoriesResponse.data || [];
 
       setStats({
         totalProducts: productsCount,
         inventoryValue: inventoryData.total_value || 0,
-        monthlyRevenue: monthlyStats.total_revenue || 0,
-        monthlySales: monthlyStats.total_sales || 0
+        monthlyRevenue: kpis.totalSales || 0,
+        monthlySales: kpis.totalTransactions || 0
       });
 
       setTopCategories(topCategoriesData);
@@ -68,7 +79,7 @@ const Dashboard = () => {
   }
 
   return (
-    <div style={{ padding: '30px', background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)', minHeight: '100vh' }}>
+    <div style={{ padding: '30px', background: 'var(--bg-gradient)', minHeight: '100vh' }}>
       <style>
         {`
           @keyframes perspective3DFlip {
@@ -161,7 +172,7 @@ const Dashboard = () => {
             <div style={{ background: 'linear-gradient(135deg, #f73194 0%, #ff6b9d 100%)', width: '50px', height: '50px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '10px' }}>
               <FaTshirt style={{ fontSize: '24px', color: 'white' }} />
             </div>
-            <h3 style={{ margin: '0 0 4px 0', fontSize: '28px', fontWeight: '700', color: '#f73194' }}>{stats.totalProducts}</h3>
+            <h3 style={{ margin: '0 0 4px 0', fontSize: '20px', fontWeight: '700', color: '#f73194' }}>{stats.totalProducts}</h3>
             <p style={{ margin: 0, fontSize: '13px', color: '#666', fontWeight: '500', minHeight: '32px', display: 'flex', alignItems: 'center' }}>Total Productos</p>
           </div>
           <Link
@@ -181,7 +192,7 @@ const Dashboard = () => {
             <div style={{ background: 'linear-gradient(135deg, #f73194 0%, #ff6b9d 100%)', width: '50px', height: '50px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '10px' }}>
               <FaStore style={{ fontSize: '24px', color: 'white' }} />
             </div>
-            <h3 style={{ margin: '0 0 4px 0', fontSize: '22px', fontWeight: '700', color: '#f73194' }}>{formatCurrency(stats.inventoryValue || 0)}</h3>
+            <h3 style={{ margin: '0 0 4px 0', fontSize: '17px', fontWeight: '700', color: '#f73194' }}>{formatCurrency(stats.inventoryValue || 0)}</h3>
             <p style={{ margin: 0, fontSize: '13px', color: '#666', fontWeight: '500', minHeight: '32px', display: 'flex', alignItems: 'center' }}>Capital en Ropa</p>
           </div>
           <Link
@@ -201,7 +212,7 @@ const Dashboard = () => {
             <div style={{ background: 'linear-gradient(135deg, #f73194 0%, #ff6b9d 100%)', width: '50px', height: '50px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '10px' }}>
               <FaShoppingCart style={{ fontSize: '24px', color: 'white' }} />
             </div>
-            <h3 style={{ margin: '0 0 4px 0', fontSize: '22px', fontWeight: '700', color: '#f73194' }}>{formatInteger(stats.monthlySales)}</h3>
+            <h3 style={{ margin: '0 0 4px 0', fontSize: '20px', fontWeight: '700', color: '#f73194' }}>{formatInteger(stats.monthlySales)}</h3>
             <p style={{ margin: 0, fontSize: '13px', color: '#666', fontWeight: '500', minHeight: '32px', display: 'flex', alignItems: 'center' }}>Ventas del Mes</p>
           </div>
           <Link
@@ -221,7 +232,7 @@ const Dashboard = () => {
             <div style={{ background: 'linear-gradient(135deg, #f73194 0%, #ff6b9d 100%)', width: '50px', height: '50px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '10px' }}>
               <FaDollarSign style={{ fontSize: '24px', color: 'white' }} />
             </div>
-            <h3 style={{ margin: '0 0 4px 0', fontSize: '22px', fontWeight: '700', color: '#f73194' }}>{formatCurrency(stats.monthlyRevenue || 0)}</h3>
+            <h3 style={{ margin: '0 0 4px 0', fontSize: '17px', fontWeight: '700', color: '#f73194' }}>{formatCurrency(stats.monthlyRevenue || 0)}</h3>
             <p style={{ margin: 0, fontSize: '13px', color: '#666', fontWeight: '500', minHeight: '32px', display: 'flex', alignItems: 'center' }}>Facturación del Mes</p>
           </div>
           <Link

@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { FaHome, FaTshirt, FaShoppingCart, FaHistory, FaChartBar, FaUsers, FaTruck, FaBookmark, FaExchangeAlt, FaBell } from 'react-icons/fa';
+import { FaHome, FaTshirt, FaShoppingCart, FaHistory, FaChartBar, FaUsers, FaTruck, FaBookmark, FaExchangeAlt, FaBell, FaSignOutAlt } from 'react-icons/fa';
+import { useAuth } from '../context/AuthContext';
+import ThemeToggle from './ThemeToggle';
 import './Sidebar.css';
 
 const menuItems = [
@@ -18,6 +20,7 @@ const menuItems = [
 
 const Sidebar = () => {
   const location = useLocation();
+  const { logout } = useAuth();
   const [modalOpen, setModalOpen] = useState(false);
   const [modalLabel, setModalLabel] = useState('');
 
@@ -63,7 +66,16 @@ const Sidebar = () => {
           })}
         </nav>
         <div className="sidebar-footer">
-          Sistema Nita Clothing
+          <ThemeToggle />
+          <button
+            onClick={logout}
+            className="sidebar-logout-btn"
+            title="Cerrar sesión"
+          >
+            <FaSignOutAlt />
+            <span>Salir</span>
+          </button>
+          <div style={{ marginTop: '6px', fontSize: '13px' }}>Sistema Nita Clothing</div>
         </div>
       </aside>
       {modalOpen && (

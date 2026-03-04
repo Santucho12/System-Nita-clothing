@@ -48,8 +48,33 @@ class ReportController {
 
     static async getProfitByCategory(req, res, next) {
         try {
-            const data = await Sale.getProfitByCategory();
-            res.json({ success: true, data });
+            const db = require('../config/database');
+            const { startDate, endDate } = req.query;
+            let dateFilter = '';
+            const params = [];
+            if (startDate && endDate) {
+                dateFilter = ' AND s.created_at BETWEEN ? AND ?';
+                params.push(startDate, endDate);
+            }
+            const sql = `
+                SELECT 
+                    c.nombre as category_name,
+                    SUM(si.quantity * si.unit_price) as total_revenue,
+                    SUM(si.unit_cost * si.quantity) as total_cost,
+                    SUM((si.unit_price - si.unit_cost) * si.quantity) as total_profit,
+                    CASE WHEN SUM(si.quantity * si.unit_price) > 0 
+                         THEN (SUM((si.unit_price - si.unit_cost) * si.quantity) / SUM(si.quantity * si.unit_price)) * 100 
+                         ELSE 0 END as profit_margin
+                FROM sale_items si
+                JOIN sales s ON si.sale_id = s.id
+                JOIN productos p ON si.product_id = p.id
+                JOIN categorias c ON p.categoria_id = c.id
+                WHERE s.status = 'completed'${dateFilter}
+                GROUP BY c.nombre
+                ORDER BY total_profit DESC
+            `;
+            const [rows] = await db.query(sql, params);
+            res.json({ success: true, data: rows });
         } catch (error) {
             next(error);
         }
@@ -139,8 +164,42 @@ class ReportController {
 
     static async getSalesByPaymentMethod(req, res, next) {
         try {
-            const stats = await Sale.getSalesByPaymentMethod();
-            res.json({ success: true, data: stats });
+            const { startDate, endDate } = req.query;
+            const db = require('../config/database');
+
+            let whereClause = "status = 'completed'";
+            let params = [];
+
+            if (startDate && endDate) {
+                whereClause += " AND DATE(created_at) BETWEEN ? AND ?";
+                params.push(startDate, endDate);
+            }
+
+            const sql = `
+                SELECT
+                    payment_method as name,
+                    COUNT(*) as count,
+                    IFNULL(SUM(total), 0) as total,
+                    ROUND(100.0 * COUNT(*) / (SELECT COUNT(*) FROM sales WHERE ${whereClause}), 1) as value
+                FROM sales
+                WHERE ${whereClause}
+                GROUP BY payment_method
+            `;
+            const rows = await db.all(sql, [...params, ...params]);
+
+            const colors = {
+                'efectivo': '#00C49F',
+                'tarjeta': '#0088FE',
+                'transferencia': '#FFBB28'
+            };
+
+            const result = rows.map(r => ({
+                ...r,
+                name: r.name.charAt(0).toUpperCase() + r.name.slice(1),
+                color: colors[r.name] || '#999'
+            }));
+
+            res.json({ success: true, data: result });
         } catch (error) {
             next(error);
         }
@@ -178,6 +237,85 @@ class ReportController {
                 revenue: parseFloat(r.revenue)
             }));
             res.json({ success: true, data: { hourly } });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    static async getTopCategoriesSold(req, res, next) {
+        try {
+            const { startDate, endDate } = req.query;
+            const db = require('../config/database');
+
+            let whereClause = "s.status = 'completed'";
+            let params = [];
+
+            if (startDate && endDate) {
+                whereClause += " AND DATE(s.created_at) BETWEEN ? AND ?";
+                params.push(startDate, endDate);
+            }
+
+            const sql = `
+                SELECT 
+                    c.nombre as category_name,
+                    SUM(si.quantity) as total_quantity,
+                    IFNULL(SUM(si.quantity * si.unit_price), 0) as total_revenue,
+                    COUNT(DISTINCT s.id) as total_sales
+                FROM sale_items si
+                JOIN sales s ON si.sale_id = s.id
+                JOIN productos p ON si.product_id = p.id
+                JOIN categorias c ON p.categoria_id = c.id
+                WHERE ${whereClause}
+                GROUP BY c.id, c.nombre
+                ORDER BY total_quantity DESC
+                LIMIT 10
+            `;
+            const rows = await db.all(sql, params);
+            res.json({ success: true, data: rows });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    static async getSalesByWeekday(req, res, next) {
+        try {
+            const { startDate, endDate } = req.query;
+            const db = require('../config/database');
+
+            let whereClause = "status = 'completed'";
+            let params = [];
+
+            if (startDate && endDate) {
+                whereClause += " AND DATE(created_at) BETWEEN ? AND ?";
+                params.push(startDate, endDate);
+            }
+
+            const sql = `
+                SELECT 
+                    DAYOFWEEK(created_at) as day_num,
+                    COUNT(*) as total_sales,
+                    IFNULL(SUM(total), 0) as revenue
+                FROM sales
+                WHERE ${whereClause}
+                GROUP BY DAYOFWEEK(created_at)
+                ORDER BY DAYOFWEEK(created_at)
+            `;
+            const rows = await db.all(sql, params);
+            
+            // DAYOFWEEK: 1=Dom, 2=Lun, 3=Mar, 4=Mié, 5=Jue, 6=Vie, 7=Sáb
+            const dayNames = { 1: 'Dom', 2: 'Lun', 3: 'Mar', 4: 'Mié', 5: 'Jue', 6: 'Vie', 7: 'Sáb' };
+            const allDays = [2, 3, 4, 5, 6, 7, 1]; // Lun a Dom
+            
+            const result = allDays.map(dayNum => {
+                const found = rows.find(r => r.day_num === dayNum);
+                return {
+                    day: dayNames[dayNum],
+                    value: found ? found.total_sales : 0,
+                    revenue: found ? parseFloat(found.revenue) : 0
+                };
+            });
+            
+            res.json({ success: true, data: result });
         } catch (error) {
             next(error);
         }
@@ -247,29 +385,22 @@ class ReportController {
                 ${endDate ? 'AND DATE(s.created_at) <= ?' : ''}
             `, [startDate, endDate].filter(Boolean));
 
-            // Ganancias netas (Considerando descuentos)
-            const profitStats = await db.get(`
+            // Costo total de los items vendidos
+            const costStats = await db.get(`
                 SELECT 
-                    (COALESCE(SUM(si.quantity * (si.unit_price - si.unit_cost)), 0) - IFNULL(MAX(s_discounts.total_discount), 0)) as netProfit,
                     COALESCE(SUM(si.quantity * si.unit_cost), 0) as totalCost
                 FROM sale_items si
                 JOIN sales s ON si.sale_id = s.id
-                CROSS JOIN (
-                    SELECT SUM(discount_amount) as total_discount
-                    FROM sales
-                    WHERE status = 'completed'
-                    ${startDate ? 'AND DATE(created_at) >= ?' : ''}
-                    ${endDate ? 'AND DATE(created_at) <= ?' : ''}
-                ) s_discounts
                 WHERE s.status = 'completed'
                 ${startDate ? 'AND DATE(s.created_at) >= ?' : ''}
                 ${endDate ? 'AND DATE(s.created_at) <= ?' : ''}
-            `, [startDate, endDate, startDate, endDate].filter(Boolean));
+            `, [startDate, endDate].filter(Boolean));
 
             // Calcular métricas
+            // Ganancia = Ingresos (lo que pagó el cliente) - Costo (lo que nos costó la mercadería)
             const totalSalesInput = parseFloat(salesStats.totalSales || 0);
-            const netProfitInput = parseFloat(profitStats.netProfit || 0);
-            const totalCostInput = parseFloat(profitStats.totalCost || 0);
+            const totalCostInput = parseFloat(costStats.totalCost || 0);
+            const netProfitInput = totalSalesInput - totalCostInput;
             const profitMarginInput = totalSalesInput > 0 ? (netProfitInput / totalSalesInput) * 100 : 0;
             const roiInput = totalCostInput > 0 ? (netProfitInput / totalCostInput) * 100 : 0;
 
@@ -277,13 +408,19 @@ class ReportController {
             const inventoryValueInner = await db.get(`
                 SELECT 
                     COALESCE(SUM(stock * costo), 0) as inventoryValue,
+                    COALESCE(SUM(stock * precio), 0) as inventoryValueSale,
                     COUNT(*) as totalSKUs
                 FROM productos
-                WHERE deleted_at IS NULL AND stock > 0 AND estado = "disponible"
+                WHERE estado != 'descontinuado' AND stock > 0 AND estado = "activo"
             `);
 
-            // Crecimiento
+            // Crecimiento comparado con período anterior
             let profitGrowthInput = 0;
+            let salesGrowthInput = 0;
+            let ticketGrowthInput = 0;
+            let productsGrowthInput = 0;
+            let transactionsGrowthInput = 0;
+
             if (startDate) {
                 const start = new Date(startDate);
                 const endRange = endDate ? new Date(endDate) : new Date();
@@ -291,18 +428,53 @@ class ReportController {
                 const prevStart = new Date(start - diffTime).toISOString().split('T')[0];
                 const prevEnd = start.toISOString().split('T')[0];
 
-                const prevProfitStatsInner = await db.get(`
-                    SELECT COALESCE(SUM(si.quantity * (si.unit_price - si.unit_cost)), 0) as netProfit
+                // Ventas y tickets del período anterior
+                const prevSalesInner = await db.get(`
+                    SELECT 
+                        COALESCE(SUM(total), 0) as totalSales,
+                        COUNT(*) as totalTransactions,
+                        COALESCE(AVG(total), 0) as avgTicket
+                    FROM sales
+                    WHERE status = 'completed'
+                      AND DATE(created_at) >= ? AND DATE(created_at) < ?
+                `, [prevStart, prevEnd]);
+
+                // Costo del período anterior
+                const prevCostInner = await db.get(`
+                    SELECT COALESCE(SUM(si.quantity * si.unit_cost), 0) as totalCost
                     FROM sale_items si
                     JOIN sales s ON si.sale_id = s.id
                     WHERE s.status = 'completed'
                       AND DATE(s.created_at) >= ? AND DATE(s.created_at) < ?
                 `, [prevStart, prevEnd]);
 
-                const prevNetProfitInner = parseFloat(prevProfitStatsInner.netProfit || 0);
-                profitGrowthInput = prevNetProfitInner > 0 ? ((netProfitInput - prevNetProfitInner) / prevNetProfitInner) * 100 : 100;
+                // Productos vendidos período anterior
+                const prevItemsInner = await db.get(`
+                    SELECT COALESCE(SUM(si.quantity), 0) as totalItemsSold
+                    FROM sale_items si
+                    JOIN sales s ON si.sale_id = s.id
+                    WHERE s.status = 'completed'
+                      AND DATE(s.created_at) >= ? AND DATE(s.created_at) < ?
+                `, [prevStart, prevEnd]);
+
+                const prevTotalSales = parseFloat(prevSalesInner.totalSales || 0);
+                const prevNetProfitInner = prevTotalSales - parseFloat(prevCostInner.totalCost || 0);
+                const prevAvgTicket = parseFloat(prevSalesInner.avgTicket || 0);
+                const prevTotalProducts = parseInt(prevItemsInner.totalItemsSold || 0);
+
+                const prevTransactions = parseInt(prevSalesInner.totalTransactions || 0);
+                const currentTransactions = parseInt(salesStats.totalTransactions || 0);
+
+                // Calcular % de crecimiento
+                salesGrowthInput = prevTotalSales > 0 ? ((totalSalesInput - prevTotalSales) / prevTotalSales) * 100 : (totalSalesInput > 0 ? 100 : 0);
+                profitGrowthInput = prevNetProfitInner > 0 ? ((netProfitInput - prevNetProfitInner) / prevNetProfitInner) * 100 : (netProfitInput > 0 ? 100 : 0);
+                ticketGrowthInput = prevAvgTicket > 0 ? ((parseFloat(salesStats.avgTicket || 0) - prevAvgTicket) / prevAvgTicket) * 100 : 0;
+                const currentProducts = parseInt(itemsStats.totalItemsSold || 0);
+                productsGrowthInput = prevTotalProducts > 0 ? ((currentProducts - prevTotalProducts) / prevTotalProducts) * 100 : (currentProducts > 0 ? 100 : 0);
+                transactionsGrowthInput = prevTransactions > 0 ? ((currentTransactions - prevTransactions) / prevTransactions) * 100 : (currentTransactions > 0 ? 100 : 0);
             } else {
                 const growthDataInner = await Sale.getSalesGrowth();
+                salesGrowthInput = growthDataInner.growth;
                 profitGrowthInput = growthDataInner.growth;
             }
 
@@ -317,8 +489,13 @@ class ReportController {
                     profitMargin: profitMarginInput,
                     roi: roiInput,
                     inventoryValue: parseFloat(inventoryValueInner.inventoryValue || 0),
+                    inventoryValueSale: parseFloat(inventoryValueInner.inventoryValueSale || 0),
                     totalSKUs: parseInt(inventoryValueInner.totalSKUs || 0),
-                    profitGrowth: parseFloat(profitGrowthInput)
+                    salesGrowth: parseFloat(salesGrowthInput),
+                    profitGrowth: parseFloat(profitGrowthInput),
+                    ticketGrowth: parseFloat(ticketGrowthInput),
+                    productsGrowth: parseFloat(productsGrowthInput),
+                    transactionsGrowth: parseFloat(transactionsGrowthInput)
                 }
             });
         } catch (error) {
@@ -331,50 +508,73 @@ class ReportController {
             const { startDate, endDate, period } = req.query;
             const db = require('../config/database');
 
-            let groupByClause = 'DATE(created_at)';
-            let selectDateExpression = 'DATE(created_at)';
+            let groupByClause = 'DATE(s.created_at)';
+            let selectDateExpression = 'DATE(s.created_at)';
 
             if (period === 'week') {
-                groupByClause = 'YEARWEEK(created_at, 1)';
-                selectDateExpression = 'YEARWEEK(created_at, 1)';
+                groupByClause = 'YEARWEEK(s.created_at, 1)';
+                selectDateExpression = 'YEARWEEK(s.created_at, 1)';
             } else if (period === 'month') {
-                groupByClause = 'DATE_FORMAT(created_at, "%Y-%m")';
-                selectDateExpression = 'DATE_FORMAT(created_at, "%Y-%m")';
+                groupByClause = 'DATE_FORMAT(s.created_at, "%Y-%m")';
+                selectDateExpression = 'DATE_FORMAT(s.created_at, "%Y-%m")';
             }
 
-            let whereClauses = ['status = ?'];
+            let whereClauses = ['s.status = ?'];
             let params = ['completed'];
 
             if (startDate) {
-                whereClauses.push('DATE(created_at) >= ?');
+                whereClauses.push('DATE(s.created_at) >= ?');
                 params.push(startDate);
             }
             if (endDate) {
-                whereClauses.push('DATE(created_at) <= ?');
+                whereClauses.push('DATE(s.created_at) <= ?');
                 params.push(endDate);
             }
 
-            const sql = `
+            // Revenue desde sales.total (ya incluye descuentos)
+            const revenueSql = `
                 SELECT 
                     ${selectDateExpression} as date,
-                    COUNT(*) as transactions,
-                    COALESCE(SUM(total), 0) as revenue
-                FROM sales
+                    COUNT(s.id) as transactions,
+                    COALESCE(SUM(s.total), 0) as revenue
+                FROM sales s
                 WHERE ${whereClauses.join(' AND ')}
                 GROUP BY ${groupByClause}
                 ORDER BY ${groupByClause} ASC
                 LIMIT 30
             `;
+            const revenueData = await db.all(revenueSql, params);
 
-            const trends = await db.all(sql, params);
+            // Costo desde sale_items
+            const costSql = `
+                SELECT 
+                    ${selectDateExpression} as date,
+                    COALESCE(SUM(si.quantity * si.unit_cost), 0) as total_cost
+                FROM sales s
+                LEFT JOIN sale_items si ON si.sale_id = s.id
+                WHERE ${whereClauses.join(' AND ')}
+                GROUP BY ${groupByClause}
+                ORDER BY ${groupByClause} ASC
+                LIMIT 30
+            `;
+            const costData = await db.all(costSql, params);
+
+            // Merge: profit = revenue - cost
+            const costMap = {};
+            costData.forEach(c => { costMap[c.date] = parseFloat(c.total_cost || 0); });
 
             res.json({
                 success: true,
-                data: trends.map(t => ({
-                    date: t.date,
-                    transactions: parseInt(t.transactions),
-                    revenue: parseFloat(t.revenue)
-                }))
+                data: revenueData.map(t => {
+                    const revenue = parseFloat(t.revenue || 0);
+                    const cost = costMap[t.date] || 0;
+                    return {
+                        date: t.date,
+                        transactions: parseInt(t.transactions),
+                        revenue: revenue,
+                        profit: revenue - cost
+                    };
+                })
             });
         } catch (error) {
             next(error);
@@ -397,7 +597,7 @@ class ReportController {
                 FROM productos p
                 LEFT JOIN sale_items si ON p.id = si.product_id
                 LEFT JOIN sales s ON si.sale_id = s.id AND s.status = 'completed'
-                WHERE p.deleted_at IS NULL
+                WHERE p.estado != 'descontinuado'
                 ${startDate ? 'AND DATE(s.created_at) >= ?' : ''}
                 ${endDate ? 'AND DATE(s.created_at) <= ?' : ''}
                 GROUP BY p.id
@@ -435,7 +635,7 @@ class ReportController {
                     SUM(CASE WHEN stock > 0 AND stock <= 5 THEN 1 ELSE 0 END) as lowStock,
                     SUM(CASE WHEN stock > 5 THEN 1 ELSE 0 END) as healthyStock
                 FROM productos
-                WHERE deleted_at IS NULL
+                WHERE estado != 'descontinuado'
             `);
 
             res.json({
@@ -465,7 +665,7 @@ class ReportController {
                     COUNT(*) as total_products,
                     IFNULL(SUM(stock), 0) as total_units
                 FROM productos
-                WHERE deleted_at IS NULL AND stock > 0 AND estado = "disponible"
+                WHERE estado != 'descontinuado' AND stock > 0 AND estado = "activo"
             `);
 
             res.json({

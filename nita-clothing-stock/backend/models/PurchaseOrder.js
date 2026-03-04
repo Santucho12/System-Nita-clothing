@@ -231,7 +231,7 @@ class PurchaseOrder {
       for (const item of order.items) {
         // Bloqueo de fila (Row-level locking) para evitar condiciones de carrera (Race Conditions)
         const product = await database.get(
-          `SELECT stock, costo, stock_minimo FROM productos WHERE id = ? FOR UPDATE`,
+          `SELECT stock, costo, stock_minimo, estado FROM productos WHERE id = ? FOR UPDATE`,
           [item.product_id],
           connection
         );
@@ -246,10 +246,11 @@ class PurchaseOrder {
         const oldCost = product.costo || 0;
         const newCost = item.unit_cost;
 
-        // Actualizar stock y costo
+        // Actualizar stock, costo y estado (si no está descontinuado)
+        const newEstado = product.estado === 'descontinuado' ? 'descontinuado' : (newStock > 0 ? 'activo' : 'sin_stock');
         await database.run(
-          `UPDATE productos SET stock = ?, costo = ?, updated_at = NOW() WHERE id = ?`,
-          [newStock, newCost, item.product_id],
+          `UPDATE productos SET stock = ?, costo = ?, estado = ?, updated_at = NOW() WHERE id = ?`,
+          [newStock, newCost, newEstado, item.product_id],
           connection
         );
 

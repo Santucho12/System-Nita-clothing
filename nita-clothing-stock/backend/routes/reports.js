@@ -20,6 +20,8 @@ router.get('/top-products', ReportController.getTopProductsThisMonth);
 router.get('/top-categories', ReportController.getTopCategoriesThisMonth);
 router.get('/payment-methods', ReportController.getSalesByPaymentMethod);
 router.get('/daily-sales', ReportController.getDailySalesReport);
+router.get('/sales-by-weekday', ReportController.getSalesByWeekday);
+router.get('/top-categorias-vendidas', ReportController.getTopCategoriesSold);
 router.get('/performance', ReportController.getPerformanceReport);
 
 // Reportes avanzados

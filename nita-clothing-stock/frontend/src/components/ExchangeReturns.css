@@ -6,12 +6,12 @@
 
 .exchange-returns-container h2 {
   margin-bottom: 1.5rem;
-  color: #2c3e50;
+  color: var(--text-heading, #2c3e50);
 }
 
 .exchange-returns-container h3 {
   margin-bottom: 1rem;
-  color: #34495e;
+  color: var(--text-heading, #34495e);
 }
 
 /* Tabs */
@@ -19,7 +19,7 @@
   display: flex;
   gap: 0.5rem;
   margin-bottom: 2rem;
-  border-bottom: 2px solid #ecf0f1;
+  border-bottom: 2px solid var(--border-color, #ecf0f1);
 }
 
 .tabs button {
@@ -29,13 +29,13 @@
   border-bottom: 3px solid transparent;
   cursor: pointer;
   font-size: 1rem;
-  color: #7f8c8d;
+  color: var(--text-muted, #7f8c8d);
   transition: all 0.3s;
 }
 
 .tabs button:hover {
-  color: #2c3e50;
-  background: #ecf0f1;
+  color: var(--text-heading, #2c3e50);
+  background: var(--bg-hover, #ecf0f1);
 }
 
 .tabs .tab-active {
@@ -46,10 +46,10 @@
 
 /* Filtros */
 .filters-card {
-  background: white;
+  background: var(--bg-card, white);
   padding: 1.5rem;
   border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  box-shadow: var(--shadow, 0 2px 8px rgba(0,0,0,0.1));
   margin-bottom: 2rem;
 }
 
@@ -68,7 +68,7 @@
 .form-group label {
   margin-bottom: 0.3rem;
   font-weight: 600;
-  color: #2c3e50;
+  color: var(--text-secondary, #2c3e50);
   font-size: 0.9rem;
 }
 
@@ -76,7 +76,7 @@
 .form-group select,
 .form-group textarea {
   padding: 0.6rem;
-  border: 1px solid #bdc3c7;
+  border: 1px solid var(--input-border, #bdc3c7);
   border-radius: 4px;
   font-size: 0.95rem;
 }
@@ -124,9 +124,9 @@
 
 /* Tabla */
 .table-container {
-  background: white;
+  background: var(--bg-card, white);
   border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  box-shadow: var(--shadow, 0 2px 8px rgba(0,0,0,0.1));
   overflow: auto;
 }
 
@@ -147,12 +147,12 @@
 }
 
 .er-table tbody tr {
-  border-bottom: 1px solid #ecf0f1;
+  border-bottom: 1px solid var(--border-color, #ecf0f1);
   transition: background 0.2s;
 }
 
 .er-table tbody tr:hover {
-  background: #f8f9fa;
+  background: var(--table-row-hover, #f8f9fa);
 }
 
 .er-table td {
@@ -175,10 +175,10 @@
 
 /* Formulario */
 .er-form {
-  background: white;
+  background: var(--bg-card, white);
   padding: 2rem;
   border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  box-shadow: var(--shadow, 0 2px 8px rgba(0,0,0,0.1));
 }
 
 .form-row {
@@ -189,7 +189,7 @@
 }
 
 .item-form {
-  background: #ecf0f1;
+  background: var(--bg-tertiary, #ecf0f1);
   padding: 1.5rem;
   border-radius: 8px;
   margin-bottom: 1rem;
@@ -214,13 +214,13 @@
 .items-list {
   margin: 1.5rem 0;
   padding: 1rem;
-  background: #f8f9fa;
+  background: var(--bg-tertiary, #f8f9fa);
   border-radius: 8px;
 }
 
 .items-list h5 {
   margin-bottom: 1rem;
-  color: #2c3e50;
+  color: var(--text-heading, #2c3e50);
 }
 
 .item-card {
@@ -228,10 +228,10 @@
   justify-content: space-between;
   align-items: center;
   padding: 1rem;
-  background: white;
+  background: var(--bg-card, white);
   border-radius: 6px;
   margin-bottom: 0.5rem;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+  box-shadow: var(--shadow-sm, 0 1px 4px rgba(0,0,0,0.1));
 }
 
 .item-card div {
@@ -302,10 +302,10 @@
 }
 
 .stat-card {
-  background: white;
+  background: var(--bg-card, white);
   padding: 1.5rem;
   border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  box-shadow: var(--shadow, 0 2px 8px rgba(0,0,0,0.1));
   text-align: center;
 }
 
@@ -318,7 +318,7 @@
 
 .stat-label {
   font-size: 0.9rem;
-  color: #7f8c8d;
+  color: var(--text-muted, #7f8c8d);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -330,15 +330,15 @@
 }
 
 .stats-section {
-  background: white;
+  background: var(--bg-card, white);
   padding: 1.5rem;
   border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  box-shadow: var(--shadow, 0 2px 8px rgba(0,0,0,0.1));
 }
 
 .stats-section h4 {
   margin-bottom: 1rem;
-  color: #2c3e50;
+  color: var(--text-heading, #2c3e50);
 }
 
 .reasons-list {
@@ -351,7 +351,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 0.8rem;
-  border-bottom: 1px solid #ecf0f1;
+  border-bottom: 1px solid var(--border-color, #ecf0f1);
 }
 
 .reasons-list li:last-child {
@@ -382,7 +382,7 @@
 .small-table td {
   padding: 0.6rem;
   text-align: left;
-  border-bottom: 1px solid #ecf0f1;
+  border-bottom: 1px solid var(--border-color, #ecf0f1);
 }
 
 /* Modal */
@@ -400,14 +400,14 @@
 }
 
 .modal-content {
-  background: white;
+  background: var(--bg-card, white);
   padding: 2rem;
   border-radius: 8px;
   max-width: 900px;
   max-height: 90vh;
   overflow-y: auto;
   position: relative;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  box-shadow: var(--shadow-lg, 0 4px 20px rgba(0,0,0,0.3));
 }
 
 .modal-close {
@@ -418,11 +418,11 @@
   border: none;
   font-size: 1.5rem;
   cursor: pointer;
-  color: #7f8c8d;
+  color: var(--text-muted, #7f8c8d);
 }
 
 .modal-close:hover {
-  color: #2c3e50;
+  color: var(--text-heading, #2c3e50);
 }
 
 .detail-grid {
@@ -434,14 +434,14 @@
 
 .detail-item {
   padding: 0.8rem;
-  background: #f8f9fa;
+  background: var(--bg-tertiary, #f8f9fa);
   border-radius: 4px;
 }
 
 .detail-item strong {
   display: block;
   margin-bottom: 0.3rem;
-  color: #7f8c8d;
+  color: var(--text-muted, #7f8c8d);
   font-size: 0.85rem;
   text-transform: uppercase;
 }
@@ -475,7 +475,7 @@
 .detail-table td {
   padding: 0.8rem;
   text-align: left;
-  border-bottom: 1px solid #ecf0f1;
+  border-bottom: 1px solid var(--border-color, #ecf0f1);
 }
 
 .modal-actions {
@@ -548,7 +548,7 @@
   text-align: center;
   padding: 3rem;
   font-size: 1.2rem;
-  color: #7f8c8d;
+  color: var(--text-muted, #7f8c8d);
 }
 
 /* Responsive */

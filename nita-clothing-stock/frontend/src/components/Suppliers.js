@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import useSortableData from '../hooks/useSortableData';
-import { FaTruck, FaPlus, FaEdit, FaTrash, FaUser, FaEnvelope, FaPhone, FaIdCard, FaMapMarkerAlt, FaCalendarAlt, FaSearch, FaSortAmountDown } from 'react-icons/fa';
+import { FaTruck, FaPlus, FaEdit, FaTrash, FaPhone, FaMapMarkerAlt, FaGlobe, FaShoppingCart, FaStickyNote, FaSearch } from 'react-icons/fa';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
@@ -113,13 +113,10 @@ const Suppliers = () => {
   const resetForm = () => {
     setFormData({
       name: '',
-      contact_name: '',
-      email: '',
       phone: '',
       address: '',
       website: '',
-      tax_id: '',
-      payment_terms: 'net_30',
+      min_purchase: '',
       notes: ''
     });
     setShowForm(false);
@@ -128,24 +125,11 @@ const Suppliers = () => {
 
   const filteredSuppliers = sortedSuppliers.filter(supplier => {
     const matchesSearch = supplier.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (supplier.email && supplier.email.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      (supplier.tax_id && supplier.tax_id.includes(searchTerm));
+      (supplier.phone && supplier.phone.includes(searchTerm));
     const matchesStatus = statusFilter === 'all' || supplier.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
 
-
-  const getPaymentTermsLabel = (terms) => {
-    const labels = {
-      'net_15': '15 días',
-      'net_30': '30 días',
-      'net_45': '45 días',
-      'net_60': '60 días',
-      'immediate': 'Inmediato',
-      'other': 'Otro'
-    };
-    return labels[terms] || terms;
-  };
 
   if (loading) {
     return (
@@ -157,7 +141,7 @@ const Suppliers = () => {
   }
 
   return (
-    <div className="suppliers-container" style={{ padding: '30px', background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)', minHeight: '100vh' }}>
+    <div className="suppliers-container" style={{ padding: '30px', background: 'var(--bg-gradient)', minHeight: '100vh' }}>
       <style>
         {`
           @keyframes perspective3DFlip {
@@ -230,7 +214,7 @@ const Suppliers = () => {
           <FaSearch style={{ position: 'absolute', left: '15px', top: '50%', transform: 'translateY(-50%)', color: '#999', fontSize: '16px' }} />
           <input
             type="text"
-            placeholder="Buscar por nombre, email o CUIT..."
+            placeholder="Buscar por nombre o teléfono..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="search-input"
@@ -424,42 +408,17 @@ const Suppliers = () => {
               </div>
 
               <div className="supplier-details" style={{ fontSize: '14px', color: '#555' }}>
-                {supplier.contact_name && (
-                  <p style={{ margin: '8px 0', display: 'flex', alignItems: 'center' }}>
-                    <FaUser style={{ marginRight: '10px', color: '#f73194', fontSize: '14px', minWidth: '14px' }} />
-                    <span style={{ fontWeight: '500' }}>{supplier.contact_name}</span>
-                  </p>
-                )}
-                {supplier.email && (
-                  <p style={{ margin: '8px 0', display: 'flex', alignItems: 'center' }}>
-                    <FaEnvelope style={{ marginRight: '10px', color: '#f73194', fontSize: '14px', minWidth: '14px' }} />
-                    <span>{supplier.email}</span>
-                  </p>
-                )}
-                {supplier.phone && (
-                  <p style={{ margin: '8px 0', display: 'flex', alignItems: 'center' }}>
-                    <FaPhone style={{ marginRight: '10px', color: '#f73194', fontSize: '14px', minWidth: '14px' }} />
-                    <span>{supplier.phone}</span>
-                  </p>
-                )}
-                {supplier.tax_id && (
-                  <p style={{ margin: '8px 0', display: 'flex', alignItems: 'center' }}>
-                    <FaIdCard style={{ marginRight: '10px', color: '#f73194', fontSize: '14px', minWidth: '14px' }} />
-                    <span>CUIT: {supplier.tax_id}</span>
-                  </p>
-                )}
-                {supplier.city && (
-                  <p style={{ margin: '8px 0', display: 'flex', alignItems: 'center' }}>
-                    <FaMapMarkerAlt style={{ marginRight: '10px', color: '#f73194', fontSize: '14px', minWidth: '14px' }} />
-                    <span>{supplier.city}{supplier.state ? `, ${supplier.state}` : ''}</span>
-                  </p>
-                )}
-                <p style={{ margin: '12px 0 8px 0', display: 'flex', alignItems: 'center', paddingTop: '10px', borderTop: '1px solid #f0f0f0' }}>
-                  <FaCalendarAlt style={{ marginRight: '10px', color: '#f73194', fontSize: '14px', minWidth: '14px' }} />
-                  <span><strong>Pago:</strong> {getPaymentTermsLabel(supplier.payment_terms)}</span>
+                <p style={{ margin: '8px 0', display: 'flex', alignItems: 'center' }}>
+                  <FaPhone style={{ marginRight: '10px', color: '#f73194', fontSize: '14px', minWidth: '14px' }} />
+                  <span>{supplier.phone || '-'}</span>
                 </p>
-                <p style={{ margin: '5px 0', fontSize: '12px', color: '#999', fontStyle: 'italic' }}>
-                  Creado: {new Date(supplier.created_at).toLocaleDateString()}
+                <p style={{ margin: '8px 0', display: 'flex', alignItems: 'center' }}>
+                  <FaMapMarkerAlt style={{ marginRight: '10px', color: '#f73194', fontSize: '14px', minWidth: '14px' }} />
+                  <span>{supplier.address || '-'}</span>
+                </p>
+                <p style={{ margin: '8px 0', display: 'flex', alignItems: 'center' }}>
+                  <FaShoppingCart style={{ marginRight: '10px', color: '#f73194', fontSize: '14px', minWidth: '14px' }} />
+                  <span><strong>Mín. Compra:</strong> {supplier.min_purchase ? `$${Number(supplier.min_purchase).toLocaleString()}` : '-'}</span>
                 </p>
               </div>
 

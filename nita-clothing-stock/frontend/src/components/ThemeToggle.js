@@ -1,23 +1,29 @@
 import React from 'react';
 import { useTheme } from '../context/ThemeContext';
-import './ThemeToggle.css';
+import { FaSun, FaMoon, FaWater } from 'react-icons/fa';
 
 const ThemeToggle = () => {
-  const { theme, toggleTheme, isDark } = useTheme();
+  const { theme, setTheme } = useTheme();
+
+  const themes = [
+    { id: 'light', icon: <FaSun />, title: 'Modo Claro' },
+    { id: 'dark', icon: <FaMoon />, title: 'Modo Oscuro' },
+    { id: 'blue-dark', icon: <FaWater />, title: 'Modo Azulado' },
+  ];
 
   return (
-    <button 
-      className="theme-toggle" 
-      onClick={toggleTheme}
-      aria-label={`Switch to ${isDark ? 'light' : 'dark'} mode`}
-      title={`Cambiar a modo ${isDark ? 'claro' : 'oscuro'}`}
-    >
-      {isDark ? (
-        <i className="fas fa-sun"></i>
-      ) : (
-        <i className="fas fa-moon"></i>
-      )}
-    </button>
+    <div className="theme-selector">
+      {themes.map(t => (
+        <button
+          key={t.id}
+          className={`theme-selector-btn${theme === t.id ? ' active' : ''}`}
+          onClick={() => setTheme(t.id)}
+          title={t.title}
+        >
+          {t.icon}
+        </button>
+      ))}
+    </div>
   );
 };
 

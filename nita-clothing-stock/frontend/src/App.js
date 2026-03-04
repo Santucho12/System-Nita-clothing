@@ -24,13 +24,15 @@ import Promotions from './components/Promotions';
 import Login from './components/Login';
 
 import { useAuth } from './context/AuthContext';
+import { useTheme } from './context/ThemeContext';
 
 import './App.css';
 
 
 function App() {
   const { user, login } = useAuth();
-
+  const { isDark } = useTheme();
+  const toastTheme = isDark ? 'dark' : 'light';
   if (!user) {
     return (
       <>
@@ -45,7 +47,7 @@ function App() {
           pauseOnFocusLoss
           draggable
           pauseOnHover
-          theme="light"
+          theme={toastTheme}
         />
       </>
     );
@@ -55,7 +57,7 @@ function App() {
     <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <div className="App" style={{ display: 'flex', minHeight: '100vh' }}>
         <Sidebar />
-        <div style={{ flex: 1, marginLeft: 230, minHeight: '100vh', background: '#f8fafc', display: 'flex', flexDirection: 'column' }}>
+        <div style={{ flex: 1, marginLeft: 230, minHeight: '100vh', background: 'var(--bg-secondary)', display: 'flex', flexDirection: 'column' }}>
           <main className="main-content" style={{ flex: 1, padding: '32px 24px 24px 24px' }}>
             <Routes>
               <Route path="/" element={<Dashboard />} />
@@ -87,7 +89,7 @@ function App() {
             pauseOnFocusLoss
             draggable
             pauseOnHover
-            theme="light"
+            theme={toastTheme}
           />
         </div>
       </div>

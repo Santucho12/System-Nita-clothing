@@ -27,10 +27,10 @@ class Database {
     async run(sql, params = [], connection = null) {
         const pool = await this.connect();
         if (connection) {
-            const [result] = await connection.execute(sql, params);
+            const [result] = await connection.query(sql, params);
             return result;
         } else {
-            const [result] = await pool.execute(sql, params);
+            const [result] = await pool.query(sql, params);
             return result;
         }
     }
@@ -55,7 +55,7 @@ class Database {
     async all(sql, params = [], connection = null) {
         const pool = await this.connect();
         const executor = connection || pool;
-        const [rows] = await executor.execute(sql, params);
+        const [rows] = await executor.query(sql, params);
         return rows;
     }
 
@@ -63,14 +63,14 @@ class Database {
         const pool = await this.connect();
         const executor = connection || pool;
         if (!executor) throw new Error('Cargando base de datos...');
-        const [rows] = await executor.execute(sql, params);
+        const [rows] = await executor.query(sql, params);
         return rows[0] || null;
     }
 
     async query(sql, params = [], connection = null) {
         const pool = await this.connect();
         const executor = connection || pool;
-        return await executor.execute(sql, params);
+        return await executor.query(sql, params);
     }
 }
 

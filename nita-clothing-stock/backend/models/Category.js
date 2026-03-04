@@ -6,7 +6,7 @@ class Category {
         this.description = description;
     }
 
-    // Crear una nueva categoría
+    // Crear una nueva categoria
     static async create(categoryData, connection = null) {
         let { name, description } = categoryData;
         if (typeof name === 'undefined') name = null;
@@ -19,7 +19,7 @@ class Category {
         return { id: result.insertId, name, description };
     }
 
-    // Obtener todas las categorías
+    // Obtener todas las categorias
     static async getAll(connection = null) {
         const sql = `
             SELECT id, nombre as name, descripcion as description, status, created_at, updated_at
@@ -30,7 +30,7 @@ class Category {
         return await database.all(sql, [], connection);
     }
 
-    // Obtener categoría por ID
+    // Obtener categoria por ID
     static async getById(id, connection = null) {
         const sql = `
             SELECT id, nombre as name, descripcion as description, status, created_at, updated_at
@@ -40,7 +40,7 @@ class Category {
         return await database.get(sql, [id], connection);
     }
 
-    // Actualizar categoría
+    // Actualizar categoria
     static async update(id, categoryData, connection = null) {
         const { name, description } = categoryData;
         const sql = `
@@ -52,14 +52,20 @@ class Category {
         return { id, name, description };
     }
 
-    // Eliminar categoría (Soft Delete)
-    static async delete(id, connection = null) {
-        // Verificar si hay productos activos en esta categoría
-        const checkSql = `SELECT COUNT(*) as count FROM productos WHERE categoria_id = ? AND deleted_at IS NULL`;
-        const checkResult = await database.get(checkSql, [id], connection);
+    // Contar productos activos en una categoria
+    static async countActiveProducts(id, connection = null) {
+        const sql = `SELECT COUNT(*) as count FROM productos WHERE categoria_id = ? AND estado != 'descontinuado'`;
+        const result = await database.get(sql, [id], connection);
+        return result ? result.count : 0;
+    }
 
-        if (checkResult && checkResult.count > 0) {
-            const error = new Error('No se puede eliminar la categoría porque tiene productos activos vinculados.');
+    // Eliminar categoria (Soft Delete)
+    static async delete(id, connection = null) {
+        // Verificar si hay productos activos/sin_stock en esta categoria
+        const productCount = await Category.countActiveProducts(id, connection);
+
+        if (productCount > 0) {
+            const error = new Error(`No se puede eliminar la categoría porque tiene ${productCount} producto(s) asignado(s). Reasigná o eliminá los productos primero.`);
             error.statusCode = 400;
             throw error;
         }
@@ -69,8 +75,18 @@ class Category {
         return true;
     }
 
-    // Cambiar estado de la categoría (activa/inactiva)
+    // Cambiar estado de la categoria (activa/inactiva)
     static async changeStatus(id, status, connection = null) {
+        // Si se intenta desactivar, verificar que no tenga productos asignados
+        if (status === 'inactiva') {
+            const productCount = await Category.countActiveProducts(id, connection);
+            if (productCount > 0) {
+                const error = new Error(`No se puede desactivar la categoría porque tiene ${productCount} producto(s) asignado(s). Reasigná o eliminá los productos primero.`);
+                error.statusCode = 400;
+                throw error;
+            }
+        }
+
         const sql = `UPDATE categorias SET status = ?, updated_at = NOW() WHERE id = ? AND deleted_at IS NULL`;
         await database.run(sql, [status, id], connection);
         return { id, status };

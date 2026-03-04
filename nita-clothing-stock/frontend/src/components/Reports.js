@@ -71,9 +71,9 @@ function Reports() {
         ]);
 
         setSalesData({
-          day: dayRes.data,
-          month: monthRes.data,
-          year: yearRes.data
+          day: dayRes.data.data || {},
+          month: monthRes.data.data || {},
+          year: yearRes.data.data || {}
         });
       } else if (activeTab === 'products') {
         const [topRes, lowRes] = await Promise.all([
@@ -184,7 +184,7 @@ function Reports() {
   };
 
   return (
-    <div className="reports-container" style={{ padding: '30px', background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)', minHeight: '100vh' }}>
+    <div className="reports-container" style={{ padding: '30px', background: 'var(--bg-gradient)', minHeight: '100vh' }}>
       <style>
         {`
           @keyframes perspective3DFlip {
@@ -321,8 +321,8 @@ function Reports() {
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                     <div>
                       <h3 style={{ margin: '0 0 8px 0', fontSize: '14px', color: '#999', fontWeight: '500' }}>Hoy</h3>
-                      <p className="amount" style={{ margin: '0 0 5px 0', fontSize: '28px', fontWeight: 'bold', color: '#333' }}>{formatCurrency(salesData.day?.total || 0)}</p>
-                      <span className="stat-detail" style={{ fontSize: '13px', color: '#666' }}>{salesData.day?.count || 0} ventas</span>
+                      <p className="amount" style={{ margin: '0 0 5px 0', fontSize: '28px', fontWeight: 'bold', color: '#333' }}>{formatCurrency(salesData.day?.total_amount || 0)}</p>
+                      <span className="stat-detail" style={{ fontSize: '13px', color: '#666' }}>{salesData.day?.total_sales || 0} ventas</span>
                     </div>
                     <div style={{ width: '60px', height: '60px', borderRadius: '12px', background: 'linear-gradient(135deg, #4CAF50 0%, #45a049 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '28px', color: 'white' }}>
                       <FaCalendarDay />
@@ -333,8 +333,8 @@ function Reports() {
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                     <div>
                       <h3 style={{ margin: '0 0 8px 0', fontSize: '14px', color: '#999', fontWeight: '500' }}>Este Mes</h3>
-                      <p className="amount" style={{ margin: '0 0 5px 0', fontSize: '28px', fontWeight: 'bold', color: '#333' }}>{formatCurrency(salesData.month?.total || 0)}</p>
-                      <span className="stat-detail" style={{ fontSize: '13px', color: '#666' }}>{salesData.month?.count || 0} ventas</span>
+                      <p className="amount" style={{ margin: '0 0 5px 0', fontSize: '28px', fontWeight: 'bold', color: '#333' }}>{formatCurrency(salesData.month?.total_amount || 0)}</p>
+                      <span className="stat-detail" style={{ fontSize: '13px', color: '#666' }}>{salesData.month?.total_sales || 0} ventas</span>
                     </div>
                     <div style={{ width: '60px', height: '60px', borderRadius: '12px', background: 'linear-gradient(135deg, #2196F3 0%, #1976D2 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '28px', color: 'white' }}>
                       <FaCalendarWeek />
@@ -345,8 +345,8 @@ function Reports() {
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                     <div>
                       <h3 style={{ margin: '0 0 8px 0', fontSize: '14px', color: '#999', fontWeight: '500' }}>Este Año</h3>
-                      <p className="amount" style={{ margin: '0 0 5px 0', fontSize: '28px', fontWeight: 'bold', color: '#333' }}>{formatCurrency(salesData.year?.total || 0)}</p>
-                      <span className="stat-detail" style={{ fontSize: '13px', color: '#666' }}>{salesData.year?.count || 0} ventas</span>
+                      <p className="amount" style={{ margin: '0 0 5px 0', fontSize: '28px', fontWeight: 'bold', color: '#333' }}>{formatCurrency(salesData.year?.total_amount || 0)}</p>
+                      <span className="stat-detail" style={{ fontSize: '13px', color: '#666' }}>{salesData.year?.total_sales || 0} ventas</span>
                     </div>
                     <div style={{ width: '60px', height: '60px', borderRadius: '12px', background: 'linear-gradient(135deg, #FF9800 0%, #F57C00 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '28px', color: 'white' }}>
                       <FaCalendarAlt />
@@ -431,8 +431,8 @@ function Reports() {
                     <tbody>
                       {productsData.low.map((product, index) => (
                         <tr key={index} style={{ borderBottom: '1px solid #f0f0f0' }}>
-                          <td style={{ padding: '12px', fontSize: '14px', color: '#333' }}>{product.name}</td>
-                          <td style={{ padding: '12px', fontSize: '14px', color: '#333' }}>{product.stock_quantity}</td>
+                          <td style={{ padding: '12px', fontSize: '14px', color: '#333' }}>{product.product_name}</td>
+                          <td style={{ padding: '12px', fontSize: '14px', color: '#333' }}>{product.stock_quantity ?? '-'}</td>
                           <td style={{ padding: '12px', fontSize: '14px', color: '#999' }}>{product.last_sale ? new Date(product.last_sale).toLocaleDateString() : 'Sin movimiento'}</td>
                         </tr>
                       ))}
@@ -550,7 +550,7 @@ function Reports() {
                       {categoriesData.map((cat, index) => (
                         <tr key={index} style={{ borderBottom: '1px solid #f0f0f0' }}>
                           <td style={{ padding: '12px', fontSize: '14px', color: '#333', fontWeight: '600' }}>{cat.category_name}</td>
-                          <td style={{ padding: '12px', fontSize: '14px', color: '#4CAF50', fontWeight: '600' }}>{formatCurrency(cat.total_sold)}</td>
+                          <td style={{ padding: '12px', fontSize: '14px', color: '#4CAF50', fontWeight: '600' }}>{cat.total_sold} uds.</td>
                           <td style={{ padding: '12px', fontSize: '14px', color: '#333' }}>{cat.current_stock}</td>
                           <td style={{ padding: '12px' }}>
                             <span style={{

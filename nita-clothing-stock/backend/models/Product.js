@@ -1,32 +1,78 @@
 const db = require('../config/database');
-const { deletePhysicalFile } = require('../utils/fileHelper');
-
-// Helper para parsear imágenes de forma segura
-const safeParseImages = (jsonStr, productId) => {
-    if (!jsonStr) return [];
-    try {
-        return JSON.parse(jsonStr);
-    } catch (e) {
-        console.error(`[ERROR] Error parseando imagen_url para producto ${productId}:`, e);
-        // Si no es JSON, devolvemos el string original en un array si parece una URL
-        return [jsonStr];
-    }
-};
 
 class Product {
-    // Obtener el último SKU numérico
-    static async getLastSku(connection = null) {
-        // Obtenemos el último código numérico para sugerir el siguiente
-        const sql = 'SELECT codigo FROM productos WHERE deleted_at IS NULL AND codigo REGEXP "^[0-9]+$" ORDER BY CAST(codigo AS UNSIGNED) DESC LIMIT 1';
-        const [rows] = await db.query(sql, [], connection);
-        return rows[0]?.codigo || null;
+        /**
+         * Devuelve el total de productos según filtros simples (nombre, código, categoría, estado)
+         * @param {Object} filters - { nombre, codigo, categoria_id, estado }
+         * @returns {Promise<number>}
+         */
+        static async getFilteredCount(filters = {}) {
+            let sql = 'SELECT COUNT(*) AS total FROM productos WHERE 1=1';
+            const params = [];
+            if (filters.nombre) {
+                sql += ' AND nombre LIKE ?';
+                params.push(`%${filters.nombre}%`);
+            }
+            if (filters.codigo) {
+                sql += ' AND codigo LIKE ?';
+                params.push(`%${filters.codigo}%`);
+            }
+            if (filters.categoria_id) {
+                sql += ' AND categoria_id = ?';
+                params.push(filters.categoria_id);
+            }
+            if (filters.estado) {
+                sql += ' AND estado = ?';
+                params.push(filters.estado);
+            }
+            const [rows] = await db.query(sql, params);
+            return rows[0]?.total || 0;
+        }
+    // Helper: parsear imagen_url de forma segura
+    static parseImages(imagen_url) {
+        try {
+            const parsed = imagen_url ? JSON.parse(imagen_url) : [];
+            return Array.isArray(parsed) ? parsed.filter(img => img && img !== 'undefined') : [];
+        } catch(e) {
+            return [];
+        }
     }
 
+    /**
+     * Determinar el estado correcto según el stock
+     * Regla: stock > 0 → 'activo', stock === 0 → 'sin_stock'
+     * 'descontinuado' solo se asigna manualmente (al "borrar" un producto)
+     */
+    static resolveEstado(stock, estadoActual) {
+        const qty = parseInt(stock) || 0;
+        // Si el producto está descontinuado, mantenerlo así (solo se cambia manualmente)
+        if (estadoActual === 'descontinuado') return 'descontinuado';
+        return qty > 0 ? 'activo' : 'sin_stock';
+    }
+
+    // Contar total de productos activos
+    static async getCount() {
+        const [rows] = await db.query("SELECT COUNT(*) AS total FROM productos WHERE estado = 'activo'");
+        return rows[0]?.total || 0;
+    }
+    // Obtener el último SKU numérico
+    static async getLastSku() {
+        const [rows] = await db.query('SELECT MAX(CAST(sku AS UNSIGNED)) AS lastSku FROM productos');
+        return rows[0]?.lastSku || 0;
+    }
     // Crear producto
-    static async create(data, connection = null) {
+    static async create(data) {
+
+        // Calcular estado según stock
+        const stockQty = parseInt(data.stock) || 0;
+        const estadoCalculado = stockQty > 0 ? 'activo' : 'sin_stock';
+
+        // Log de depuración para supplier_id
+        console.log('[Product.create] supplier_id recibido:', data.supplier_id);
+        console.log('[Product.create] data completo:', data);
+
         const {
             nombre,
-            descripcion = null,
             codigo,
             categoria_id,
             tallas = null,
@@ -35,304 +81,226 @@ class Product {
             costo,
             stock,
             stock_minimo,
-            proveedor,
-            supplier_id = null,
+            supplier_id,
             ubicacion,
-            estado = 'disponible',
             fecha_ingreso,
             imagen_url,
             notas,
             created_at,
             updated_at
         } = data;
-
-        const sql = `
-            INSERT INTO productos (
-                nombre, descripcion, codigo, categoria_id, tallas, colores, precio, costo, 
-                stock, stock_minimo, proveedor, supplier_id, ubicacion, 
-                estado, fecha_ingreso, imagen_url, notas, created_at, updated_at
-            )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        `;
-
         const values = [
             nombre !== undefined ? nombre : null,
-            descripcion !== undefined ? descripcion : null,
             codigo !== undefined ? codigo : null,
             categoria_id !== undefined ? categoria_id : null,
             tallas !== undefined ? tallas : null,
             colores !== undefined ? colores : null,
-            precio !== undefined ? precio : 0,
-            costo !== undefined ? costo : 0,
-            stock !== undefined ? stock : 0,
-            stock_minimo !== undefined ? stock_minimo : 0,
-            proveedor !== undefined ? proveedor : null,
+            precio !== undefined ? precio : null,
+            costo !== undefined ? costo : null,
+            stock !== undefined ? stock : null,
+            stock_minimo !== undefined ? stock_minimo : null,
             supplier_id !== undefined ? supplier_id : null,
             ubicacion !== undefined ? ubicacion : null,
-            estado !== undefined ? estado : 'disponible',
+            estadoCalculado,
             fecha_ingreso !== undefined ? fecha_ingreso : null,
             imagen_url !== undefined ? imagen_url : null,
             notas !== undefined ? notas : null,
             created_at !== undefined ? created_at : null,
             updated_at !== undefined ? updated_at : null
         ];
-
-        const [result] = await db.query(sql, values, connection);
-        return { id: result.insertId, ...data };
+        const [result] = await db.query(
+            `INSERT INTO productos (nombre, codigo, categoria_id, tallas, colores, precio, costo, stock, stock_minimo, supplier_id, ubicacion, estado, fecha_ingreso, imagen_url, notas, created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            values
+        );
+        return { id: result.insertId, ...data, estado: estadoCalculado };
     }
 
-    // Obtener todos los productos con paginación y filtros
-    static async getAll(options = {}, connection = null) {
-        const {
-            limit = null,
-            offset = 0,
-            sort = 'id',
-            direction = 'DESC',
-            q = null,
-            category = null,
-            size = null,
-            color = null,
-            status = null
-        } = options;
-
-        let sql = 'SELECT * FROM productos WHERE deleted_at IS NULL';
-        const params = [];
-
-        if (q) {
-            sql += ' AND (nombre LIKE ? OR codigo LIKE ?)';
-            params.push(`%${q}%`, `%${q}%`);
-        }
-        if (category) {
-            sql += ' AND categoria_id = ?';
-            params.push(category);
-        }
-        if (size) {
-            sql += ' AND tallas = ?';
-            params.push(size);
-        }
-        if (color) {
-            sql += ' AND colores LIKE ?';
-            params.push(`%${color}%`);
-        }
-        if (status) {
-            sql += ' AND estado = ?';
-            params.push(status);
-        }
-
-        // Note: In a production app, we should validate 'sort' against a whitelist
-        const ALLOWED_SORT_FIELDS = ['id', 'nombre', 'precio', 'stock', 'created_at'];
-        const validatedSort = ALLOWED_SORT_FIELDS.includes(sort) ? sort : 'id';
-        const validatedDir = direction.toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
-
-        sql += ` ORDER BY ${validatedSort} ${validatedDir}`;
-
-        if (limit !== null) {
-            sql += ' LIMIT ? OFFSET ?';
-            params.push(parseInt(limit), parseInt(offset));
-        }
-
-        const [rows] = await db.query(sql, params, connection);
-        return rows.map(p => ({ ...p, images: safeParseImages(p.imagen_url, p.id) }));
-    }
-
-    // Obtener conteo filtrado para paginación
-    static async getFilteredCount(options = {}, connection = null) {
-        const {
-            q = null,
-            category = null,
-            size = null,
-            color = null,
-            status = null
-        } = options;
-
-        let sql = 'SELECT COUNT(*) as total FROM productos WHERE deleted_at IS NULL';
-        const params = [];
-
-        if (q) {
-            sql += ' AND (nombre LIKE ? OR codigo LIKE ?)';
-            params.push(`%${q}%`, `%${q}%`);
-        }
-        if (category) {
-            sql += ' AND categoria_id = ?';
-            params.push(category);
-        }
-        if (size) {
-            sql += ' AND tallas = ?';
-            params.push(size);
-        }
-        if (color) {
-            sql += ' AND colores LIKE ?';
-            params.push(`%${color}%`);
-        }
-        if (status) {
-            sql += ' AND estado = ?';
-            params.push(status);
-        }
-
-        const row = await db.get(sql, params, connection);
-        return row ? row.total : 0;
-    }
-
-    // Verificar si un SKU ya existe
-    static async checkSkuExists(sku, excludeId = null, connection = null) {
-        let query = 'SELECT id FROM productos WHERE codigo = ? AND deleted_at IS NULL';
-        const params = [sku];
-
-        if (excludeId) {
-            query += ' AND id != ?';
-            params.push(excludeId);
-        }
-
-        const [rows] = await db.query(query, params, connection);
-        return rows.length > 0;
+    // Obtener todos los productos
+    static async getAll() {
+        const [rows] = await db.query('SELECT * FROM productos');
+        return rows.map(p => {
+            return { ...p, images: Product.parseImages(p.imagen_url) };
+        });
     }
 
     // Obtener producto por ID
-    static async getById(id, connection = null) {
-        const [rows] = await db.query('SELECT * FROM productos WHERE id = ? AND deleted_at IS NULL', [id], connection);
+    static async getById(id) {
+        const [rows] = await db.query('SELECT * FROM productos WHERE id = ?', [id]);
         if (!rows[0]) return null;
-        return { ...rows[0], images: safeParseImages(rows[0].imagen_url, rows[0].id) };
+        return { ...rows[0], images: Product.parseImages(rows[0].imagen_url) };
     }
 
     // Buscar productos por nombre o SKU
-    static async search(query, connection = null) {
+    static async search(query) {
         const [rows] = await db.query(
-            `SELECT * FROM productos WHERE (nombre LIKE ? OR codigo LIKE ?) AND deleted_at IS NULL`,
-            [`%${query}%`, `%${query}%`],
-            connection
+            `SELECT * FROM productos WHERE nombre LIKE ? OR codigo LIKE ?`,
+            [`%${query}%`, `%${query}%`]
         );
-        return rows.map(p => ({ ...p, images: safeParseImages(p.imagen_url, p.id) }));
+        return rows.map(p => ({ ...p, images: Product.parseImages(p.imagen_url) }));
     }
 
     // Filtrar por categoría
-    static async getByCategory(categoryId, connection = null) {
-        const [rows] = await db.query('SELECT * FROM productos WHERE categoria_id = ? AND deleted_at IS NULL', [categoryId], connection);
-        return rows.map(p => ({ ...p, images: safeParseImages(p.imagen_url, p.id) }));
+    static async getByCategory(categoryId) {
+        const [rows] = await db.query('SELECT * FROM productos WHERE categoria_id = ?', [categoryId]);
+        return rows.map(p => ({ ...p, images: Product.parseImages(p.imagen_url) }));
     }
 
     // Productos con stock bajo
-    static async getLowStock(connection = null) {
-        const [rows] = await db.query('SELECT * FROM productos WHERE stock < stock_minimo AND stock > 0 AND deleted_at IS NULL', [], connection);
-        return rows.map(p => ({ ...p, images: safeParseImages(p.imagen_url, p.id) }));
+    static async getLowStock() {
+        const [rows] = await db.query('SELECT * FROM productos WHERE stock < stock_minimo AND stock > 0');
+        return rows.map(p => ({ ...p, images: Product.parseImages(p.imagen_url) }));
     }
 
     // Productos sin stock
-    static async getOutOfStock(connection = null) {
-        const [rows] = await db.query('SELECT * FROM productos WHERE stock <= 0 AND deleted_at IS NULL', [], connection);
-        return rows.map(p => ({ ...p, images: safeParseImages(p.imagen_url, p.id) }));
+    static async getOutOfStock() {
+        const [rows] = await db.query('SELECT * FROM productos WHERE stock <= 0');
+        return rows.map(p => ({ ...p, images: Product.parseImages(p.imagen_url) }));
     }
 
     // Actualizar producto
-    static async update(id, data, connection = null) {
-        // Whitelist de columnas permitidas para prevenir SQL injection
-        const ALLOWED_FIELDS = [
-            'nombre', 'descripcion', 'codigo', 'categoria_id', 'tallas', 'colores',
-            'precio', 'costo', 'stock', 'stock_minimo', 'proveedor', 'supplier_id',
-            'ubicacion', 'estado', 'imagen_url', 'notas', 'fecha_ingreso'
-        ];
-
+    static async update(id, data) {
         const fields = [];
         const values = [];
         for (const key in data) {
-            if (key === 'id') continue;
-            if (!ALLOWED_FIELDS.includes(key) && key !== 'images') continue;
-
+            if (data[key] === undefined) continue; // Evitar campos undefined
             if (key === 'images' || key === 'imagen_url') {
                 fields.push('imagen_url = ?');
-                values.push(Array.isArray(data[key]) ? JSON.stringify(data[key]) : data[key]);
-            } else if (key === 'stock') {
-                // Asegurar que el stock no baje de cero
-                fields.push('`stock` = GREATEST(0, ?)');
-                values.push(data[key]);
+                if (Array.isArray(data[key])) {
+                    values.push(JSON.stringify(data[key]));
+                } else {
+                    values.push(data[key]);
+                }
             } else {
-                fields.push(`\`${key}\` = ?`);
+                fields.push(`${key} = ?`);
                 values.push(data[key]);
             }
         }
-        if (fields.length === 0) return this.getById(id, connection);
-        await db.query(`UPDATE productos SET ${fields.join(', ')}, updated_at = NOW() WHERE id = ? AND deleted_at IS NULL`, [...values, id], connection);
-        return this.getById(id, connection);
+        fields.push('updated_at = ?');
+        values.push(new Date());
+        values.push(id);
+        await db.query(`UPDATE productos SET ${fields.join(', ')} WHERE id = ?`, values);
+        return this.getById(id);
     }
 
-    // Eliminar producto (Soft Delete)
-    static async delete(id, connection = null) {
-        await db.query('UPDATE productos SET deleted_at = NOW() WHERE id = ?', [id], connection);
+    // Eliminar producto (soft delete: stock=0, estado=descontinuado)
+    static async delete(id) {
+        await db.query(
+            "UPDATE productos SET stock = 0, estado = 'descontinuado', updated_at = NOW() WHERE id = ?",
+            [id]
+        );
         return true;
     }
 
-    // Actualizar stock manualmente y sincronizar estado
-    static async updateStock(id, quantity, connection = null) {
-        const estado = quantity > 0 ? 'disponible' : 'sin_stock';
+    // Ajustar stock manualmente (positivo o negativo) — auto-actualiza estado
+    static async adjustStock(id, delta) {
         await db.query(
-            'UPDATE productos SET stock = ?, estado = ?, updated_at = NOW() WHERE id = ? AND deleted_at IS NULL',
-            [quantity, estado, id],
-            connection
+            'UPDATE productos SET stock = stock + ?, updated_at = NOW() WHERE id = ?',
+            [delta, id]
         );
-        return this.getById(id, connection);
+        // Sincronizar estado con el nuevo stock
+        const product = await this.getById(id);
+        if (product && product.estado !== 'descontinuado') {
+            const newEstado = product.stock > 0 ? 'activo' : 'sin_stock';
+            if (product.estado !== newEstado) {
+                await db.query('UPDATE productos SET estado = ? WHERE id = ?', [newEstado, id]);
+            }
+        }
+        return this.getById(id);
     }
 
-    // Cambiar estado
-    static async changeStatus(id, status, connection = null) {
-        await db.query('UPDATE productos SET estado = ?, updated_at = NOW() WHERE id = ? AND deleted_at IS NULL', [status, id], connection);
-        return this.getById(id, connection);
+    // Cambiar estado manualmente — con lógica de stock asociada
+    static async changeStatus(id, status) {
+        // Si se cambia a sin_stock → stock pasa a 0
+        if (status === 'sin_stock') {
+            await db.query(
+                "UPDATE productos SET estado = 'sin_stock', stock = 0, updated_at = NOW() WHERE id = ?",
+                [id]
+            );
+        }
+        // Si se cambia a activo y el stock actual es 0 → stock pasa a 1
+        else if (status === 'activo') {
+            const product = await this.getById(id);
+            if (product && product.stock <= 0) {
+                await db.query(
+                    "UPDATE productos SET estado = 'activo', stock = 1, updated_at = NOW() WHERE id = ?",
+                    [id]
+                );
+            } else {
+                await db.query(
+                    "UPDATE productos SET estado = 'activo', updated_at = NOW() WHERE id = ?",
+                    [id]
+                );
+            }
+        }
+        // descontinuado → stock pasa a 0
+        else if (status === 'descontinuado') {
+            await db.query(
+                "UPDATE productos SET estado = 'descontinuado', stock = 0, updated_at = NOW() WHERE id = ?",
+                [id]
+            );
+        }
+        return this.getById(id);
     }
 
     // Subir imágenes (agrega a las existentes)
-    static async addImages(id, imageUrls, connection = null) {
-        const product = await this.getById(id, connection);
+    static async addImages(id, imageUrls) {
+        const product = await this.getById(id);
         const images = product.images.concat(imageUrls);
-        await db.query('UPDATE productos SET imagen_url = ?, updated_at = NOW() WHERE id = ? AND deleted_at IS NULL', [JSON.stringify(images), id], connection);
-        return this.getById(id, connection);
+        await db.query('UPDATE productos SET imagen_url = ?, updated_at = ? WHERE id = ?', [JSON.stringify(images), new Date(), id]);
+        return this.getById(id);
     }
 
     // Eliminar imagen
-    static async removeImage(id, imageUrl, connection = null) {
-        const product = await this.getById(id, connection);
+    static async removeImage(id, imageUrl) {
+        const product = await this.getById(id);
         const images = product.images.filter(img => img !== imageUrl);
-
-        // Eliminar archivo físico
-        deletePhysicalFile(imageUrl);
-
-        await db.query('UPDATE productos SET imagen_url = ?, updated_at = NOW() WHERE id = ? AND deleted_at IS NULL', [JSON.stringify(images), id], connection);
-        return this.getById(id, connection);
+        await db.query('UPDATE productos SET imagen_url = ?, updated_at = ? WHERE id = ?', [JSON.stringify(images), new Date(), id]);
+        return this.getById(id);
     }
 
     // Duplicar producto (para variantes)
     static async duplicate(id, overrides = {}) {
         const product = await this.getById(id);
         if (!product) return null;
-
         const copy = { ...product, ...overrides };
         delete copy.id;
-        delete copy.images; // Remove virtual field
-        delete copy.created_at;
-        delete copy.updated_at;
-
-        // NOTA DE SEGURIDAD: Al duplicar, evitamos que apunten a los mismos archivos físicos
-        // para que al borrar fotos de uno, no se borren del otro accidentalmente.
-        // Aquí simplemente limpiamos imagen_url, obligando a re-subir o duplicar físicamente.
-        // Por ahora, para evitar confusión, lo dejamos vacío si no hay override de imágenes.
-        if (!overrides.imagen_url && !overrides.images) {
-            copy.imagen_url = null;
+        // Generar código único para el duplicado
+        if (copy.codigo) {
+            copy.codigo = copy.codigo + '-COPY-' + Date.now();
         }
-
-        copy.codigo = (copy.codigo || '') + '-COPY-' + Date.now();
+        if (copy.sku) {
+            copy.sku = copy.sku + '-COPY-' + Date.now();
+        }
+        copy.created_at = new Date();
+        copy.updated_at = new Date();
         return this.create(copy);
     }
 
     // Indicador visual de stock
     static getStockIndicator(product) {
-        if (product.stock <= 0 || product.stock < (product.stock_minimo * 0.5)) return 'critical';
-        if (product.stock < product.stock_minimo && product.stock > 0) return 'low';
-        if (product.stock >= product.stock_minimo) return 'ok';
+        if (product.stock_quantity <= 0 || product.stock_quantity < (product.min_stock * 0.5)) return 'critical';
+        if (product.stock_quantity < product.min_stock && product.stock_quantity > 0) return 'low';
+        if (product.stock_quantity >= product.min_stock) return 'ok';
         return 'unknown';
     }
 
-    // Conteo total de productos disponibles
-    static async getCount(connection = null) {
-        const row = await db.get('SELECT COUNT(*) as total FROM productos WHERE deleted_at IS NULL AND stock > 0 AND estado = "disponible"', [], connection);
-        return row ? row.total : 0;
-    }
+        /**
+         * Verifica si existe un producto con el mismo SKU/código
+         * @param {string} codigo - SKU/código a verificar
+         * @param {number} [excludeId] - Opcional: ID a excluir (para edición)
+         * @returns {Promise<boolean>} true si existe, false si no
+         */
+        static async checkSkuExists(codigo, excludeId = null) {
+            let sql = 'SELECT COUNT(*) AS total FROM productos WHERE codigo = ?';
+            const params = [codigo];
+            if (excludeId) {
+                sql += ' AND id != ?';
+                params.push(excludeId);
+            }
+            const [rows] = await db.query(sql, params);
+            return rows[0]?.total > 0;
+        }
 }
 
 module.exports = Product;

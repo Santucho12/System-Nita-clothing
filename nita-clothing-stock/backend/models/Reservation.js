@@ -54,9 +54,14 @@ class Reservation {
                         item.quantity, product.sale_price
                     ]);
                     
-                    // Descontar stock
+                    // Descontar stock y sincronizar estado
                     await database.run('UPDATE productos SET stock = stock - ?, updated_at = datetime("now") WHERE id = ?', 
                         [item.quantity, item.product_id]);
+                    // Verificar si quedó sin stock
+                    const updatedProd = await database.get('SELECT stock, estado FROM productos WHERE id = ?', [item.product_id]);
+                    if (updatedProd && updatedProd.stock <= 0 && updatedProd.estado !== 'descontinuado') {
+                        await database.run("UPDATE productos SET estado = 'sin_stock' WHERE id = ?", [item.product_id]);
+                    }
                 }
                 
                 
@@ -160,11 +165,16 @@ class Reservation {
             
             
             try {
-                // Restaurar stock
+                // Restaurar stock y sincronizar estado
                 const items = await database.all('SELECT * FROM reservation_items WHERE reservation_id = ?', [id]);
                 for (const item of items) {
                     await database.run('UPDATE productos SET stock = stock + ?, updated_at = datetime("now") WHERE id = ?',
                         [item.quantity, item.product_id]);
+                    // Si el producto no está descontinuado y ahora tiene stock, ponerlo activo
+                    const prod = await database.get('SELECT stock, estado FROM productos WHERE id = ?', [item.product_id]);
+                    if (prod && prod.estado !== 'descontinuado' && prod.stock > 0) {
+                        await database.run("UPDATE productos SET estado = 'activo' WHERE id = ?", [item.product_id]);
+                    }
                 }
                 
                 // Actualizar reserva

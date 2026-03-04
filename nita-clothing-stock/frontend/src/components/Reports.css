@@ -7,14 +7,14 @@
 .reports-container h1 {
   font-size: 32px;
   margin-bottom: 30px;
-  color: #333;
+  color: var(--text-heading, #333);
 }
 
 .tabs {
   display: flex;
   gap: 10px;
   margin-bottom: 30px;
-  border-bottom: 2px solid #e0e0e0;
+  border-bottom: 2px solid var(--table-border, #e0e0e0);
   flex-wrap: wrap;
 }
 
@@ -26,7 +26,7 @@
   border-bottom: 3px solid transparent;
   transition: all 0.3s;
   font-size: 15px;
-  color: #666;
+  color: var(--text-secondary, #666);
   display: flex;
   align-items: center;
   gap: 8px;
@@ -39,7 +39,7 @@
 }
 
 .tabs button:hover {
-  background: #f5f5f5;
+  background: var(--bg-tertiary, #f5f5f5);
   color: #2196F3;
 }
 
@@ -47,7 +47,7 @@
   text-align: center;
   padding: 60px;
   font-size: 18px;
-  color: #666;
+  color: var(--text-secondary, #666);
 }
 
 .loading i {
@@ -65,10 +65,10 @@
 }
 
 .stat-card {
-  background: white;
+  background: var(--bg-card, white);
   padding: 24px;
   border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  box-shadow: var(--shadow, 0 4px 6px rgba(0,0,0,0.1));
   display: flex;
   align-items: center;
   gap: 20px;
@@ -93,7 +93,7 @@
 
 .stat-info h3 {
   margin: 0 0 8px 0;
-  color: #666;
+  color: var(--text-secondary, #666);
   font-size: 14px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -102,7 +102,7 @@
 .stat-info .amount {
   font-size: 32px;
   font-weight: bold;
-  color: #333;
+  color: var(--text-heading, #333);
   margin: 0;
   line-height: 1;
 }
@@ -111,43 +111,43 @@
   display: block;
   margin-top: 8px;
   font-size: 13px;
-  color: #999;
+  color: var(--text-muted, #999);
 }
 
 .chart-container {
-  background: white;
+  background: var(--bg-card, white);
   padding: 24px;
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  box-shadow: var(--shadow, 0 2px 8px rgba(0,0,0,0.1));
   margin-bottom: 30px;
 }
 
 .chart-container h3 {
   margin-top: 0;
   margin-bottom: 20px;
-  color: #333;
+  color: var(--text-heading, #333);
   font-size: 20px;
 }
 
 .report-table {
   width: 100%;
   border-collapse: collapse;
-  background: white;
+  background: var(--bg-card, white);
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  box-shadow: var(--shadow, 0 2px 8px rgba(0,0,0,0.1));
 }
 
 .report-table thead {
-  background: #f8f9fa;
+  background: var(--table-header-bg, #f8f9fa);
 }
 
 .report-table th {
   padding: 14px 16px;
   text-align: left;
   font-weight: 600;
-  color: #333;
-  border-bottom: 2px solid #dee2e6;
+  color: var(--text-heading, #333);
+  border-bottom: 2px solid var(--table-border, #dee2e6);
   font-size: 14px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -155,13 +155,13 @@
 
 .report-table td {
   padding: 14px 16px;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--table-border, #f0f0f0);
   font-size: 14px;
-  color: #555;
+  color: var(--text-secondary, #555);
 }
 
 .report-table tbody tr:hover {
-  background: #f8f9fa;
+  background: var(--bg-tertiary, #f8f9fa);
 }
 
 .report-table tbody tr:last-child td {
@@ -171,11 +171,11 @@
 .empty-message {
   text-align: center;
   padding: 40px;
-  color: #999;
+  color: var(--text-muted, #999);
   font-style: italic;
-  background: white;
+  background: var(--bg-card, white);
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  box-shadow: var(--shadow, 0 2px 8px rgba(0,0,0,0.1));
 }
 
 .badge {

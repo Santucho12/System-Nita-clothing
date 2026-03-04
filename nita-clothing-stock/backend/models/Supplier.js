@@ -7,17 +7,10 @@ class Supplier {
   static async create(data, connection = null) {
     const {
       name,
-      contact_name,
-      email,
       phone,
       address,
-      city,
-      state,
-      postal_code,
-      country,
       website,
-      tax_id,
-      payment_terms,
+      min_purchase,
       notes
     } = data;
 
@@ -25,24 +18,16 @@ class Supplier {
     if (!name) throw new Error('El nombre del proveedor es obligatorio');
 
     const sql = `INSERT INTO suppliers (
-          name, contact_name, email, phone, address, city, state, 
-          postal_code, country, website, tax_id, payment_terms, notes, 
+          name, phone, address, website, min_purchase, notes,
           status, created_at, updated_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'active', NOW(), NOW())`;
+        ) VALUES (?, ?, ?, ?, ?, ?, 'active', NOW(), NOW())`;
 
     const params = [
       name,
-      contact_name || null,
-      email || null,
       phone || null,
       address || null,
-      city || null,
-      state || null,
-      postal_code || null,
-      country || null,
       website || null,
-      tax_id || null,
-      payment_terms || 'net_30',
+      min_purchase || null,
       notes || null
     ];
 
@@ -74,22 +59,7 @@ class Supplier {
     if (filters.name) {
       query += ' AND s.name LIKE ?';
       params.push(`%${filters.name}%`);
-    }
-
-    if (filters.email) {
-      query += ' AND s.email LIKE ?';
-      params.push(`%${filters.email}%`);
-    }
-
-    if (filters.city) {
-      query += ' AND s.city LIKE ?';
-      params.push(`%${filters.city}%`);
-    }
-
-    if (filters.country) {
-      query += ' AND s.country = ?';
-      params.push(filters.country);
-    }
+    }
 
     query += ' GROUP BY s.id ORDER BY s.name ASC';
 
@@ -129,9 +99,7 @@ class Supplier {
    */
   static async update(id, data, connection = null) {
     const allowedFields = [
-      'name', 'contact_name', 'email', 'phone', 'address',
-      'city', 'state', 'postal_code', 'country', 'website',
-      'tax_id', 'payment_terms', 'notes', 'status'
+      'name', 'phone', 'address', 'website', 'min_purchase', 'notes', 'status'
     ];
 
     const updates = [];

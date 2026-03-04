@@ -407,9 +407,10 @@ class ExchangeReturn {
     // Restaurar stock del producto devuelto
     const product = await Product.getById(item.product_id, connection);
     if (product) {
+      const newStock = product.stock + item.quantity;
       await Product.update(item.product_id, {
-        stock: product.stock + item.quantity,
-        estado: 'disponible'
+        stock: newStock,
+        estado: newStock > 0 ? 'activo' : 'sin_stock'
       }, connection);
     }
 
@@ -420,9 +421,10 @@ class ExchangeReturn {
         if (newProduct.stock < item.new_quantity) {
           throw new Error(`Stock insuficiente para producto ${newProduct.nombre}`);
         }
+        const resultStock = newProduct.stock - item.new_quantity;
         await Product.update(item.new_product_id, {
-          stock: newProduct.stock - item.new_quantity,
-          estado: (newProduct.stock - item.new_quantity) === 0 ? 'sin_stock' : 'disponible'
+          stock: resultStock,
+          estado: resultStock > 0 ? 'activo' : 'sin_stock'
         }, connection);
       }
     }

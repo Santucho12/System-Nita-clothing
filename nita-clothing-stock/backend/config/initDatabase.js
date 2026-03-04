@@ -51,7 +51,7 @@ async function initDatabase() {
                 proveedor VARCHAR(255),
                 supplier_id INT,
                 ubicacion VARCHAR(255),
-                estado ENUM('disponible', 'sin_stock') DEFAULT 'disponible',
+                estado ENUM('activo', 'descontinuado', 'sin_stock') DEFAULT 'activo',
                 fecha_ingreso DATETIME DEFAULT CURRENT_TIMESTAMP,
                 imagen_url TEXT,
                 notas TEXT,

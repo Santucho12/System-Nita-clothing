@@ -92,7 +92,7 @@ export default function Customers() {
   );
 
   return (
-    <div className="customers-container" style={{ padding: '30px', background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)', minHeight: '100vh' }}>
+    <div className="customers-container" style={{ padding: '30px', background: 'var(--bg-gradient)', minHeight: '100vh' }}>
       <style>
         {`
           @keyframes perspective3DFlip {
@@ -408,37 +408,13 @@ export default function Customers() {
                       </div>
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '20px', marginBottom: '30px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '20px', marginBottom: '30px' }}>
                       <div style={{ padding: '20px', background: '#f8f9fa', borderRadius: '8px', borderLeft: '4px solid #f73194' }}>
                         <div style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
                           <FaEnvelope style={{ marginRight: '8px', color: '#f73194' }} />
                           <span style={{ fontSize: '12px', color: '#666', textTransform: 'uppercase', fontWeight: '600' }}>Email</span>
                         </div>
                         <p style={{ margin: 0, fontSize: '16px', color: '#333', fontWeight: '500' }}>{selectedCustomer.email}</p>
-                      </div>
-
-                      <div style={{ padding: '20px', background: '#f8f9fa', borderRadius: '8px', borderLeft: '4px solid #f73194' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
-                          <FaUser style={{ marginRight: '8px', color: '#f73194' }} />
-                          <span style={{ fontSize: '12px', color: '#666', textTransform: 'uppercase', fontWeight: '600' }}>Nombre</span>
-                        </div>
-                        <p style={{ margin: 0, fontSize: '16px', color: '#333', fontWeight: '500' }}>{selectedCustomer.name}</p>
-                      </div>
-
-                      <div style={{ padding: '20px', background: '#f8f9fa', borderRadius: '8px', borderLeft: '4px solid #f73194' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
-                          <FaPhone style={{ marginRight: '8px', color: '#f73194' }} />
-                          <span style={{ fontSize: '12px', color: '#666', textTransform: 'uppercase', fontWeight: '600' }}>Teléfono</span>
-                        </div>
-                        <p style={{ margin: 0, fontSize: '16px', color: '#333', fontWeight: '500' }}>{selectedCustomer.phone}</p>
-                      </div>
-
-                      <div style={{ padding: '20px', background: '#f8f9fa', borderRadius: '8px', borderLeft: '4px solid #f73194' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
-                          <FaMapMarkerAlt style={{ marginRight: '8px', color: '#f73194' }} />
-                          <span style={{ fontSize: '12px', color: '#666', textTransform: 'uppercase', fontWeight: '600' }}>Dirección</span>
-                        </div>
-                        <p style={{ margin: 0, fontSize: '16px', color: '#333', fontWeight: '500' }}>{selectedCustomer.address || 'N/A'}</p>
                       </div>
                     </div>
 

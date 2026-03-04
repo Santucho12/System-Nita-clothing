@@ -51,10 +51,21 @@ app.use(cors({
         }
     },
     credentials: true,
-    allowedHeaders: ['Content-Type', 'Authorization', 'Idempotency-Key']
+    allowedHeaders: ['Content-Type', 'Authorization', 'Idempotency-Key', 'Cache-Control', 'Pragma']
 }));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
+// DEBUG: Log de TODAS las requests HTTP con status de respuesta
+app.use((req, res, next) => {
+    console.log(`[HTTP] --> ${req.method} ${req.originalUrl}`);
+    const originalJson = res.json.bind(res);
+    res.json = function(body) {
+        console.log(`[HTTP] <-- ${req.method} ${req.originalUrl} [${res.statusCode}]`, JSON.stringify(body).substring(0, 200));
+        return originalJson(body);
+    };
+    next();
+});
 
 // Middleware de idempotencia (después de bodyParser para interceptar post-data)
 app.use(idempotency);

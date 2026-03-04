@@ -50,22 +50,17 @@ export default function SalesHistory() {
     // eslint-disable-next-line
   }, []);
 
+  // Filtrado en vivo con debounce
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      fetchSales({ ...filters, page: 1 });
+    }, 400);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line
+  }, [filters.start_date, filters.end_date, filters.payment_method, filters.customer_email, filters.sale_number]);
+
   const handleFilterChange = e => {
     setFilters({ ...filters, [e.target.name]: e.target.value, page: 1 });
-  };
-
-  const handleSearch = e => {
-    e.preventDefault();
-    let newFilters = { ...filters, page: 1 };
-    // Si solo hay fecha de inicio, completar fecha fin con hoy
-    if (newFilters.start_date && !newFilters.end_date) {
-      const today = new Date();
-      const yyyy = today.getFullYear();
-      const mm = String(today.getMonth() + 1).padStart(2, '0');
-      const dd = String(today.getDate()).padStart(2, '0');
-      newFilters.end_date = `${yyyy}-${mm}-${dd}`;
-    }
-    fetchSales(newFilters);
   };
 
   const handleClearFilters = () => {
@@ -81,7 +76,7 @@ export default function SalesHistory() {
   const handleShowDetail = async (sale) => {
     try {
       setLoading(true);
-      const response = await api.get(`/sales/${sale.id}`);
+      const response = await api.get(`/ventas/${sale.id}`);
       if (response.data.success) {
         setSelectedSale(response.data.data);
       } else {
@@ -108,23 +103,15 @@ export default function SalesHistory() {
     });
   };
 
-  const handlePrintTicket = (sale) => {
-    toast.info(`Imprimiendo ticket de venta #${sale.sale_number || sale.id}...`);
-  };
-
-  const handleSendEmail = (sale) => {
-    toast.info(`Enviando comprobante a ${sale.customer_email || 'el cliente'}...`);
-  };
-
-  const handleExportPDF = (sale) => {
-    toast.info(`Generando PDF de venta #${sale.sale_number || sale.id}...`);
-  };
+  const handlePrintTicket = () => showComingSoonAlert();
+  const handleSendEmail = () => showComingSoonAlert();
+  const handleExportPDF = () => showComingSoonAlert();
 
   const handleCancelSale = async (sale) => {
     if (window.confirm(`¿Estás seguro de que deseas cancelar la venta #${sale.sale_number || sale.id}? Esta acción restaurará el stock de los productos.`)) {
       try {
         setLoading(true);
-        const response = await api.delete(`/sales/${sale.id}`);
+        const response = await api.delete(`/ventas/${sale.id}`);
         if (response.data.success) {
           toast.success('Venta cancelada exitosamente y stock restaurado.');
           fetchSales();
@@ -139,11 +126,13 @@ export default function SalesHistory() {
   };
   const getStatusBadge = (status) => {
     const statusStyles = {
+      completed: { bg: '#d4edda', color: '#155724', icon: FaCheckCircle, label: 'Completada' },
       completada: { bg: '#d4edda', color: '#155724', icon: FaCheckCircle, label: 'Completada' },
+      cancelled: { bg: '#f8d7da', color: '#721c24', icon: FaTimesCircle, label: 'Cancelada' },
       cancelada: { bg: '#f8d7da', color: '#721c24', icon: FaTimesCircle, label: 'Cancelada' },
       devuelta: { bg: '#fff3cd', color: '#856404', icon: FaExchangeAlt, label: 'Devuelta' }
     };
-    const style = statusStyles[status] || statusStyles.completada;
+    const style = statusStyles[status] || statusStyles.completed;
     const Icon = style.icon;
     return (
       <span style={{
@@ -175,7 +164,7 @@ export default function SalesHistory() {
   const totalPages = Math.ceil(total / filters.page_size);
 
   return (
-    <div style={{ padding: '30px', background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)', minHeight: '100vh' }}>
+    <div style={{ padding: '30px', background: 'var(--bg-gradient)', minHeight: '100vh' }}>
       <style>
         {`
           @keyframes perspective3DFlip {
@@ -259,16 +248,11 @@ export default function SalesHistory() {
       </div>
 
       {showFilters && (
-        <div className="filters-section" style={{ background: 'white', padding: '25px', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)', marginBottom: '30px' }}>
-          <h3 style={{ margin: '0 0 20px 0', fontSize: '18px', color: '#333', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <FaSearch style={{ color: '#f73194' }} />
-            Filtros de Búsqueda
-          </h3>
-          <form onSubmit={handleSearch}>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '15px', marginBottom: '20px' }}>
-              <div>
-                <label style={{ display: 'block', marginBottom: '6px', fontSize: '14px', fontWeight: '500', color: '#555' }}>
-                  <FaCalendarAlt style={{ marginRight: '6px', color: '#f73194' }} />
+        <div className="filters-section" style={{ background: 'white', padding: '20px 25px', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)', marginBottom: '30px' }}>
+            <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-end' }}>
+              <div style={{ flex: 1 }}>
+                <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: '500', color: '#555' }}>
+                  <FaCalendarAlt style={{ marginRight: '5px', color: '#f73194' }} />
                   Fecha Inicio
                 </label>
                 <input
@@ -277,12 +261,12 @@ export default function SalesHistory() {
                   value={filters.start_date}
                   onChange={handleFilterChange}
                   className="filter-input"
-                  style={{ width: '180px', padding: '10px', border: '2px solid #e0e0e0', borderRadius: '8px', fontSize: '14px' }}
+                  style={{ width: '100%', padding: '9px 10px', border: '2px solid #e0e0e0', borderRadius: '8px', fontSize: '14px', boxSizing: 'border-box' }}
                 />
               </div>
-              <div>
-                <label style={{ display: 'block', marginBottom: '6px', fontSize: '14px', fontWeight: '500', color: '#555' }}>
-                  <FaCalendarAlt style={{ marginRight: '6px', color: '#f73194' }} />
+              <div style={{ flex: 1 }}>
+                <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: '500', color: '#555' }}>
+                  <FaCalendarAlt style={{ marginRight: '5px', color: '#f73194' }} />
                   Fecha Fin
                 </label>
                 <input
@@ -291,12 +275,12 @@ export default function SalesHistory() {
                   value={filters.end_date}
                   onChange={handleFilterChange}
                   className="filter-input"
-                  style={{ width: '180px', padding: '10px', border: '2px solid #e0e0e0', borderRadius: '8px', fontSize: '14px' }}
+                  style={{ width: '100%', padding: '9px 10px', border: '2px solid #e0e0e0', borderRadius: '8px', fontSize: '14px', boxSizing: 'border-box' }}
                 />
               </div>
-              <div>
-                <label style={{ display: 'block', marginBottom: '6px', fontSize: '14px', fontWeight: '500', color: '#555' }}>
-                  <FaFileInvoice style={{ marginRight: '6px', color: '#f73194' }} />
+              <div style={{ flex: 1 }}>
+                <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: '500', color: '#555' }}>
+                  <FaFileInvoice style={{ marginRight: '5px', color: '#f73194' }} />
                   N° Venta
                 </label>
                 <input
@@ -306,12 +290,12 @@ export default function SalesHistory() {
                   value={filters.sale_number}
                   onChange={handleFilterChange}
                   className="filter-input"
-                  style={{ width: '150px', padding: '10px', border: '2px solid #e0e0e0', borderRadius: '8px', fontSize: '14px' }}
+                  style={{ width: '100%', padding: '9px 10px', border: '2px solid #e0e0e0', borderRadius: '8px', fontSize: '14px', boxSizing: 'border-box' }}
                 />
               </div>
-              <div>
-                <label style={{ display: 'block', marginBottom: '6px', fontSize: '14px', fontWeight: '500', color: '#555' }}>
-                  <FaEnvelope style={{ marginRight: '6px', color: '#f73194' }} />
+              <div style={{ flex: 1 }}>
+                <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: '500', color: '#555' }}>
+                  <FaEnvelope style={{ marginRight: '5px', color: '#f73194' }} />
                   Email Cliente
                 </label>
                 <input
@@ -321,12 +305,12 @@ export default function SalesHistory() {
                   value={filters.customer_email}
                   onChange={handleFilterChange}
                   className="filter-input"
-                  style={{ width: '200px', padding: '10px', border: '2px solid #e0e0e0', borderRadius: '8px', fontSize: '14px' }}
+                  style={{ width: '100%', padding: '9px 10px', border: '2px solid #e0e0e0', borderRadius: '8px', fontSize: '14px', boxSizing: 'border-box' }}
                 />
               </div>
-              <div>
-                <label style={{ display: 'block', marginBottom: '6px', fontSize: '14px', fontWeight: '500', color: '#555' }}>
-                  <FaCreditCard style={{ marginRight: '6px', color: '#f73194' }} />
+              <div style={{ flex: 1 }}>
+                <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: '500', color: '#555' }}>
+                  <FaCreditCard style={{ marginRight: '5px', color: '#f73194' }} />
                   Método de Pago
                 </label>
                 <select
@@ -334,7 +318,7 @@ export default function SalesHistory() {
                   value={filters.payment_method}
                   onChange={handleFilterChange}
                   className="filter-input"
-                  style={{ width: '160px', padding: '10px', border: '2px solid #e0e0e0', borderRadius: '8px', fontSize: '14px', cursor: 'pointer' }}
+                  style={{ width: '100%', padding: '9px 10px', border: '2px solid #e0e0e0', borderRadius: '8px', fontSize: '14px', cursor: 'pointer', boxSizing: 'border-box' }}
                 >
                   <option value="">Todos</option>
                   <option value="efectivo">💵 Efectivo</option>
@@ -342,68 +326,29 @@ export default function SalesHistory() {
                   <option value="transferencia">🏦 Transferencia</option>
                 </select>
               </div>
+              {(filters.start_date || filters.end_date || filters.payment_method || filters.customer_email || filters.sale_number) && (
+                <button
+                  type="button"
+                  onClick={handleClearFilters}
+                  className="btn-secondary"
+                  style={{ padding: '9px 18px', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '14px', fontWeight: '500', background: '#343a40', whiteSpace: 'nowrap' }}
+                >
+                  <FaTimes />
+                  Limpiar
+                </button>
+              )}
             </div>
-            <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
-              <button
-                type="button"
-                onClick={handleClearFilters}
-                className="btn-secondary"
-                style={{ padding: '12px 24px', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '15px', fontWeight: '500', background: '#343a40' }}
-              >
-                <FaTimes />
-                Limpiar
-              </button>
-              <button
-                type="submit"
-                className="btn-pink"
-                style={{ padding: '12px 24px', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '15px', fontWeight: '500', background: '#f73194' }}
-              >
-                <FaSearch />
-                Buscar
-              </button>
-            </div>
-          </form>
         </div>
       )}
 
       {!loading && sales.length > 0 && (
-        <div className="sales-stats" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '20px', marginBottom: '30px' }}>
-          <div style={{ background: 'white', padding: '20px', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', borderTop: '4px solid #f73194' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-              <div style={{ width: '50px', height: '50px', borderRadius: '12px', background: 'linear-gradient(135deg, #f73194 0%, #ff6fb8 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <FaFileInvoice style={{ fontSize: '24px', color: 'white' }} />
-              </div>
-              <div>
-                <p style={{ margin: '0 0 5px 0', fontSize: '14px', color: '#666', fontWeight: '500' }}>Total Ventas</p>
-                <p style={{ margin: 0, fontSize: '24px', fontWeight: '700', color: '#333' }}>{total}</p>
-              </div>
+        <div className="sales-stats" style={{ marginBottom: '30px' }}>
+          <div style={{ background: 'white', padding: '20px 25px', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', borderLeft: '4px solid #f73194', display: 'flex', alignItems: 'center', gap: '15px' }}>
+            <div style={{ width: '45px', height: '45px', borderRadius: '10px', background: 'linear-gradient(135deg, #f73194 0%, #ff6fb8 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <FaFileInvoice style={{ fontSize: '20px', color: 'white' }} />
             </div>
-          </div>
-          <div style={{ background: 'white', padding: '20px', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', borderTop: '4px solid #4CAF50' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-              <div style={{ width: '50px', height: '50px', borderRadius: '12px', background: 'linear-gradient(135deg, #4CAF50 0%, #66BB6A 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <FaDollarSign style={{ fontSize: '24px', color: 'white' }} />
-              </div>
-              <div>
-                <p style={{ margin: '0 0 5px 0', fontSize: '14px', color: '#666', fontWeight: '500' }}>Total Recaudado</p>
-                <p style={{ margin: 0, fontSize: '24px', fontWeight: '700', color: '#333' }}>
-                  {formatCurrency(sales.reduce((sum, sale) => sum + (parseFloat(sale.total) || 0), 0))}
-                </p>
-              </div>
-            </div>
-          </div>
-          <div style={{ background: 'white', padding: '20px', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', borderTop: '4px solid #2196F3' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-              <div style={{ width: '50px', height: '50px', borderRadius: '12px', background: 'linear-gradient(135deg, #2196F3 0%, #42A5F5 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <FaUser style={{ fontSize: '24px', color: 'white' }} />
-              </div>
-              <div>
-                <p style={{ margin: '0 0 5px 0', fontSize: '14px', color: '#666', fontWeight: '500' }}>Promedio por Venta</p>
-                <p style={{ margin: 0, fontSize: '24px', fontWeight: '700', color: '#333' }}>
-                  {sales.length > 0 ? formatCurrency(sales.reduce((sum, sale) => sum + (parseFloat(sale.total) || 0), 0) / sales.length) : formatCurrency(0)}
-                </p>
-              </div>
-            </div>
+            <p style={{ margin: 0, fontSize: '15px', color: '#666', fontWeight: '500' }}>Total Ventas</p>
+            <p style={{ margin: 0, fontSize: '26px', fontWeight: '700', color: '#333' }}>{total}</p>
           </div>
         </div>
       )}
@@ -606,7 +551,7 @@ export default function SalesHistory() {
       {selectedSale && (
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '20px' }} onClick={handleCloseDetail}>
           <div style={{ background: 'white', borderRadius: '16px', maxWidth: '700px', width: '100%', maxHeight: '90vh', overflow: 'auto', boxShadow: '0 8px 32px rgba(0,0,0,0.2)' }} onClick={e => e.stopPropagation()}>
-            <div style={{ background: 'linear-gradient(135deg, #f73194 0%, #ff6fb8 100%)', padding: '25px', borderRadius: '16px 16px 0 0', position: 'relative' }}>
+            <div style={{ background: 'linear-gradient(135deg, #f73194 0%, #ff6fb8 100%)', padding: '23px', borderRadius: '16px 16px 0 0', position: 'relative' }}>
               <button
                 onClick={handleCloseDetail}
                 style={{ position: 'absolute', top: '15px', right: '15px', background: 'rgba(255,255,255,0.3)', border: 'none', color: 'white', borderRadius: '50%', width: '36px', height: '36px', fontSize: '20px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}
@@ -619,10 +564,10 @@ export default function SalesHistory() {
               </h2>
             </div>
 
-            <div style={{ padding: '30px' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '25px' }}>
-                <div style={{ background: '#f8f9fa', padding: '18px', borderRadius: '10px', borderLeft: '4px solid #f73194' }}>
-                  <p style={{ margin: '0 0 6px 0', fontSize: '13px', color: '#666', fontWeight: '500', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Fecha y Hora</p>
+            <div style={{ padding: '28px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '18px', marginBottom: '23px' }}>
+                <div style={{ background: '#f8f9fa', padding: '16px', borderRadius: '10px', borderLeft: '4px solid #f73194' }}>
+                  <p style={{ margin: '0 0 4px 0', fontSize: '13px', color: '#666', fontWeight: '500', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Fecha y Hora</p>
                   <p style={{ margin: 0, fontSize: '16px', fontWeight: '600', color: '#333', display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <FaCalendarAlt style={{ color: '#f73194' }} />
                     {new Date(selectedSale.created_at).toLocaleString('es-AR', {
@@ -634,22 +579,22 @@ export default function SalesHistory() {
                     })}
                   </p>
                 </div>
-                <div style={{ background: '#f8f9fa', padding: '18px', borderRadius: '10px', borderLeft: '4px solid #4CAF50' }}>
-                  <p style={{ margin: '0 0 6px 0', fontSize: '13px', color: '#666', fontWeight: '500', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Total</p>
+                <div style={{ background: '#f8f9fa', padding: '16px', borderRadius: '10px', borderLeft: '4px solid #4CAF50' }}>
+                  <p style={{ margin: '0 0 4px 0', fontSize: '13px', color: '#666', fontWeight: '500', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Total</p>
                   <p style={{ margin: 0, fontSize: '28px', fontWeight: '700', color: '#4CAF50', display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <FaDollarSign />
                     {formatCurrency(selectedSale.total || 0)}
                   </p>
                 </div>
-                <div style={{ background: '#f8f9fa', padding: '18px', borderRadius: '10px', borderLeft: '4px solid #2196F3' }}>
-                  <p style={{ margin: '0 0 6px 0', fontSize: '13px', color: '#666', fontWeight: '500', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Cliente</p>
+                <div style={{ background: '#f8f9fa', padding: '16px', borderRadius: '10px', borderLeft: '4px solid #2196F3' }}>
+                  <p style={{ margin: '0 0 4px 0', fontSize: '13px', color: '#666', fontWeight: '500', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Cliente</p>
                   <p style={{ margin: 0, fontSize: '16px', fontWeight: '600', color: '#333', display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <FaUser style={{ color: '#2196F3' }} />
                     {selectedSale.customer_email || 'Sin email'}
                   </p>
                 </div>
-                <div style={{ background: '#f8f9fa', padding: '18px', borderRadius: '10px', borderLeft: '4px solid #FF9800' }}>
-                  <p style={{ margin: '0 0 6px 0', fontSize: '13px', color: '#666', fontWeight: '500', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Método de Pago</p>
+                <div style={{ background: '#f8f9fa', padding: '16px', borderRadius: '10px', borderLeft: '4px solid #FF9800' }}>
+                  <p style={{ margin: '0 0 4px 0', fontSize: '13px', color: '#666', fontWeight: '500', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Método de Pago</p>
                   <p style={{ margin: 0, fontSize: '16px', fontWeight: '600', color: '#333', display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <FaCreditCard style={{ color: '#FF9800' }} />
                     {getPaymentMethodIcon(selectedSale.payment_method)} {selectedSale.payment_method ? selectedSale.payment_method.charAt(0).toUpperCase() + selectedSale.payment_method.slice(1) : 'N/A'}
@@ -741,12 +686,13 @@ export default function SalesHistory() {
                 </button>
                 <button
                   onClick={() => handleCancelSale(selectedSale)}
-                  style={{ padding: '14px', background: '#6c757d', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '15px', fontWeight: '500', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', transition: 'all 0.3s ease' }}
-                  onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+                  disabled={selectedSale?.status === 'cancelled'}
+                  style={{ padding: '14px', background: selectedSale?.status === 'cancelled' ? '#adb5bd' : '#6c757d', color: 'white', border: 'none', borderRadius: '8px', cursor: selectedSale?.status === 'cancelled' ? 'not-allowed' : 'pointer', fontSize: '15px', fontWeight: '500', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', transition: 'all 0.3s ease', opacity: selectedSale?.status === 'cancelled' ? 0.6 : 1 }}
+                  onMouseOver={(e) => { if (selectedSale?.status !== 'cancelled') e.currentTarget.style.transform = 'scale(1.1)'; }}
                   onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
                 >
                   <FaTimes />
-                  Cancelar Venta
+                  {selectedSale?.status === 'cancelled' ? 'Venta Cancelada' : 'Cancelar Venta'}
                 </button>
               </div>
             </div>

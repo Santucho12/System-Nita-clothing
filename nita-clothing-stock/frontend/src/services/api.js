@@ -62,7 +62,7 @@ export const categoryService = {
       const response = await api.get('/categorias');
       return response.data;
     } catch (error) {
-      throw new Error(error.response?.data?.message || 'Error obteniendo categorías');
+      throw new Error(error.message || error.data?.message || 'Error obteniendo categorías');
     }
   },
 
@@ -72,7 +72,7 @@ export const categoryService = {
       const response = await api.get(`/categorias/${id}`);
       return response.data;
     } catch (error) {
-      throw new Error(error.response?.data?.message || 'Error obteniendo categoría');
+      throw new Error(error.message || error.data?.message || 'Error obteniendo categoría');
     }
   },
 
@@ -82,7 +82,7 @@ export const categoryService = {
       const response = await api.post('/categorias', categoryData);
       return response.data;
     } catch (error) {
-      throw new Error(error.response?.data?.message || 'Error creando categoría');
+      throw new Error(error.message || error.data?.message || 'Error creando categoría');
     }
   },
 
@@ -92,7 +92,7 @@ export const categoryService = {
       const response = await api.put(`/categorias/${id}`, categoryData);
       return response.data;
     } catch (error) {
-      throw new Error(error.response?.data?.message || 'Error actualizando categoría');
+      throw new Error(error.message || error.data?.message || 'Error actualizando categoría');
     }
   },
 
@@ -102,7 +102,7 @@ export const categoryService = {
       const response = await api.delete(`/categorias/${id}`);
       return response.data;
     } catch (error) {
-      throw new Error(error.response?.data?.message || 'Error eliminando categoría');
+      throw new Error(error.message || error.data?.message || 'Tiene productos activos esta categoria');
     }
   },
 
@@ -112,7 +112,7 @@ export const categoryService = {
       const response = await api.patch(`/categorias/${id}/status`, { status });
       return response.data;
     } catch (error) {
-      throw new Error(error.response?.data?.message || 'Error cambiando estado de categoría');
+      throw new Error(error.message || error.data?.message || 'Error cambiando estado de categoría');
     }
   }
 };
@@ -125,7 +125,7 @@ export const productService = {
       const response = await api.get('/productos/ultimo-sku');
       return response.data;
     } catch (error) {
-      throw new Error(error.response?.data?.message || 'Error obteniendo último SKU');
+      throw new Error(error.message || error.data?.message || 'Error obteniendo último SKU');
     }
   },
   // Obtener todos los productos con paginación y filtros
@@ -141,10 +141,12 @@ export const productService = {
   // Obtener el conteo de productos
   getCount: async () => {
     try {
-      const response = await api.get('/productos/count');
+      const response = await api.get('/productos/count', {
+        params: { _t: Date.now() }
+      });
       return response.data;
     } catch (error) {
-      throw new Error(error.response?.data?.message || 'Error obteniendo el conteo de productos');
+      throw new Error(error.message || error.data?.message || 'Error obteniendo el conteo de productos');
     }
   },
 
@@ -154,7 +156,7 @@ export const productService = {
       const response = await api.get(`/productos/${id}`);
       return response.data;
     } catch (error) {
-      throw new Error(error.response?.data?.message || 'Error obteniendo producto');
+      throw new Error(error.message || error.data?.message || 'Error obteniendo producto');
     }
   },
 
@@ -164,7 +166,7 @@ export const productService = {
       const response = await api.get(`/productos/categoria/${categoryId}`);
       return response.data;
     } catch (error) {
-      throw new Error(error.response?.data?.message || 'Error obteniendo productos por categoría');
+      throw new Error(error.message || error.data?.message || 'Error obteniendo productos por categoría');
     }
   },
 
@@ -174,7 +176,7 @@ export const productService = {
       const response = await api.get(`/productos/search?q=${encodeURIComponent(searchTerm)}`);
       return response.data;
     } catch (error) {
-      throw new Error(error.response?.data?.message || 'Error buscando productos');
+      throw new Error(error.message || error.data?.message || 'Error buscando productos');
     }
   },
 
@@ -184,7 +186,7 @@ export const productService = {
       const response = await api.get(`/productos/stock-bajo?min=${minQuantity}`);
       return response.data;
     } catch (error) {
-      throw new Error(error.response?.data?.message || 'Error obteniendo productos con stock bajo');
+      throw new Error(error.message || error.data?.message || 'Error obteniendo productos con stock bajo');
     }
   },
 
@@ -210,7 +212,7 @@ export const productService = {
       const response = await api.post('/productos', dataToSend, { headers });
       return response.data;
     } catch (error) {
-      throw new Error(error.response?.data?.message || 'Error creando producto');
+      throw new Error(error.message || error.data?.message || 'Error creando producto');
     }
   },
 
@@ -235,7 +237,7 @@ export const productService = {
       const response = await api.put(`/productos/${id}`, dataToSend, { headers });
       return response.data;
     } catch (error) {
-      throw new Error(error.response?.data?.message || 'Error actualizando producto');
+      throw new Error(error.message || error.data?.message || 'Error actualizando producto');
     }
   },
 
@@ -245,7 +247,7 @@ export const productService = {
       const response = await api.patch(`/productos/${id}/stock`, { quantity });
       return response.data;
     } catch (error) {
-      throw new Error(error.response?.data?.message || 'Error actualizando stock');
+      throw new Error(error.message || error.data?.message || 'Error actualizando stock');
     }
   },
 
@@ -255,7 +257,7 @@ export const productService = {
       const response = await api.patch(`/productos/${id}/status`, { status });
       return response.data;
     } catch (error) {
-      throw new Error(error.response?.data?.message || 'Error cambiando estado del producto');
+      throw new Error(error.message || error.data?.message || 'Error cambiando estado del producto');
     }
   },
 
@@ -265,7 +267,7 @@ export const productService = {
       const response = await api.post(`/productos/${id}/duplicar`);
       return response.data;
     } catch (error) {
-      throw new Error(error.response?.data?.message || 'Error duplicando producto');
+      throw new Error(error.message || error.data?.message || 'Error duplicando producto');
     }
   },
 
@@ -275,7 +277,7 @@ export const productService = {
       const response = await api.delete(`/productos/${id}`);
       return response.data;
     } catch (error) {
-      throw new Error(error.response?.data?.message || 'Error eliminando producto');
+      throw new Error(error.message || error.data?.message || 'Error eliminando producto');
     }
   }
 };
@@ -288,7 +290,7 @@ export const supplierService = {
       const response = await api.get('/proveedores');
       return response.data;
     } catch (error) {
-      throw new Error(error.response?.data?.message || 'Error obteniendo proveedores');
+      throw new Error(error.message || error.data?.message || 'Error obteniendo proveedores');
     }
   },
 
@@ -298,7 +300,7 @@ export const supplierService = {
       const response = await api.get(`/proveedores/${id}`);
       return response.data;
     } catch (error) {
-      throw new Error(error.response?.data?.message || 'Error obteniendo proveedor');
+      throw new Error(error.message || error.data?.message || 'Error obteniendo proveedor');
     }
   },
 
@@ -308,7 +310,7 @@ export const supplierService = {
       const response = await api.post('/proveedores', supplierData);
       return response.data;
     } catch (error) {
-      throw new Error(error.response?.data?.message || 'Error creando proveedor');
+      throw new Error(error.message || error.data?.message || 'Error creando proveedor');
     }
   },
 
@@ -318,7 +320,7 @@ export const supplierService = {
       const response = await api.put(`/proveedores/${id}`, supplierData);
       return response.data;
     } catch (error) {
-      throw new Error(error.response?.data?.message || 'Error actualizando proveedor');
+      throw new Error(error.message || error.data?.message || 'Error actualizando proveedor');
     }
   },
 
@@ -328,7 +330,7 @@ export const supplierService = {
       const response = await api.delete(`/proveedores/${id}`);
       return response.data;
     } catch (error) {
-      throw new Error(error.response?.data?.message || 'Error eliminando proveedor');
+      throw new Error(error.message || error.data?.message || 'Error eliminando proveedor');
     }
   }
 };
