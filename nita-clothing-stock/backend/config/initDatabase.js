@@ -231,6 +231,7 @@ async function initDatabase() {
                 postal_code VARCHAR(20),
                 country VARCHAR(100),
                 website VARCHAR(255),
+                min_order_amount DECIMAL(10,2) DEFAULT 0,
                 tax_id VARCHAR(100) UNIQUE,
                 payment_terms ENUM('net_15', 'net_30', 'net_45', 'net_60', 'immediate', 'other') DEFAULT 'net_30',
                 notes TEXT,

@@ -123,8 +123,8 @@
   --table-border: #1e3a50;
   --badge-bg: #1a3040;
   --stat-card-bg: #112233;
-  --accent-pink: #f73194;
-  --accent-pink-light: rgba(247, 49, 148, 0.12);
+  --accent-pink: #e754a0;
+  --accent-pink-light: rgba(231, 84, 160, 0.15);
   --accent-blue: #4fc3f7;
   --accent-green: #26a69a;
   --accent-orange: #ffb74d;
@@ -339,30 +339,74 @@ td {
 :root[data-theme="dark"] [style*="background: #fff"],
 :root[data-theme="dark"] [style*="background: rgb(255"],
 :root[data-theme="dark"] [style*="background:#fff"],
+:root[data-theme="dark"] [style*="background: '#ffffff'"],
+:root[data-theme="dark"] [style*="background:'white'"],
 :root[data-theme="blue-dark"] [style*="background: white"],
 :root[data-theme="blue-dark"] [style*="background: #fff"],
 :root[data-theme="blue-dark"] [style*="background: rgb(255"],
-:root[data-theme="blue-dark"] [style*="background:#fff"] {
+:root[data-theme="blue-dark"] [style*="background:#fff"],
+:root[data-theme="blue-dark"] [style*="background: '#ffffff'"],
+:root[data-theme="blue-dark"] [style*="background:'white'"] {
   background: var(--bg-card) !important;
 }
 
-/* Override light gray backgrounds */
+/* Override light gray backgrounds — expanded */
 :root[data-theme="dark"] [style*="background: #f8f9fa"],
 :root[data-theme="dark"] [style*="background: #f8fafc"],
 :root[data-theme="dark"] [style*="background: #f5f6fa"],
 :root[data-theme="dark"] [style*="background: #fafafa"],
+:root[data-theme="dark"] [style*="background: #f1f5f9"],
+:root[data-theme="dark"] [style*="background: #f5f5f5"],
+:root[data-theme="dark"] [style*="background: #f0f2f5"],
+:root[data-theme="dark"] [style*="background: #fafbfc"],
+:root[data-theme="dark"] [style*="background: #eef2f7"],
+:root[data-theme="dark"] [style*="background:'#f1f5f9'"],
+:root[data-theme="dark"] [style*="background: '#f1f5f9'"],
+:root[data-theme="dark"] [style*="background:'#f5f5f5'"],
+:root[data-theme="dark"] [style*="background: '#f5f5f5'"],
+:root[data-theme="dark"] [style*="background:'#f8fafc'"],
+:root[data-theme="dark"] [style*="background: '#f8fafc'"],
 :root[data-theme="blue-dark"] [style*="background: #f8f9fa"],
 :root[data-theme="blue-dark"] [style*="background: #f8fafc"],
 :root[data-theme="blue-dark"] [style*="background: #f5f6fa"],
-:root[data-theme="blue-dark"] [style*="background: #fafafa"] {
+:root[data-theme="blue-dark"] [style*="background: #fafafa"],
+:root[data-theme="blue-dark"] [style*="background: #f1f5f9"],
+:root[data-theme="blue-dark"] [style*="background: #f5f5f5"],
+:root[data-theme="blue-dark"] [style*="background: #f0f2f5"],
+:root[data-theme="blue-dark"] [style*="background: #fafbfc"],
+:root[data-theme="blue-dark"] [style*="background: #eef2f7"],
+:root[data-theme="blue-dark"] [style*="background:'#f1f5f9'"],
+:root[data-theme="blue-dark"] [style*="background: '#f1f5f9'"],
+:root[data-theme="blue-dark"] [style*="background:'#f5f5f5'"],
+:root[data-theme="blue-dark"] [style*="background: '#f5f5f5'"],
+:root[data-theme="blue-dark"] [style*="background:'#f8fafc'"],
+:root[data-theme="blue-dark"] [style*="background: '#f8fafc'"] {
   background: var(--bg-tertiary) !important;
+}
+
+/* Override pink-light backgrounds (badge/status areas) */
+:root[data-theme="dark"] [style*="background: #fff0f7"],
+:root[data-theme="dark"] [style*="background: '#fff0f7'"],
+:root[data-theme="dark"] [style*="background: #ffe0ef"],
+:root[data-theme="dark"] [style*="background: '#ffe0ef'"],
+:root[data-theme="blue-dark"] [style*="background: #fff0f7"],
+:root[data-theme="blue-dark"] [style*="background: '#fff0f7'"],
+:root[data-theme="blue-dark"] [style*="background: #ffe0ef"],
+:root[data-theme="blue-dark"] [style*="background: '#ffe0ef'"] {
+  background: var(--accent-pink-light) !important;
 }
 
 /* Text color overrides */
 :root[data-theme="dark"] [style*="color: #333"],
 :root[data-theme="dark"] [style*="color:#333"],
+:root[data-theme="dark"] [style*="color: #222"],
+:root[data-theme="dark"] [style*="color: '#333'"],
+:root[data-theme="dark"] [style*="color: '#222'"],
 :root[data-theme="blue-dark"] [style*="color: #333"],
-:root[data-theme="blue-dark"] [style*="color:#333"] {
+:root[data-theme="blue-dark"] [style*="color:#333"],
+:root[data-theme="blue-dark"] [style*="color: #222"],
+:root[data-theme="blue-dark"] [style*="color: '#333'"],
+:root[data-theme="blue-dark"] [style*="color: '#222'"] {
   color: var(--text-primary) !important;
 }
 
@@ -370,33 +414,77 @@ td {
 :root[data-theme="dark"] [style*="color:#555"],
 :root[data-theme="dark"] [style*="color: #666"],
 :root[data-theme="dark"] [style*="color:#666"],
+:root[data-theme="dark"] [style*="color: #475569"],
+:root[data-theme="dark"] [style*="color: '#475569'"],
+:root[data-theme="dark"] [style*="color: '#555'"],
+:root[data-theme="dark"] [style*="color: '#666'"],
 :root[data-theme="blue-dark"] [style*="color: #555"],
 :root[data-theme="blue-dark"] [style*="color:#555"],
 :root[data-theme="blue-dark"] [style*="color: #666"],
-:root[data-theme="blue-dark"] [style*="color:#666"] {
+:root[data-theme="blue-dark"] [style*="color:#666"],
+:root[data-theme="blue-dark"] [style*="color: #475569"],
+:root[data-theme="blue-dark"] [style*="color: '#475569'"],
+:root[data-theme="blue-dark"] [style*="color: '#555'"],
+:root[data-theme="blue-dark"] [style*="color: '#666'"] {
   color: var(--text-secondary) !important;
 }
 
 :root[data-theme="dark"] [style*="color: #888"],
 :root[data-theme="dark"] [style*="color: #999"],
+:root[data-theme="dark"] [style*="color: #64748b"],
+:root[data-theme="dark"] [style*="color: '#64748b'"],
+:root[data-theme="dark"] [style*="color: #94a3b8"],
+:root[data-theme="dark"] [style*="color: '#94a3b8'"],
 :root[data-theme="blue-dark"] [style*="color: #888"],
-:root[data-theme="blue-dark"] [style*="color: #999"] {
+:root[data-theme="blue-dark"] [style*="color: #999"],
+:root[data-theme="blue-dark"] [style*="color: #64748b"],
+:root[data-theme="blue-dark"] [style*="color: '#64748b'"],
+:root[data-theme="blue-dark"] [style*="color: #94a3b8"],
+:root[data-theme="blue-dark"] [style*="color: '#94a3b8'"] {
   color: var(--text-muted) !important;
 }
 
-/* Border overrides */
+/* Border overrides — expanded */
 :root[data-theme="dark"] [style*="border-color: #e0e0e0"],
 :root[data-theme="dark"] [style*="border-color: #eee"],
 :root[data-theme="dark"] [style*="border-color: #ddd"],
+:root[data-theme="dark"] [style*="border: 1px solid #e2e8f0"],
+:root[data-theme="dark"] [style*="border: 1px solid #f1f5f9"],
+:root[data-theme="dark"] [style*="border: 2px solid #e2e8f0"],
+:root[data-theme="dark"] [style*="border: 2px dashed #e2e8f0"],
 :root[data-theme="blue-dark"] [style*="border-color: #e0e0e0"],
 :root[data-theme="blue-dark"] [style*="border-color: #eee"],
-:root[data-theme="blue-dark"] [style*="border-color: #ddd"] {
+:root[data-theme="blue-dark"] [style*="border-color: #ddd"],
+:root[data-theme="blue-dark"] [style*="border: 1px solid #e2e8f0"],
+:root[data-theme="blue-dark"] [style*="border: 1px solid #f1f5f9"],
+:root[data-theme="blue-dark"] [style*="border: 2px solid #e2e8f0"],
+:root[data-theme="blue-dark"] [style*="border: 2px dashed #e2e8f0"] {
+  border-color: var(--border-color) !important;
+}
+
+/* borderBottom / borderTop inline overrides */
+:root[data-theme="dark"] [style*="border-bottom: 1px solid #f1f5f9"],
+:root[data-theme="dark"] [style*="border-top: 1px solid #f1f5f9"],
+:root[data-theme="dark"] [style*="borderBottom: 1px solid #f1f5f9"],
+:root[data-theme="dark"] [style*="borderTop: 1px solid #f1f5f9"],
+:root[data-theme="dark"] [style*="border-right: 1px solid #f1f5f9"],
+:root[data-theme="dark"] [style*="borderRight: 1px solid #f1f5f9"],
+:root[data-theme="blue-dark"] [style*="border-bottom: 1px solid #f1f5f9"],
+:root[data-theme="blue-dark"] [style*="border-top: 1px solid #f1f5f9"],
+:root[data-theme="blue-dark"] [style*="borderBottom: 1px solid #f1f5f9"],
+:root[data-theme="blue-dark"] [style*="borderTop: 1px solid #f1f5f9"],
+:root[data-theme="blue-dark"] [style*="border-right: 1px solid #f1f5f9"],
+:root[data-theme="blue-dark"] [style*="borderRight: 1px solid #f1f5f9"] {
   border-color: var(--border-color) !important;
 }
 
 /* Gradient overrides */
 :root[data-theme="dark"] [style*="linear-gradient(135deg, #f5f7fa"],
-:root[data-theme="blue-dark"] [style*="linear-gradient(135deg, #f5f7fa"] {
+:root[data-theme="dark"] [style*="linear-gradient(135deg, #fff0f7"],
+:root[data-theme="dark"] [style*="linear-gradient(135deg, #ffe0ef"],
+:root[data-theme="blue-dark"] [style*="linear-gradient(135deg, #f5f7fa"],
+:root[data-theme="blue-dark"] [style*="linear-gradient(135deg, #fff0f7"],
+:root[data-theme="blue-dark"] [style*="linear-gradient(135deg, #ffe0ef"] {
   background: var(--bg-gradient) !important;
 }
 
@@ -841,4 +929,188 @@ tr {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M6 8L1 3h10z' fill='%237878a0'/%3E%3C/svg%3E");
   border-color: var(--border-color) !important;
   color: var(--text-primary) !important;
+}
+
+/* ========================================
+   COMPONENT-SPECIFIC DARK OVERRIDES
+   Targets elements using CSS-in-JS <style> blocks
+   and embedded styles in component files
+   ======================================== */
+
+/* ---- No-Image Placeholder (Products) ---- */
+:root[data-theme="dark"] .no-image-placeholder-premium,
+:root[data-theme="blue-dark"] .no-image-placeholder-premium {
+  background: var(--bg-tertiary) !important;
+}
+
+/* ---- Product Card Premium ---- */
+:root[data-theme="dark"] .product-card-premium,
+:root[data-theme="blue-dark"] .product-card-premium {
+  background: var(--bg-card) !important;
+  border-color: var(--border-color) !important;
+  box-shadow: var(--shadow) !important;
+}
+
+:root[data-theme="dark"] .product-card-premium:hover,
+:root[data-theme="blue-dark"] .product-card-premium:hover {
+  box-shadow: var(--shadow-hover) !important;
+}
+
+/* ---- Category Cards ---- */
+:root[data-theme="dark"] .category-card,
+:root[data-theme="blue-dark"] .category-card {
+  background: var(--bg-card) !important;
+  border-color: var(--border-color) !important;
+  box-shadow: var(--shadow) !important;
+}
+
+:root[data-theme="dark"] .categories-header,
+:root[data-theme="blue-dark"] .categories-header {
+  background: var(--bg-card) !important;
+}
+
+/* ---- Dashboard Category Items ---- */
+:root[data-theme="dark"] .category-item,
+:root[data-theme="blue-dark"] .category-item {
+  background: var(--bg-card) !important;
+  border-color: var(--border-color) !important;
+}
+
+:root[data-theme="dark"] .category-item:hover,
+:root[data-theme="blue-dark"] .category-item:hover {
+  background: var(--bg-hover) !important;
+}
+
+/* ---- Form Containers ---- */
+:root[data-theme="dark"] .form-container,
+:root[data-theme="blue-dark"] .form-container {
+  background: var(--bg-card) !important;
+}
+
+/* ---- Pricing Section Box ---- */
+:root[data-theme="dark"] .pricing-section,
+:root[data-theme="blue-dark"] .pricing-section {
+  background: var(--bg-tertiary) !important;
+  border-color: var(--border-color) !important;
+}
+
+/* ---- Chart Containers ---- */
+:root[data-theme="dark"] .chart-container,
+:root[data-theme="blue-dark"] .chart-container {
+  background: var(--bg-card) !important;
+  box-shadow: var(--shadow) !important;
+}
+
+/* ---- Orders Table ---- */
+:root[data-theme="dark"] .orders-table,
+:root[data-theme="blue-dark"] .orders-table {
+  background: var(--bg-card) !important;
+}
+
+/* ---- Various Card-like containers ---- */
+:root[data-theme="dark"] .info-card,
+:root[data-theme="blue-dark"] .info-card {
+  background: var(--bg-card) !important;
+  border-color: var(--border-color) !important;
+}
+
+/* ---- Inline CSS background override for #e2e8f0 (used in Dashboard progress bars) ---- */
+:root[data-theme="dark"] [style*="background: #e2e8f0"],
+:root[data-theme="dark"] [style*="background:#e2e8f0"],
+:root[data-theme="blue-dark"] [style*="background: #e2e8f0"],
+:root[data-theme="blue-dark"] [style*="background:#e2e8f0"] {
+  background: var(--bg-tertiary) !important;
+}
+
+/* ---- Container flex items with white hardcoded ---- */
+:root[data-theme="dark"] [style*="borderBottom: '1px solid #f1f5f9'"],
+:root[data-theme="dark"] [style*="borderTop: '1px solid #f1f5f9'"],
+:root[data-theme="dark"] [style*="borderRight: '1px solid #f1f5f9'"],
+:root[data-theme="blue-dark"] [style*="borderBottom: '1px solid #f1f5f9'"],
+:root[data-theme="blue-dark"] [style*="borderTop: '1px solid #f1f5f9'"],
+:root[data-theme="blue-dark"] [style*="borderRight: '1px solid #f1f5f9'"] {
+  border-color: var(--border-color) !important;
+}
+
+/* ---- Toggle switch backgrounds ---- */
+:root[data-theme="dark"] [style*="border: '4px solid #f1f5f9'"],
+:root[data-theme="blue-dark"] [style*="border: '4px solid #f1f5f9'"] {
+  border-color: var(--border-color) !important;
+}
+
+/* ---- Tab Buttons inactive state ---- */
+:root[data-theme="dark"] .tab-btn,
+:root[data-theme="blue-dark"] .tab-btn {
+  background: var(--bg-tertiary) !important;
+  color: var(--text-secondary) !important;
+}
+
+:root[data-theme="dark"] .tab-btn.active,
+:root[data-theme="blue-dark"] .tab-btn.active {
+  background: var(--accent-pink) !important;
+  color: white !important;
+}
+
+/* ---- Cancel Buttons (white bg) ---- */
+:root[data-theme="dark"] button[style*="background: 'white'"],
+:root[data-theme="dark"] button[style*="background: white"],
+:root[data-theme="blue-dark"] button[style*="background: 'white'"],
+:root[data-theme="blue-dark"] button[style*="background: white"] {
+  background: var(--bg-tertiary) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-color) !important;
+}
+
+/* ---- Inline Box Shadows fix: replace light shadows with dark-appropriate ones ---- */
+:root[data-theme="dark"] [style*="box-shadow: 0 2px 8px rgba(0,0,0,0.08)"],
+:root[data-theme="dark"] [style*="box-shadow: 0 2px 8px rgba(0,0,0,0.1)"],
+:root[data-theme="dark"] [style*="box-shadow: 0 2px 4px rgba(0,0,0,0.1)"],
+:root[data-theme="blue-dark"] [style*="box-shadow: 0 2px 8px rgba(0,0,0,0.08)"],
+:root[data-theme="blue-dark"] [style*="box-shadow: 0 2px 8px rgba(0,0,0,0.1)"],
+:root[data-theme="blue-dark"] [style*="box-shadow: 0 2px 4px rgba(0,0,0,0.1)"] {
+  box-shadow: var(--shadow) !important;
+}
+
+/* ---- Global div/section white bg catch-all with !important ---- */
+:root[data-theme="dark"] div[style*="background: white"],
+:root[data-theme="dark"] div[style*="background:'white'"],
+:root[data-theme="dark"] section[style*="background: white"],
+:root[data-theme="blue-dark"] div[style*="background: white"],
+:root[data-theme="blue-dark"] div[style*="background:'white'"],
+:root[data-theme="blue-dark"] section[style*="background: white"] {
+  background: var(--bg-card) !important;
+}
+
+/* ---- Hardcoded Pink Overrides ( catch legacy code ) ---- */
+:root[data-theme="dark"] [style*="color: #f73194"],
+:root[data-theme="dark"] [style*="color: '#f73194'"],
+:root[data-theme="blue-dark"] [style*="color: #f73194"],
+:root[data-theme="blue-dark"] [style*="color: '#f73194'"] {
+  color: var(--accent-pink) !important;
+}
+
+:root[data-theme="dark"] [style*="background: #f73194"],
+:root[data-theme="dark"] [style*="background: '#f73194'"],
+:root[data-theme="blue-dark"] [style*="background: #f73194"],
+:root[data-theme="blue-dark"] [style*="background: '#f73194'"] {
+  background: var(--accent-pink) !important;
+}
+
+:root[data-theme="dark"] [style*="border: 2px solid #f73194"],
+:root[data-theme="dark"] [style*="border: 1px solid #f73194"],
+:root[data-theme="dark"] [style*="borderColor: '#f73194'"],
+:root[data-theme="dark"] [style*="border-color: #f73194"],
+:root[data-theme="blue-dark"] [style*="border: 2px solid #f73194"],
+:root[data-theme="blue-dark"] [style*="border: 1px solid #f73194"],
+:root[data-theme="blue-dark"] [style*="borderColor: '#f73194'"],
+:root[data-theme="blue-dark"] [style*="border-color: #f73194"] {
+  border-color: var(--accent-pink) !important;
+}
+
+/* Fix borderColor on styled React elements */
+:root[data-theme="dark"] [style*="borderLeftColor: '#f73194'"],
+:root[data-theme="dark"] [style*="borderLeftColor: #f73194"],
+:root[data-theme="blue-dark"] [style*="borderLeftColor: '#f73194'"],
+:root[data-theme="blue-dark"] [style*="borderLeftColor: #f73194"] {
+  border-left-color: var(--accent-pink) !important;
 }

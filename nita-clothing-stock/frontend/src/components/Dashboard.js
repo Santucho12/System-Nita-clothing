@@ -70,12 +70,10 @@ const Dashboard = () => {
   };
 
   if (loading) {
-    return (
-      <div style={{ textAlign: 'center', padding: '40px' }}>
-        <div style={{ fontSize: '2em', color: '#f73194' }}>⏳</div>
-        <p>Cargando dashboard...</p>
-      </div>
-    );
+    <div style={{ textAlign: 'center', padding: '100px 40px', background: 'var(--bg-secondary)', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ width: '50px', height: '50px', border: '5px solid var(--accent-pink-light)', borderTopColor: 'var(--accent-pink)', borderRadius: '50%', animation: 'spin 1.2s linear infinite' }}></div>
+      <p style={{ marginTop: '20px', color: 'var(--text-muted)', fontWeight: '600', fontSize: '18px' }}>Cargando dashboard...</p>
+    </div>
   }
 
   return (
@@ -140,13 +138,13 @@ const Dashboard = () => {
             margin: 0 0 2px 0;
             font-size: 24px;
             font-weight: 800;
-            color: #f73194;
+            color: var(--accent-pink);
           }
 
           .stat-label {
             margin: 0;
             font-size: 11px;
-            color: #64748b;
+            color: var(--text-muted);
             font-weight: 700;
             letter-spacing: 0.05em;
             text-transform: uppercase;
@@ -166,7 +164,7 @@ const Dashboard = () => {
             justify-content: center;
             gap: 8px;
             text-decoration: none;
-            color: #f73194;
+            color: var(--accent-pink);
             font-weight: 700;
             font-size: 13px;
             width: 100%;
@@ -175,7 +173,7 @@ const Dashboard = () => {
           }
 
           .stat-footer-link:hover {
-            background: #e2e8f0;
+            background: var(--bg-hover);
           }
 
           .top-products-section {
@@ -196,15 +194,15 @@ const Dashboard = () => {
           }
 
           .btn-pink {
-            background: #f73194;
+            background: var(--accent-pink);
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             border-radius: 12px !important;
           }
 
           .btn-pink:hover {
-            background: #d6237c !important;
+            background: var(--accent-pink-dark, #d6237c) !important;
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(247, 49, 148, 0.3);
+            box-shadow: 0 4px 12px var(--accent-pink-light);
           }
 
           .btn-gray {
@@ -216,9 +214,9 @@ const Dashboard = () => {
           }
 
           .btn-gray:hover {
-            background: #e2e8f0 !important;
-            border-color: #cbd5e1 !important;
-            color: #1e293b !important;
+            background: var(--bg-hover) !important;
+            border-color: var(--border-color) !important;
+            color: var(--text-primary) !important;
             transform: translateY(-2px);
           }
 
@@ -228,7 +226,7 @@ const Dashboard = () => {
 
           .product-item:hover {
             transform: translateX(5px);
-            background: #ffeef8 !important;
+            background: var(--bg-hover) !important;
           }
         `}
       </style>
@@ -251,8 +249,8 @@ const Dashboard = () => {
         {/* Fila 1: Badge + Fecha */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <div style={{
-            background: '#fff0f7',
-            color: '#f73194',
+            background: 'var(--accent-pink-light)',
+            color: 'var(--accent-pink)',
             padding: '6px 16px',
             borderRadius: '100px',
             fontSize: '11px',
@@ -265,8 +263,8 @@ const Dashboard = () => {
             <FaChartBar style={{ fontSize: '14px' }} />
             SISTEMA ACTIVO
           </div>
-          <span style={{ color: '#cbd5e1', fontSize: '18px' }}>•</span>
-          <span style={{ color: '#64748b', fontSize: '14px', fontWeight: '500' }}>
+          <span style={{ color: 'var(--border-color)', fontSize: '18px' }}>•</span>
+          <span style={{ color: 'var(--text-muted)', fontSize: '14px', fontWeight: '500' }}>
             {new Date().toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })}
           </span>
         </div>
@@ -276,11 +274,11 @@ const Dashboard = () => {
           <h1 style={{
             margin: 0,
             fontSize: '42px',
-            color: '#1e293b',
+            color: 'var(--text-heading)',
             fontWeight: '850',
             letterSpacing: '-0.02em'
           }}>
-            Hola, <span style={{ color: '#f73194' }}>Nita Clothing</span> <span style={{ display: 'inline-block', animation: 'waveHand 2.5s infinite', transformOrigin: '70% 70%' }}>👋</span>
+            Hola, <span style={{ color: 'var(--accent-pink)' }}>Nita Clothing</span> <span style={{ display: 'inline-block', animation: 'waveHand 2.5s infinite', transformOrigin: '70% 70%' }}>👋</span>
           </h1>
         </div>
 
@@ -288,7 +286,7 @@ const Dashboard = () => {
         <p style={{
           margin: 0,
           fontSize: '17px',
-          color: '#64748b',
+          color: 'var(--text-muted)',
           fontWeight: '500',
           maxWidth: '850px',
           lineHeight: '1.5'
@@ -318,7 +316,7 @@ const Dashboard = () => {
         <div className="stat-card" style={{ animationDelay: '0.1s' }}>
           <div className="stat-card-body">
             <div className="stat-icon-wrapper">
-              <FaTshirt style={{ fontSize: '20px', color: '#f73194' }} />
+              <FaTshirt style={{ fontSize: '20px', color: 'var(--accent-pink)' }} />
             </div>
             <h3 className="stat-value">{stats.totalProducts}</h3>
             <p className="stat-label">TOTAL PRODUCTOS</p>
@@ -335,7 +333,7 @@ const Dashboard = () => {
         <div className="stat-card" style={{ animationDelay: '0.2s' }}>
           <div className="stat-card-body">
             <div className="stat-icon-wrapper">
-              <FaStore style={{ fontSize: '20px', color: '#f73194' }} />
+              <FaStore style={{ fontSize: '20px', color: 'var(--accent-pink)' }} />
             </div>
             <h3 className="stat-value">{formatCurrency(stats.inventoryValue || 0)}</h3>
             <p className="stat-label">CAPITAL EN ROPA</p>
@@ -352,7 +350,7 @@ const Dashboard = () => {
         <div className="stat-card" style={{ animationDelay: '0.3s' }}>
           <div className="stat-card-body">
             <div className="stat-icon-wrapper">
-              <FaShoppingCart style={{ fontSize: '20px', color: '#f73194' }} />
+              <FaShoppingCart style={{ fontSize: '20px', color: 'var(--accent-pink)' }} />
             </div>
             <h3 className="stat-value">{formatInteger(stats.monthlySales)}</h3>
             <p className="stat-label">VENTAS DEL MES</p>
@@ -369,7 +367,7 @@ const Dashboard = () => {
         <div className="stat-card" style={{ animationDelay: '0.4s' }}>
           <div className="stat-card-body">
             <div className="stat-icon-wrapper">
-              <FaDollarSign style={{ fontSize: '20px', color: '#f73194' }} />
+              <FaDollarSign style={{ fontSize: '20px', color: 'var(--accent-pink)' }} />
             </div>
             <h3 className="stat-value">{formatCurrency(stats.monthlyRevenue || 0)}</h3>
             <p className="stat-label">FACTURACIÓN DEL MES</p>
@@ -385,10 +383,10 @@ const Dashboard = () => {
 
       {/* Categorías más vendidas del mes */}
       {topCategories.length > 0 && (
-        <div className="top-categories-section" style={{ background: 'white', borderRadius: '12px', padding: '20px 30px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', marginBottom: '30px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px', paddingBottom: '10px', borderBottom: '2px solid #f0f0f0' }}>
-            <h2 style={{ margin: 0, fontSize: '24px', fontWeight: '600', color: '#333', display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <FaTrophy style={{ color: '#f73194', fontSize: '28px' }} />
+        <div className="top-categories-section" style={{ background: 'var(--bg-card)', borderRadius: '12px', padding: '20px 30px', boxShadow: 'var(--shadow)', marginBottom: '30px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px', paddingBottom: '10px', borderBottom: '2px solid var(--border-color)' }}>
+            <h2 style={{ margin: 0, fontSize: '24px', fontWeight: '600', color: 'var(--text-heading)', display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <FaTrophy style={{ color: 'var(--accent-pink)', fontSize: '28px' }} />
               Categorías Más Vendidas del Mes
             </h2>
             <Link
@@ -410,9 +408,9 @@ const Dashboard = () => {
                   display: 'flex',
                   alignItems: 'center',
                   padding: '14px 20px',
-                  background: '#f8f9fa',
+                  background: 'var(--bg-tertiary)',
                   borderRadius: '10px',
-                  border: '1px solid #e9ecef',
+                  border: '1px solid var(--border-color)',
                   gap: '20px'
                 }}
               >
@@ -435,19 +433,19 @@ const Dashboard = () => {
 
                 {/* Categoría Info */}
                 <div style={{ flex: 1 }}>
-                  <h4 style={{ margin: '0 0 8px 0', fontSize: '18px', fontWeight: '600', color: '#333' }}>{category.category_name}</h4>
-                  <p style={{ margin: '0 0 10px 0', fontSize: '14px', color: '#666', display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                  <h4 style={{ margin: '0 0 8px 0', fontSize: '18px', fontWeight: '600', color: 'var(--text-heading)' }}>{category.category_name}</h4>
+                  <p style={{ margin: '0 0 10px 0', fontSize: '14px', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
                     <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                      <FaTshirt style={{ color: '#f73194' }} />
+                      <FaTshirt style={{ color: 'var(--accent-pink)' }} />
                       {category.products_count} productos
                     </span>
                   </p>
                   <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 12px', background: '#e3f2fd', color: '#2196F3', borderRadius: '6px', fontSize: '13px', fontWeight: '600' }}>
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 12px', background: 'var(--bg-tertiary)', color: 'var(--text-primary)', borderRadius: '6px', fontSize: '13px', fontWeight: '600' }}>
                       <FaBox />
                       {formatInteger(category.total_quantity)} vendidos
                     </span>
-                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 12px', background: '#f3e5f5', color: '#f73194', borderRadius: '6px', fontSize: '13px', fontWeight: '600' }}>
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 12px', background: 'var(--accent-pink-light)', color: 'var(--accent-pink)', borderRadius: '6px', fontSize: '13px', fontWeight: '600' }}>
                       <FaMoneyBillWave />
                       {formatCurrency(category.total_revenue)} generados
                     </span>
@@ -469,7 +467,7 @@ const Dashboard = () => {
                     fontSize: '14px',
                     fontWeight: '750',
                     whiteSpace: 'nowrap',
-                    boxShadow: '0 4px 14px rgba(247,49,148,0.2)'
+                    boxShadow: '0 4px 14px var(--accent-pink-light)'
                   }}
                 >
                   Ver Categoría
@@ -482,8 +480,8 @@ const Dashboard = () => {
       )}
 
       {/* Acciones rápidas */}
-      <div className="quick-actions-section" style={{ background: 'white', borderRadius: '12px', padding: '20px 30px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
-        <h2 style={{ margin: '0 0 25px 0', fontSize: '24px', fontWeight: '600', color: '#333', display: 'flex', alignItems: 'center', gap: '10px', paddingBottom: '10px', borderBottom: '2px solid #f0f0f0' }}>
+      <div className="quick-actions-section" style={{ background: 'var(--bg-card)', borderRadius: '12px', padding: '20px 30px', boxShadow: 'var(--shadow)' }}>
+        <h2 style={{ margin: '0 0 25px 0', fontSize: '24px', fontWeight: '600', color: 'var(--text-heading)', display: 'flex', alignItems: 'center', gap: '10px', paddingBottom: '10px', borderBottom: '2px solid var(--border-color)' }}>
           <FaBolt style={{ color: '#f59e0b', fontSize: '28px' }} />
           Acciones Rápidas
         </h2>
@@ -497,27 +495,27 @@ const Dashboard = () => {
               display: 'flex',
               alignItems: 'center',
               padding: '17px 28px',
-              background: 'white',
+              background: 'var(--bg-card)',
               borderRadius: '24px',
               textDecoration: 'none',
-              border: '1px solid #f1f5f9',
+              border: '1px solid var(--border-color)',
               boxShadow: '0 4px 20px rgba(0,0,0,0.03)',
               gap: '20px',
               transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
             }}
           >
             <div style={{
-              background: '#fff0f7',
+              background: 'var(--accent-pink-light)',
               width: '56px', height: '56px', borderRadius: '18px',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               flexShrink: 0,
-              boxShadow: '0 4px 12px rgba(247,49,148,0.1)'
+              boxShadow: '0 4px 12px var(--accent-pink-light)'
             }}>
-              <FaShoppingCart style={{ fontSize: '24px', color: '#f73194' }} />
+              <FaShoppingCart style={{ fontSize: '24px', color: 'var(--accent-pink)' }} />
             </div>
             <div style={{ flex: 1 }}>
-              <h3 style={{ margin: '0 0 4px 0', fontSize: '18px', fontWeight: '850', color: '#1e293b', letterSpacing: '-0.01em' }}>Nueva Venta</h3>
-              <p style={{ margin: 0, fontSize: '13px', color: '#64748b', fontWeight: '500', lineHeight: '1.4' }}>Registrar una venta ahora</p>
+              <h3 style={{ margin: '0 0 4px 0', fontSize: '18px', fontWeight: '850', color: 'var(--text-heading)', letterSpacing: '-0.01em' }}>Nueva Venta</h3>
+              <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-muted)', fontWeight: '500', lineHeight: '1.4' }}>Registrar una venta ahora</p>
             </div>
             <FaChevronRight style={{ color: '#cbd5e1', fontSize: '14px' }} />
           </Link>
@@ -530,27 +528,27 @@ const Dashboard = () => {
               display: 'flex',
               alignItems: 'center',
               padding: '17px 28px',
-              background: 'white',
+              background: 'var(--bg-card)',
               borderRadius: '24px',
               textDecoration: 'none',
-              border: '1px solid #f1f5f9',
+              border: '1px solid var(--border-color)',
               boxShadow: '0 4px 20px rgba(0,0,0,0.03)',
               gap: '20px',
               transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
             }}
           >
             <div style={{
-              background: '#fff0f7',
+              background: 'var(--accent-pink-light)',
               width: '56px', height: '56px', borderRadius: '18px',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               flexShrink: 0,
-              boxShadow: '0 4px 12px rgba(247,49,148,0.1)'
+              boxShadow: '0 4px 12px var(--accent-pink-light)'
             }}>
-              <FaPlus style={{ fontSize: '24px', color: '#f73194' }} />
+              <FaPlus style={{ fontSize: '24px', color: 'var(--accent-pink)' }} />
             </div>
             <div style={{ flex: 1 }}>
-              <h3 style={{ margin: '0 0 4px 0', fontSize: '18px', fontWeight: '850', color: '#1e293b', letterSpacing: '-0.01em' }}>Nuevo Producto</h3>
-              <p style={{ margin: 0, fontSize: '13px', color: '#64748b', fontWeight: '500', lineHeight: '1.4' }}>Agregar producto al stock</p>
+              <h3 style={{ margin: '0 0 4px 0', fontSize: '18px', fontWeight: '850', color: 'var(--text-heading)', letterSpacing: '-0.01em' }}>Nuevo Producto</h3>
+              <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-muted)', fontWeight: '500', lineHeight: '1.4' }}>Agregar producto al stock</p>
             </div>
             <FaChevronRight style={{ color: '#cbd5e1', fontSize: '14px' }} />
           </Link>
@@ -563,27 +561,27 @@ const Dashboard = () => {
               display: 'flex',
               alignItems: 'center',
               padding: '17px 28px',
-              background: 'white',
+              background: 'var(--bg-card)',
               borderRadius: '24px',
               textDecoration: 'none',
-              border: '1px solid #f1f5f9',
+              border: '1px solid var(--border-color)',
               boxShadow: '0 4px 20px rgba(0,0,0,0.03)',
               gap: '20px',
               transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
             }}
           >
             <div style={{
-              background: '#fff0f7',
+              background: 'var(--accent-pink-light)',
               width: '56px', height: '56px', borderRadius: '18px',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               flexShrink: 0,
-              boxShadow: '0 4px 12px rgba(247,49,148,0.1)'
+              boxShadow: '0 4px 12px var(--accent-pink-light)'
             }}>
-              <FaUsers style={{ fontSize: '24px', color: '#f73194' }} />
+              <FaUsers style={{ fontSize: '24px', color: 'var(--accent-pink)' }} />
             </div>
             <div style={{ flex: 1 }}>
-              <h3 style={{ margin: '0 0 4px 0', fontSize: '18px', fontWeight: '850', color: '#1e293b', letterSpacing: '-0.01em' }}>Clientes</h3>
-              <p style={{ margin: 0, fontSize: '13px', color: '#64748b', fontWeight: '500', lineHeight: '1.4' }}>Base de datos de clientes</p>
+              <h3 style={{ margin: '0 0 4px 0', fontSize: '18px', fontWeight: '850', color: 'var(--text-heading)', letterSpacing: '-0.01em' }}>Clientes</h3>
+              <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-muted)', fontWeight: '500', lineHeight: '1.4' }}>Base de datos de clientes</p>
             </div>
             <FaChevronRight style={{ color: '#cbd5e1', fontSize: '14px' }} />
           </Link>

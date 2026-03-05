@@ -1,9 +1,9 @@
 :root {
   --glass-bg: rgba(255, 255, 255, 0.7);
   --glass-border: rgba(255, 255, 255, 0.3);
-  --pink-gradient: linear-gradient(135deg, #f73194 0%, #ff69b4 100%);
-  --blue-gradient: linear-gradient(135deg, #2196F3 0%, #00bcd4 100%);
-  --gold-gradient: linear-gradient(135deg, #d4af37 0%, #f9d71c 100%);
+  --pink-gradient: var(--accent-pink);
+  --blue-gradient: #2196F3;
+  --gold-gradient: #d4af37;
 }
 
 [data-theme="dark"] :root {
@@ -95,7 +95,7 @@
 }
 
 .header-icon-wrapper {
-  background: var(--pink-gradient);
+  background: var(--accent-pink);
   width: 50px;
   height: 50px;
   border-radius: 12px;
@@ -111,10 +111,7 @@
   margin: 0;
   font-size: 28px;
   font-weight: 700;
-  background: var(--pink-gradient);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: var(--accent-pink);
 }
 
 /* Buttons */
@@ -132,9 +129,9 @@
 }
 
 .premium-btn-primary {
-  background: var(--pink-gradient);
+  background: var(--accent-pink);
   color: white;
-  box-shadow: 0 4px 15px rgba(247, 49, 148, 0.2);
+  box-shadow: 0 4px 14px rgba(247, 49, 148, 0.3);
 }
 
 .premium-btn-secondary {
@@ -212,7 +209,7 @@
 
 .card-top-accent {
   height: 3px;
-  background: var(--pink-gradient);
+  background: var(--accent-pink);
   width: 100%;
 }
 
@@ -338,21 +335,21 @@
 }
 
 .segment-vip {
-  background: rgba(40, 167, 69, 0.1);
+  background: rgba(40, 167, 69, 0.2);
   color: #28a745;
   border: 1px solid rgba(40, 167, 69, 0.3);
 }
 
 .segment-regular {
-  background: rgba(255, 193, 7, 0.1);
-  color: #d39e00;
-  border: 1px solid rgba(255, 193, 7, 0.3);
+  background: rgba(245, 166, 35, 0.2);
+  color: #f5a623;
+  border: 1px solid rgba(245, 166, 35, 0.3);
 }
 
 .segment-new {
-  background: rgba(220, 53, 69, 0.1);
-  color: #dc3545;
-  border: 1px solid rgba(220, 53, 69, 0.3);
+  background: rgba(232, 85, 94, 0.2);
+  color: #e8555e;
+  border: 1px solid rgba(232, 85, 94, 0.3);
 }
 
 /* Modal Styling */
@@ -400,7 +397,7 @@
 }
 
 .modal-header-hero {
-  background: var(--pink-gradient);
+  background: var(--accent-pink);
   padding: 40px;
   color: white;
   position: relative;

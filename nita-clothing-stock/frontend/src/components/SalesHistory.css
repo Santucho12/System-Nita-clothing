@@ -434,6 +434,10 @@
   font-size: 16px;
   font-weight: 700;
   color: var(--text-heading);
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* Products Table in Modal */

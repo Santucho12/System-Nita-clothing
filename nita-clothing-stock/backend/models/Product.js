@@ -7,7 +7,7 @@ class Product {
      * @returns {Promise<number>}
      */
     static async getFilteredCount(filters = {}) {
-        let sql = 'SELECT COUNT(*) AS total FROM productos WHERE 1=1';
+        let sql = 'SELECT COUNT(*) AS total FROM productos WHERE deleted_at IS NULL';
         const params = [];
         if (filters.nombre) {
             sql += ' AND nombre LIKE ?';
@@ -52,7 +52,7 @@ class Product {
 
     // Contar total de productos activos
     static async getCount() {
-        const [rows] = await db.query("SELECT COUNT(*) AS total FROM productos WHERE estado = 'activo'");
+        const [rows] = await db.query("SELECT COUNT(*) AS total FROM productos WHERE estado = 'activo' AND deleted_at IS NULL");
         return rows[0]?.total || 0;
     }
     // Obtener el último SKU numérico
@@ -138,7 +138,7 @@ class Product {
 
     // Obtener todos los productos
     static async getAll() {
-        const [rows] = await db.query('SELECT * FROM productos');
+        const [rows] = await db.query('SELECT * FROM productos WHERE deleted_at IS NULL');
         return rows.map(p => {
             return { ...p, images: Product.parseImages(p.imagen_url) };
         });
@@ -154,7 +154,7 @@ class Product {
     // Buscar productos por nombre o SKU
     static async search(query) {
         const [rows] = await db.query(
-            `SELECT * FROM productos WHERE nombre LIKE ? OR codigo LIKE ?`,
+            `SELECT * FROM productos WHERE (nombre LIKE ? OR codigo LIKE ?) AND deleted_at IS NULL`,
             [`%${query}%`, `%${query}%`]
         );
         return rows.map(p => ({ ...p, images: Product.parseImages(p.imagen_url) }));
@@ -162,19 +162,19 @@ class Product {
 
     // Filtrar por categoría
     static async getByCategory(categoryId) {
-        const [rows] = await db.query('SELECT * FROM productos WHERE categoria_id = ?', [categoryId]);
+        const [rows] = await db.query('SELECT * FROM productos WHERE categoria_id = ? AND deleted_at IS NULL', [categoryId]);
         return rows.map(p => ({ ...p, images: Product.parseImages(p.imagen_url) }));
     }
 
     // Productos con stock bajo
     static async getLowStock() {
-        const [rows] = await db.query('SELECT * FROM productos WHERE stock < stock_minimo AND stock > 0');
+        const [rows] = await db.query('SELECT * FROM productos WHERE stock < stock_minimo AND stock > 0 AND deleted_at IS NULL');
         return rows.map(p => ({ ...p, images: Product.parseImages(p.imagen_url) }));
     }
 
     // Productos sin stock
     static async getOutOfStock() {
-        const [rows] = await db.query('SELECT * FROM productos WHERE stock <= 0');
+        const [rows] = await db.query('SELECT * FROM productos WHERE stock <= 0 AND deleted_at IS NULL');
         return rows.map(p => ({ ...p, images: Product.parseImages(p.imagen_url) }));
     }
 
@@ -203,10 +203,10 @@ class Product {
         return this.getById(id);
     }
 
-    // Eliminar producto (soft delete: stock=0, estado=descontinuado)
+    // Eliminar producto (soft delete: stock=0, estado=descontinuado, deleted_at=NOW())
     static async delete(id) {
         await db.query(
-            "UPDATE productos SET stock = 0, estado = 'descontinuado', updated_at = NOW() WHERE id = ?",
+            "UPDATE productos SET stock = 0, estado = 'descontinuado', deleted_at = NOW(), updated_at = NOW() WHERE id = ?",
             [id]
         );
         return true;
@@ -312,7 +312,7 @@ class Product {
      * @returns {Promise<boolean>} true si existe, false si no
      */
     static async checkSkuExists(codigo, excludeId = null) {
-        let sql = 'SELECT COUNT(*) AS total FROM productos WHERE codigo = ?';
+        let sql = 'SELECT COUNT(*) AS total FROM productos WHERE codigo = ? AND deleted_at IS NULL';
         const params = [codigo];
         if (excludeId) {
             sql += ' AND id != ?';

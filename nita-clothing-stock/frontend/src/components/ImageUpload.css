@@ -24,9 +24,9 @@
 }
 
 .upload-label:hover {
-  background: var(--accent-blue);
-  color: white;
-  border-color: var(--accent-blue);
+  background: var(--accent-pink-light);
+  color: var(--accent-pink);
+  border-color: var(--accent-pink);
   transform: scale(1.02);
 }
 
@@ -74,7 +74,7 @@
   position: absolute;
   top: 0.5rem;
   right: 0.5rem;
-  background: rgba(220, 53, 69, 0.9);
+  background: var(--accent-pink);
   color: white;
   border: none;
   border-radius: 50%;
@@ -95,7 +95,7 @@
 .upload-button {
   width: 100%;
   padding: 0.9rem;
-  background: var(--accent-green);
+  background: var(--accent-pink);
   color: white;
   border: none;
   border-radius: 6px;
@@ -110,9 +110,9 @@
 }
 
 .upload-button:hover:not(:disabled) {
-  background: #218838;
+  background: var(--accent-pink-dark, #d42079);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+  box-shadow: 0 4px 12px var(--accent-pink-light);
 }
 
 .upload-button:disabled {
@@ -123,8 +123,8 @@
 .upload-error {
   margin-top: 1rem;
   padding: 0.8rem;
-  background: rgba(220, 53, 69, 0.1);
-  color: #dc3545;
+  background: var(--accent-pink-light);
+  color: var(--accent-pink);
   border-radius: 6px;
   display: flex;
   align-items: center;

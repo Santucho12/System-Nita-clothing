@@ -317,36 +317,82 @@ const Promotions = () => {
   };
 
   return (
-    <div className="promotions-container">
-      <div className="promotions-header">
-        <h1>
-          <i className="fas fa-tags"></i> Promociones y Descuentos
-        </h1>
-        <button className="btn-primary" onClick={openNewModal}>
+    <div className="promotions-container" style={{ padding: '30px', background: 'var(--bg-secondary)', minHeight: '100vh' }}>
+      {/* ═══════ HERO HEADER ═══════ */}
+      <div className="products-hero" style={{
+        background: 'var(--bg-card)',
+        borderRadius: '20px',
+        padding: '28px 36px',
+        marginBottom: '24px',
+        boxShadow: 'var(--shadow)',
+        border: '1px solid var(--border-color)',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '18px' }}>
+          <div style={{
+            background: 'var(--accent-pink-light)',
+            padding: '14px',
+            borderRadius: '16px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}>
+            <i className="fas fa-tags" style={{ color: 'var(--accent-pink)', fontSize: '26px' }}></i>
+          </div>
+          <div>
+            <h1 style={{ margin: 0, fontSize: '24px', fontWeight: '800', color: 'var(--text-heading)', letterSpacing: '-0.02em', background: 'none', webkitTextFillColor: 'initial' }}>
+              Promociones y Descuentos
+            </h1>
+            <p style={{ margin: '2px 0 0', fontSize: '14px', color: 'var(--text-muted)', fontWeight: '500' }}>
+              Gestiona ofertas especiales y rebajas de precios
+            </p>
+          </div>
+        </div>
+
+        <button
+          className="action-btn btn-primary-action"
+          onClick={openNewModal}
+          style={{ width: 'auto', padding: '12px 24px' }}
+        >
           <i className="fas fa-plus"></i> Nueva Promoción
         </button>
       </div>
 
-      <div className="promotions-filters">
-        <div className="search-box">
-          <i className="fas fa-search"></i>
+      <div className="products-filters-bar" style={{
+        background: 'var(--bg-card)',
+        borderRadius: '20px',
+        padding: '20px 28px',
+        marginBottom: '28px',
+        boxShadow: 'var(--shadow)',
+        border: '1px solid var(--border-color)',
+        display: 'flex',
+        gap: '14px'
+      }}>
+        <div style={{ flex: 1, position: 'relative' }}>
+          <i className="fas fa-search" style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', fontSize: '14px', zIndex: 1 }}></i>
           <input
             type="text"
-            placeholder="Buscar promoción..."
+            placeholder="Buscar promoción por nombre..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
+            className="nita-search-input"
+            style={{ paddingLeft: '40px' }}
           />
         </div>
-        <select
-          value={filterStatus}
-          onChange={(e) => setFilterStatus(e.target.value)}
-          className="filter-select"
-        >
-          <option value="">Todos los estados</option>
-          <option value="activa">Activas</option>
-          <option value="pausada">Pausadas</option>
-          <option value="finalizada">Finalizadas</option>
-        </select>
+        <div style={{ width: '200px' }}>
+          <select
+            value={filterStatus}
+            onChange={(e) => setFilterStatus(e.target.value)}
+            className="nita-filter-select"
+          >
+            <option value="">Todos los estados</option>
+            <option value="activa">Activas</option>
+            <option value="pausada">Pausadas</option>
+            <option value="finalizada">Finalizadas</option>
+          </select>
+        </div>
       </div>
 
       {loading ? (
@@ -377,7 +423,7 @@ const Promotions = () => {
                     <span className="label">
                       <i className="fas fa-percent"></i> Descuento:
                     </span>
-                    <span className="value discount-value">{getDiscountText(promo)}</span>
+                    <span className="value discount-value" style={{ color: 'var(--accent-pink)' }}>{getDiscountText(promo)}</span>
                   </div>
 
                   <div className="detail-item">

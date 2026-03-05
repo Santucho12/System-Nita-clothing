@@ -32,20 +32,20 @@ const PremiumModal = ({
 
     const getIcon = () => {
         switch (type) {
-            case 'danger': return <FaTrash style={{ color: '#ef4444' }} />;
-            case 'confirm': return <FaQuestionCircle style={{ color: '#3b82f6' }} />;
-            case 'info': return <FaCheckCircle style={{ color: '#10b981' }} />;
-            case 'prompt': return <FaArrowRight style={{ color: '#f73194' }} />;
-            default: return <FaExclamationTriangle style={{ color: '#f59e0b' }} />;
+            case 'danger': return <FaTrash style={{ color: 'var(--accent-pink)' }} />;
+            case 'confirm': return <FaQuestionCircle style={{ color: 'var(--accent-pink)' }} />;
+            case 'info': return <FaCheckCircle style={{ color: 'var(--accent-pink)' }} />;
+            case 'prompt': return <FaArrowRight style={{ color: 'var(--accent-pink)' }} />;
+            default: return <FaExclamationTriangle style={{ color: 'var(--accent-pink)' }} />;
         }
     };
 
     const getHeaderColor = () => {
         switch (type) {
-            case 'danger': return 'var(--danger-gradient, linear-gradient(135deg, #ef4444, #b91c1c))';
-            case 'confirm': return 'var(--blue-gradient, linear-gradient(135deg, #3b82f6, #1d4ed8))';
-            case 'prompt': return 'var(--pink-gradient, linear-gradient(135deg, #f73194, #ff69b4))';
-            default: return 'var(--pink-gradient, linear-gradient(135deg, #f73194, #ff69b4))';
+            case 'danger': return 'var(--pink-gradient)';
+            case 'confirm': return 'var(--pink-gradient)';
+            case 'prompt': return 'var(--pink-gradient)';
+            default: return 'var(--pink-gradient)';
         }
     };
 
@@ -82,7 +82,11 @@ const PremiumModal = ({
                     <button
                         className={`premium-modal-btn confirm ${type === 'danger' ? 'danger' : ''}`}
                         onClick={onConfirm}
-                        style={{ background: type === 'danger' ? '#ef4444' : 'var(--accent-pink)' }}
+                        style={{
+                            background: type === 'danger' ? 'var(--bg-tertiary)' : 'var(--accent-pink)',
+                            color: type === 'danger' ? 'var(--text-primary)' : 'white',
+                            border: type === 'danger' ? '1px solid var(--border-color)' : 'none'
+                        }}
                     >
                         {confirmText}
                     </button>

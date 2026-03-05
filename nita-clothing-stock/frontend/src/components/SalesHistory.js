@@ -216,14 +216,14 @@ export default function SalesHistory() {
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '18px' }}>
           <div style={{
-            background: 'linear-gradient(135deg, #fff0f7, #ffe0ef)',
+            background: 'var(--accent-pink-light)',
             padding: '14px',
             borderRadius: '16px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center'
           }}>
-            <FaHistory style={{ color: '#f73194', fontSize: '26px' }} />
+            <FaHistory style={{ color: 'var(--accent-pink)', fontSize: '26px' }} />
           </div>
           <div>
             <h1 style={{ margin: 0, fontSize: '24px', fontWeight: '800', color: 'var(--text-heading)', letterSpacing: '-0.02em' }}>
@@ -298,7 +298,7 @@ export default function SalesHistory() {
               />
             </div>
             <div style={{ flex: '2.5 1 180px', position: 'relative' }}>
-              <FaEnvelope style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: '#f73194', fontSize: '14px', zIndex: 1, pointerEvents: 'none' }} />
+              <FaEnvelope style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--accent-pink)', fontSize: '14px', zIndex: 1, pointerEvents: 'none' }} />
               <input
                 type="text"
                 name="customer_email"
@@ -387,24 +387,26 @@ export default function SalesHistory() {
             <table className="premium-table">
               <thead>
                 <tr>
-                  <th>N° Venta</th>
-                  <th>Fecha</th>
-                  <th>Cliente</th>
-                  <th>Pago</th>
-                  <th onClick={() => requestSort('total')} style={{ cursor: 'pointer' }}>
-                    Total {sortConfig?.key === 'total' && (sortConfig.direction === 'ascending' ? <FaSortUp /> : <FaSortDown />)}
+                  <th style={{ textAlign: 'center', verticalAlign: 'middle' }}>N° Venta</th>
+                  <th style={{ textAlign: 'center', verticalAlign: 'middle' }}>Fecha</th>
+                  <th style={{ textAlign: 'center', verticalAlign: 'middle' }}>Cliente</th>
+                  <th style={{ textAlign: 'center', verticalAlign: 'middle' }}>Pago</th>
+                  <th onClick={() => requestSort('total')} style={{ cursor: 'pointer', textAlign: 'center', verticalAlign: 'middle' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px' }}>
+                      Total {sortConfig?.key === 'total' && (sortConfig.direction === 'ascending' ? <FaSortUp /> : <FaSortDown />)}
+                    </div>
                   </th>
-                  <th>Estado</th>
-                  <th>Acción</th>
+                  <th style={{ textAlign: 'center', verticalAlign: 'middle' }}>Estado</th>
+                  <th style={{ textAlign: 'center', verticalAlign: 'middle' }}>Acción</th>
                 </tr>
               </thead>
               <tbody>
                 {sortedSales.map((sale) => (
                   <tr key={sale.id} className="table-row-item">
-                    <td style={{ fontWeight: '700', color: '#f73194 !important' }}>#{sale.id}</td>
-                    <td style={{ fontSize: '13px', padding: '12px 10px' }}>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', alignItems: 'center' }}>
-                        <span style={{ fontWeight: '800', color: '#f73194', textTransform: 'uppercase', fontSize: '11px', letterSpacing: '0.02em' }}>
+                    <td style={{ fontWeight: '700', color: 'var(--accent-pink)', textAlign: 'center', verticalAlign: 'middle' }}>#{sale.id}</td>
+                    <td style={{ fontSize: '13px', padding: '12px 10px', textAlign: 'center', verticalAlign: 'middle' }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', alignItems: 'center', justifyContent: 'center' }}>
+                        <span style={{ fontWeight: '800', color: 'var(--accent-pink)', textTransform: 'uppercase', fontSize: '11px', letterSpacing: '0.02em' }}>
                           {new Date(sale.created_at).toLocaleDateString('es-ES', { weekday: 'long' })}
                         </span>
                         <span style={{ fontWeight: '700', color: 'var(--text-primary)', fontSize: '14px' }}>
@@ -415,21 +417,23 @@ export default function SalesHistory() {
                         </span>
                       </div>
                     </td>
-                    <td style={{ fontSize: '13px', opacity: 0.8 }}>{sale.customer_email || 'Particular'}</td>
-                    <td>
+                    <td style={{ fontSize: '13px', opacity: 0.8, textAlign: 'center', verticalAlign: 'middle' }}>{sale.customer_email || 'Particular'}</td>
+                    <td style={{ textAlign: 'center', verticalAlign: 'middle' }}>
                       <span style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center' }}>
                         {getPaymentMethodIcon(sale.payment_method)}
                         {sale.payment_method}
                       </span>
                     </td>
-                    <td style={{ fontWeight: '800', color: '#f73194' }}>
+                    <td style={{ fontWeight: '800', color: 'var(--accent-pink)', textAlign: 'center', verticalAlign: 'middle' }}>
                       {formatCurrency(sale.total)}
                     </td>
-                    <td>{getStatusBadge(sale.status)}</td>
-                    <td style={{ textAlign: 'center' }}>
-                      <button onClick={() => handleShowDetail(sale)} className="premium-btn premium-btn-primary" style={{ padding: '6px 12px', fontSize: '12px' }}>
-                        Detalle
-                      </button>
+                    <td style={{ textAlign: 'center', verticalAlign: 'middle' }}>{getStatusBadge(sale.status)}</td>
+                    <td style={{ textAlign: 'center', verticalAlign: 'middle' }}>
+                      <div style={{ display: 'flex', justifyContent: 'center' }}>
+                        <button onClick={() => handleShowDetail(sale)} className="premium-btn premium-btn-primary" style={{ padding: '6px 12px', fontSize: '12px' }}>
+                          Detalle
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -460,7 +464,7 @@ export default function SalesHistory() {
         <div className="modal-premium-overlay" onClick={handleCloseDetail}>
           <div className="modal-premium-content" onClick={e => e.stopPropagation()}>
             <div className="modal-premium-header">
-              <button onClick={handleCloseDetail} style={{ position: 'absolute', right: '20px', top: '20px', background: 'rgba(255,255,255,0.2)', border: 'none', borderRadius: '10px', color: 'white', padding: '10px', cursor: 'pointer' }}>
+              <button onClick={handleCloseDetail} style={{ position: 'absolute', right: '20px', top: '20px', background: 'var(--bg-tertiary)', border: 'none', borderRadius: '10px', color: 'var(--text-primary)', padding: '10px', cursor: 'pointer' }}>
                 <FaTimes />
               </button>
               <h2><FaFileInvoice /> Venta #{selectedSale.id}</h2>
@@ -525,7 +529,7 @@ export default function SalesHistory() {
                       <span>-{formatCurrency(selectedSale.discount_amount)}</span>
                     </div>
                   )}
-                  <div className="total-premium-row">
+                  <div className="total-premium-row" style={{ color: 'var(--accent-pink)' }}>
                     {formatCurrency(selectedSale.total || 0)}
                   </div>
                 </div>

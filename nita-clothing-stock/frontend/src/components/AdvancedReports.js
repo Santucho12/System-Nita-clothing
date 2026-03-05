@@ -5,6 +5,7 @@ import { formatCurrency, formatNumber } from '../utils/formatters';
 import useSortableData from '../hooks/useSortableData';
 import {
   FaChartBar,
+  FaHome,
   FaTachometerAlt,
   FaShoppingCart,
   FaBox,
@@ -340,7 +341,7 @@ function AdvancedReports() {
         flexWrap: 'wrap'
       }}>
         {[
-          { id: 'overview', icon: FaTachometerAlt, label: 'General' },
+          { id: 'overview', icon: FaHome, label: 'General' },
           { id: 'sales', icon: FaShoppingCart, label: 'Ventas' },
           { id: 'products', icon: FaTags, label: 'Categorías' },
           { id: 'profits', icon: FaDollarSign, label: 'Rentabilidad' }
@@ -459,14 +460,14 @@ function AdvancedReports() {
 
       {activeView === 'sales' && (
         <div className="view-content">
-          <div className="section-header" style={{ marginBottom: '24px', padding: '20px', background: 'white', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', animationDelay: '0.25s' }}>
-            <h2 style={{ margin: 0, fontSize: '22px', color: '#333', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '10px' }}>📊 Análisis Detallado de Ventas</h2>
+          <div className="section-header" style={{ marginBottom: '24px', padding: '20px', background: 'var(--bg-card)', borderRadius: '12px', boxShadow: 'var(--shadow)', animationDelay: '0.25s' }}>
+            <h2 style={{ margin: 0, fontSize: '22px', color: 'var(--text-heading)', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '10px' }}>📊 Análisis Detallado de Ventas</h2>
           </div>
 
           <div className="charts-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(500px, 1fr))', gap: '24px' }}>
-            <div className="chart-card" style={{ background: 'white', padding: '24px', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', borderTop: '4px solid #9C27B0', animationDelay: '1.3s' }}>
+            <div className="chart-card" style={{ background: 'var(--bg-card)', padding: '24px', borderRadius: '12px', boxShadow: 'var(--shadow)', borderTop: '4px solid #9C27B0', animationDelay: '1.3s' }}>
               <div className="chart-header" style={{ marginBottom: '20px' }}>
-                <h3 style={{ margin: 0, fontSize: '18px', color: '#333', fontWeight: '600' }}>Formas de Pago</h3>
+                <h3 style={{ margin: 0, fontSize: '18px', color: 'var(--text-heading)', fontWeight: '600' }}>Formas de Pago</h3>
               </div>
               <div className="payment-breakdown">
                 {paymentMethods.map((method, index) => (
@@ -486,9 +487,9 @@ function AdvancedReports() {
               </div>
             </div>
 
-            <div className="chart-card" style={{ background: 'white', padding: '24px', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', borderTop: '4px solid #4CAF50', animationDelay: '1.5s' }}>
+            <div className="chart-card" style={{ background: 'var(--bg-card)', padding: '24px', borderRadius: '12px', boxShadow: 'var(--shadow)', borderTop: '4px solid #4CAF50', animationDelay: '1.5s' }}>
               <div className="chart-header" style={{ marginBottom: '20px' }}>
-                <h3 style={{ margin: 0, fontSize: '18px', color: '#333', fontWeight: '600' }}>Días de Venta</h3>
+                <h3 style={{ margin: 0, fontSize: '18px', color: 'var(--text-heading)', fontWeight: '600' }}>Días de Venta</h3>
               </div>
               <ResponsiveContainer width="100%" height={300}>
                 <RadarChart data={weekdaySales}>
@@ -506,14 +507,14 @@ function AdvancedReports() {
 
       {activeView === 'products' && (
         <div className="view-content">
-          <div className="section-header" style={{ marginBottom: '24px', padding: '20px', background: 'white', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', animationDelay: '0.25s' }}>
-            <h2 style={{ margin: 0, fontSize: '22px', color: '#333', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '10px' }}>📦 Análisis de Categorías</h2>
+          <div className="section-header" style={{ marginBottom: '24px', padding: '20px', background: 'var(--bg-card)', borderRadius: '12px', boxShadow: 'var(--shadow)', animationDelay: '0.25s' }}>
+            <h2 style={{ margin: 0, fontSize: '22px', color: 'var(--text-heading)', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '10px' }}>📦 Análisis de Categorías</h2>
           </div>
 
           <div className="charts-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(500px, 1fr))', gap: '24px' }}>
-            <div className="chart-card" style={{ background: 'white', padding: '24px', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', borderTop: '4px solid #FF9800', animationDelay: '0.5s' }}>
+            <div className="chart-card" style={{ background: 'var(--bg-card)', padding: '24px', borderRadius: '12px', boxShadow: 'var(--shadow)', borderTop: '4px solid #FF9800', animationDelay: '0.5s' }}>
               <div className="chart-header" style={{ marginBottom: '20px' }}>
-                <h3 style={{ margin: 0, fontSize: '18px', color: '#333', fontWeight: '600' }}>Categorías Más Vendidas</h3>
+                <h3 style={{ margin: 0, fontSize: '18px', color: 'var(--text-heading)', fontWeight: '600' }}>Categorías Más Vendidas</h3>
               </div>
               <div className="products-ranking">
                 {topCategories.slice(0, 10).map((cat, index) => (
@@ -546,14 +547,14 @@ function AdvancedReports() {
 
       {activeView === 'profits' && (
         <div className="view-content">
-          <div className="section-header" style={{ marginBottom: '24px', padding: '20px', background: 'white', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', animationDelay: '0.25s' }}>
-            <h2 style={{ margin: 0, fontSize: '22px', color: '#333', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '10px' }}>💰 Análisis de Rentabilidad</h2>
+          <div className="section-header" style={{ marginBottom: '24px', padding: '20px', background: 'var(--bg-card)', borderRadius: '12px', boxShadow: 'var(--shadow)', animationDelay: '0.25s' }}>
+            <h2 style={{ margin: 0, fontSize: '22px', color: 'var(--text-heading)', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '10px' }}>💰 Análisis de Rentabilidad</h2>
           </div>
 
           <div className="charts-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(500px, 1fr))', gap: '24px' }}>
-            <div className="chart-card large" style={{ gridColumn: '1 / -1', background: 'white', padding: '24px', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', borderTop: '4px solid #FF9800', animationDelay: '0.3s' }}>
+            <div className="chart-card large" style={{ gridColumn: '1 / -1', background: 'var(--bg-card)', padding: '24px', borderRadius: '12px', boxShadow: 'var(--shadow)', borderTop: '4px solid var(--accent-pink)', animationDelay: '0.3s' }}>
               <div className="chart-header" style={{ marginBottom: '20px' }}>
-                <h3 style={{ margin: 0, fontSize: '18px', color: '#333', fontWeight: '600' }}>ROI (Porcentaje de Ganancia) por Categoría</h3>
+                <h3 style={{ margin: 0, fontSize: '18px', color: 'var(--text-heading)', fontWeight: '600' }}>ROI (Porcentaje de Ganancia) por Categoría</h3>
               </div>
               <div className="roi-list">
                 {categoryPerformance.filter(cat => cat.total_cost > 0).map((cat, index) => {

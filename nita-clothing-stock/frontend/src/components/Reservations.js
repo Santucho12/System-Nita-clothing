@@ -110,37 +110,40 @@ export default function Reservations() {
       {view === 'create' && (
         <form className="reservation-form" onSubmit={handleSubmit}>
           <h3>Nueva Reserva</h3>
-          <input type="email" placeholder="Email del cliente" value={formData.customer_email} 
-                 onChange={e => setFormData({ ...formData, customer_email: e.target.value })} required />
+          <input type="email" placeholder="Email del cliente" value={formData.customer_email}
+            onChange={e => setFormData({ ...formData, customer_email: e.target.value })} required />
           <input type="text" placeholder="Nombre" value={formData.customer_name}
-                 onChange={e => setFormData({ ...formData, customer_name: e.target.value })} required />
+            onChange={e => setFormData({ ...formData, customer_name: e.target.value })} required />
           <input type="tel" placeholder="Teléfono" value={formData.customer_phone}
-                 onChange={e => setFormData({ ...formData, customer_phone: e.target.value })} required />
-          
+            onChange={e => setFormData({ ...formData, customer_phone: e.target.value })} required />
+
           <h4>Productos</h4>
           {formData.items.map((item, idx) => (
             <div key={idx} className="item-row">
               <input type="number" placeholder="ID Producto" value={item.product_id}
-                     onChange={e => handleItemChange(idx, 'product_id', e.target.value)} required />
+                onChange={e => handleItemChange(idx, 'product_id', e.target.value)} required />
               <input type="number" min="1" placeholder="Cantidad" value={item.quantity}
-                     onChange={e => handleItemChange(idx, 'quantity', e.target.value)} required />
+                onChange={e => handleItemChange(idx, 'quantity', e.target.value)} required />
               {formData.items.length > 1 && <button type="button" onClick={() => removeItem(idx)}>-</button>}
             </div>
           ))}
           <button type="button" onClick={addItem}>Agregar Producto</button>
 
           <input type="number" min="0" step="0.01" placeholder="Seña" value={formData.deposit_amount}
-                 onChange={e => setFormData({ ...formData, deposit_amount: e.target.value })} required />
+            onChange={e => setFormData({ ...formData, deposit_amount: e.target.value })} required />
           <input type="date" value={formData.expiration_date}
-                 onChange={e => setFormData({ ...formData, expiration_date: e.target.value })} required />
+            onChange={e => setFormData({ ...formData, expiration_date: e.target.value })} required />
           <select value={formData.payment_method} onChange={e => setFormData({ ...formData, payment_method: e.target.value })}>
             <option value="efectivo">Efectivo</option>
             <option value="tarjeta">Tarjeta</option>
             <option value="transferencia">Transferencia</option>
           </select>
           <textarea placeholder="Notas" value={formData.notes}
-                    onChange={e => setFormData({ ...formData, notes: e.target.value })} />
-          <button type="submit" disabled={loading}>{loading ? 'Creando...' : 'Crear Reserva'}</button>
+            onChange={e => setFormData({ ...formData, notes: e.target.value })}
+            style={{ background: 'var(--bg-input)', color: 'var(--text-primary)', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '10px' }} />
+          <button type="submit" disabled={loading} style={{ background: 'var(--accent-pink)', color: 'white', padding: '12px', borderRadius: '12px', border: 'none', fontWeight: 'bold' }}>
+            {loading ? 'Creando...' : 'Crear Reserva'}
+          </button>
         </form>
       )}
 
@@ -159,8 +162,8 @@ export default function Reservations() {
                       <td>{r.expiration_date?.slice(0, 10)}</td>
                       <td>{formatCurrency(r.total_amount || 0)}</td>
                       <td>
-                        <button onClick={() => handleComplete(r.id)}>Completar</button>
-                        <button onClick={() => handleCancel(r.id)}>Cancelar</button>
+                        <button style={{ background: 'var(--accent-pink)', color: 'white', padding: '5px 12px', borderRadius: '6px', border: 'none', marginRight: '5px' }} onClick={() => handleComplete(r.id)}>Completar</button>
+                        <button style={{ background: 'var(--bg-tertiary)', color: 'var(--text-muted)', padding: '5px 12px', borderRadius: '6px', border: '1px solid var(--border-color)' }} onClick={() => handleCancel(r.id)}>Cancelar</button>
                       </td>
                     </tr>
                   ))}
@@ -182,8 +185,8 @@ export default function Reservations() {
                   <td>{formatCurrency(r.deposit_amount || 0)}</td>
                   <td>{r.expiration_date?.slice(0, 10)}</td>
                   <td>
-                    <button onClick={() => handleComplete(r.id)}>Completar</button>
-                    <button onClick={() => handleCancel(r.id)}>Cancelar</button>
+                    <button style={{ background: 'var(--accent-pink)', color: 'white', padding: '5px 12px', borderRadius: '6px', border: 'none', marginRight: '5px' }} onClick={() => handleComplete(r.id)}>Completar</button>
+                    <button style={{ background: 'var(--bg-tertiary)', color: 'var(--text-muted)', padding: '5px 12px', borderRadius: '6px', border: '1px solid var(--border-color)' }} onClick={() => handleCancel(r.id)}>Cancelar</button>
                   </td>
                 </tr>
               ))}

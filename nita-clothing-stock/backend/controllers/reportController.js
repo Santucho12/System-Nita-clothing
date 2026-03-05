@@ -301,11 +301,11 @@ class ReportController {
                 ORDER BY DAYOFWEEK(created_at)
             `;
             const rows = await db.all(sql, params);
-            
+
             // DAYOFWEEK: 1=Dom, 2=Lun, 3=Mar, 4=Mié, 5=Jue, 6=Vie, 7=Sáb
             const dayNames = { 1: 'Dom', 2: 'Lun', 3: 'Mar', 4: 'Mié', 5: 'Jue', 6: 'Vie', 7: 'Sáb' };
             const allDays = [2, 3, 4, 5, 6, 7, 1]; // Lun a Dom
-            
+
             const result = allDays.map(dayNum => {
                 const found = rows.find(r => r.day_num === dayNum);
                 return {
@@ -314,7 +314,7 @@ class ReportController {
                     revenue: found ? parseFloat(found.revenue) : 0
                 };
             });
-            
+
             res.json({ success: true, data: result });
         } catch (error) {
             next(error);

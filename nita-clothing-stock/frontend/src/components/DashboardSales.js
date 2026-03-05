@@ -7,7 +7,7 @@ import {
 } from 'recharts';
 import './DashboardSales.css';
 
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
+const COLORS = ['var(--accent-pink)', '#8884d8', '#3498db', '#9b59b6', '#f39c12'];
 
 export default function DashboardSales() {
   const [stats, setStats] = useState({
@@ -107,14 +107,21 @@ export default function DashboardSales() {
                     <stop offset="95%" stopColor="#1976d2" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#eee" />
-                <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#888' }} />
-                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#888' }} />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border-color)" />
+                <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: 'var(--text-muted)' }} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: 'var(--text-muted)' }} />
                 <Tooltip
-                  contentStyle={{ borderRadius: '10px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
+                  contentStyle={{
+                    background: 'var(--bg-card)',
+                    color: 'var(--text-primary)',
+                    borderRadius: '10px',
+                    border: '1px solid var(--border-color)',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                  }}
+                  itemStyle={{ color: 'var(--text-primary)' }}
                   formatter={(value) => [`$${value.toLocaleString()}`, 'Ingresos']}
                 />
-                <Area type="monotone" dataKey="revenue" stroke="#1976d2" fillOpacity={1} fill="url(#colorRevenue)" strokeWidth={3} />
+                <Area type="monotone" dataKey="revenue" stroke="var(--accent-pink)" fillOpacity={1} fill="url(#colorRevenue)" strokeWidth={3} />
               </AreaChart>
             </ResponsiveContainer>
           </div>
@@ -125,11 +132,14 @@ export default function DashboardSales() {
           <div className="chart-container">
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={stats.topProducts} layout="vertical">
-                <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f0f0f0" />
+                <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="var(--border-color)" />
                 <XAxis type="number" hide />
-                <YAxis dataKey="product_name" type="category" width={100} tick={{ fontSize: 11 }} />
-                <Tooltip />
-                <Bar dataKey="quantity_sold" fill="#00C49F" radius={[0, 4, 4, 0]} barSize={20} />
+                <YAxis dataKey="product_name" type="category" width={100} tick={{ fontSize: 11, fill: 'var(--text-primary)' }} />
+                <Tooltip
+                  contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '8px' }}
+                  itemStyle={{ color: 'var(--text-primary)' }}
+                />
+                <Bar dataKey="quantity_sold" fill="var(--accent-pink)" radius={[0, 4, 4, 0]} barSize={20} />
               </BarChart>
             </ResponsiveContainer>
           </div>

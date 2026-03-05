@@ -217,17 +217,25 @@ const PurchaseOrders = () => {
   };
 
   const getStatusBadge = (status) => {
-    const styles = {
-      pending: { bg: '#fff3cd', color: '#856404', text: 'Pendiente' },
-      received: { bg: '#d4edda', color: '#155724', text: 'Recibida' },
-      partial: { bg: '#d1ecf1', color: '#0c5460', text: 'Parcial' },
-      cancelled: { bg: '#f8d7da', color: '#721c24', text: 'Cancelada' }
-    };
+    const s = (status || 'pending').toLowerCase();
 
-    const style = styles[status] || styles.pending;
+    let className = 'status-pending';
+    let text = 'Pendiente';
+
+    if (s === 'received') {
+      className = 'status-success';
+      text = 'Recibida';
+    } else if (s === 'partial') {
+      className = 'status-warning';
+      text = 'Parcial';
+    } else if (s === 'cancelled') {
+      className = 'status-danger';
+      text = 'Cancelada';
+    }
+
     return (
-      <span style={{ display: 'inline-block', padding: '4px 12px', borderRadius: '12px', fontSize: '12px', fontWeight: 'bold', background: style.bg, color: style.color }}>
-        {style.text}
+      <span className={`premium-status-badge ${className}`}>
+        {text}
       </span>
     );
   };
@@ -250,55 +258,128 @@ const PurchaseOrders = () => {
   }
 
   return (
-    <div className="purchase-orders-container" style={{ padding: '20px' }}>
-      <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-        <h1>
-          <i className="fas fa-file-invoice" style={{ marginRight: '10px' }}></i>
-          Órdenes de Compra
-        </h1>
+    <div className="purchase-orders-container" style={{ padding: '30px', background: 'var(--bg-secondary)', minHeight: '100vh' }}>
+      {/* ═══════ HERO HEADER ═══════ */}
+      <div className="products-hero" style={{
+        background: 'var(--bg-card)',
+        borderRadius: '20px',
+        padding: '28px 36px',
+        marginBottom: '24px',
+        boxShadow: 'var(--shadow)',
+        border: '1px solid var(--border-color)',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '18px' }}>
+          <div style={{
+            background: 'var(--accent-pink-light)',
+            padding: '14px',
+            borderRadius: '16px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}>
+            <i className="fas fa-file-invoice" style={{ color: 'var(--accent-pink)', fontSize: '26px' }}></i>
+          </div>
+          <div>
+            <h1 style={{ margin: 0, fontSize: '24px', fontWeight: '800', color: 'var(--text-heading)', letterSpacing: '-0.02em' }}>
+              Órdenes de Compra
+            </h1>
+            <p style={{ margin: '2px 0 0', fontSize: '14px', color: 'var(--text-muted)', fontWeight: '500' }}>
+              Gestiona el abastecimiento de mercadería
+            </p>
+          </div>
+        </div>
+
         <button
-          className="btn btn-primary"
+          className="action-btn btn-primary-action"
           onClick={() => setShowForm(true)}
-          style={{ padding: '10px 20px', background: '#007bff', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+          style={{ width: 'auto', padding: '12px 24px' }}
         >
-          <i className="fas fa-plus" style={{ marginRight: '8px' }}></i>
-          Nueva Orden
+          <i className="fas fa-plus"></i> Nueva Orden
         </button>
       </div>
 
-      <div className="filters" style={{ marginBottom: '20px', display: 'flex', gap: '10px' }}>
+      <div className="products-filters-bar" style={{
+        background: 'var(--bg-card)',
+        borderRadius: '20px',
+        padding: '20px 28px',
+        marginBottom: '28px',
+        boxShadow: 'var(--shadow)',
+        border: '1px solid var(--border-color)',
+        display: 'flex',
+        gap: '10px'
+      }}>
         <button
           onClick={() => setFilterStatus('all')}
-          style={{ padding: '8px 16px', border: '1px solid #ddd', borderRadius: '4px', background: filterStatus === 'all' ? '#007bff' : 'white', color: filterStatus === 'all' ? 'white' : '#333', cursor: 'pointer' }}
+          className={`nita-filter-btn ${filterStatus === 'all' ? 'active' : ''}`}
+          style={{
+            padding: '10px 20px',
+            borderRadius: '12px',
+            border: 'none',
+            background: filterStatus === 'all' ? 'var(--accent-pink)' : 'var(--bg-tertiary)',
+            color: filterStatus === 'all' ? 'white' : 'var(--text-secondary)',
+            fontWeight: '700',
+            cursor: 'pointer',
+            transition: 'all 0.2s'
+          }}
         >
           Todas
         </button>
         <button
           onClick={() => setFilterStatus('pending')}
-          style={{ padding: '8px 16px', border: '1px solid #ddd', borderRadius: '4px', background: filterStatus === 'pending' ? '#007bff' : 'white', color: filterStatus === 'pending' ? 'white' : '#333', cursor: 'pointer' }}
+          style={{
+            padding: '10px 20px',
+            borderRadius: '12px',
+            border: 'none',
+            background: filterStatus === 'pending' ? 'var(--accent-pink)' : 'var(--bg-tertiary)',
+            color: filterStatus === 'pending' ? 'white' : 'var(--text-secondary)',
+            fontWeight: '700',
+            cursor: 'pointer',
+            transition: 'all 0.2s'
+          }}
         >
           Pendientes
         </button>
         <button
           onClick={() => setFilterStatus('received')}
-          style={{ padding: '8px 16px', border: '1px solid #ddd', borderRadius: '4px', background: filterStatus === 'received' ? '#007bff' : 'white', color: filterStatus === 'received' ? 'white' : '#333', cursor: 'pointer' }}
+          style={{
+            padding: '10px 20px',
+            borderRadius: '12px',
+            border: 'none',
+            background: filterStatus === 'received' ? 'var(--accent-pink)' : 'var(--bg-tertiary)',
+            color: filterStatus === 'received' ? 'white' : 'var(--text-secondary)',
+            fontWeight: '700',
+            cursor: 'pointer',
+            transition: 'all 0.2s'
+          }}
         >
           Recibidas
         </button>
         <button
           onClick={() => setFilterStatus('cancelled')}
-          style={{ padding: '8px 16px', border: '1px solid #ddd', borderRadius: '4px', background: filterStatus === 'cancelled' ? '#007bff' : 'white', color: filterStatus === 'cancelled' ? 'white' : '#333', cursor: 'pointer' }}
+          style={{
+            padding: '10px 20px',
+            borderRadius: '12px',
+            border: 'none',
+            background: filterStatus === 'cancelled' ? 'var(--accent-pink)' : 'var(--bg-tertiary)',
+            color: filterStatus === 'cancelled' ? 'white' : 'var(--text-secondary)',
+            fontWeight: '700',
+            cursor: 'pointer',
+            transition: 'all 0.2s'
+          }}
         >
           Canceladas
         </button>
       </div>
 
       {showForm && (
-        <div className="modal-overlay" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }} onClick={resetForm}>
-          <div className="modal-content" style={{ background: 'white', padding: '30px', borderRadius: '8px', maxWidth: '800px', width: '90%', maxHeight: '90vh', overflow: 'auto' }} onClick={e => e.stopPropagation()}>
-            <div className="form-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-              <h3>Nueva Orden de Compra</h3>
-              <button onClick={resetForm} style={{ background: 'none', border: 'none', fontSize: '24px', cursor: 'pointer' }}>×</button>
+        <div className="modal-premium-overlay" onClick={resetForm}>
+          <div className="modal-premium-content" style={{ maxWidth: '850px' }} onClick={e => e.stopPropagation()}>
+            <div className="modal-premium-header">
+              <h2><i className="fas fa-file-invoice"></i> Nueva Orden de Compra</h2>
+              <button onClick={resetForm} style={{ position: 'absolute', right: '20px', top: '20px', background: 'var(--bg-tertiary)', border: 'none', borderRadius: '10px', color: 'var(--text-primary)', padding: '10px', cursor: 'pointer' }}>✕</button>
             </div>
 
             <form onSubmit={handleSubmit}>
@@ -434,13 +515,12 @@ const PurchaseOrders = () => {
                 )}
               </div>
 
-              <div className="form-actions" style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
-                <button type="button" onClick={resetForm} style={{ padding: '10px 20px', background: '#6c757d', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
+              <div className="modal-premium-footer">
+                <button type="button" className="premium-btn-secondary" onClick={resetForm}>
                   Cancelar
                 </button>
-                <button type="submit" style={{ padding: '10px 20px', background: '#007bff', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
-                  <i className="fas fa-save" style={{ marginRight: '8px' }}></i>
-                  Crear Orden
+                <button type="submit" className="premium-btn-primary">
+                  <i className="fas fa-save"></i> Crear Orden
                 </button>
               </div>
             </form>
@@ -449,49 +529,53 @@ const PurchaseOrders = () => {
       )}
 
       {selectedOrder && (
-        <div className="modal-overlay" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }} onClick={() => setSelectedOrder(null)}>
-          <div className="modal-content" style={{ background: 'white', padding: '30px', borderRadius: '8px', maxWidth: '700px', width: '90%', maxHeight: '90vh', overflow: 'auto' }} onClick={e => e.stopPropagation()}>
-            <div className="form-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-              <h3>Orden #{selectedOrder.order_number}</h3>
-              <button onClick={() => setSelectedOrder(null)} style={{ background: 'none', border: 'none', fontSize: '24px', cursor: 'pointer' }}>×</button>
+        <div className="modal-premium-overlay" onClick={() => setSelectedOrder(null)}>
+          <div className="modal-premium-content" style={{ maxWidth: '700px' }} onClick={e => e.stopPropagation()}>
+            <div className="modal-premium-header">
+              <h3><i className="fas fa-file-invoice"></i> Orden #{selectedOrder.order_number}</h3>
+              <button onClick={() => setSelectedOrder(null)} style={{ position: 'absolute', right: '20px', top: '20px', background: 'var(--bg-tertiary)', border: 'none', borderRadius: '10px', color: 'var(--text-primary)', padding: '10px', cursor: 'pointer' }}>✕</button>
             </div>
 
-            <div style={{ marginBottom: '20px' }}>
-              <p><strong>Proveedor:</strong> {selectedOrder.supplier?.name}</p>
-              <p><strong>Fecha:</strong> {new Date(selectedOrder.order_date).toLocaleDateString()}</p>
-              <p><strong>Fecha Esperada:</strong> {selectedOrder.expected_date ? new Date(selectedOrder.expected_date).toLocaleDateString() : 'N/A'}</p>
-              <p><strong>Estado:</strong> {getStatusBadge(selectedOrder.status)}</p>
-              {selectedOrder.notes && <p><strong>Notas:</strong> {selectedOrder.notes}</p>}
+            <div style={{ marginBottom: '20px', padding: '0 30px' }}>
+              <p style={{ color: 'var(--text-secondary)' }}><strong>Proveedor:</strong> {selectedOrder.supplier?.name}</p>
+              <p style={{ color: 'var(--text-secondary)' }}><strong>Fecha:</strong> {new Date(selectedOrder.order_date).toLocaleDateString()}</p>
+              <p style={{ color: 'var(--text-secondary)' }}><strong>Fecha Esperada:</strong> {selectedOrder.expected_date ? new Date(selectedOrder.expected_date).toLocaleDateString() : 'N/A'}</p>
+              <p style={{ color: 'var(--text-secondary)' }}><strong>Estado:</strong> {getStatusBadge(selectedOrder.status)}</p>
+              {selectedOrder.notes && <p style={{ color: 'var(--text-secondary)' }}><strong>Notas:</strong> {selectedOrder.notes}</p>}
             </div>
 
-            <h4>Productos</h4>
-            <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '20px' }}>
-              <thead>
-                <tr style={{ borderBottom: '2px solid #ddd' }}>
-                  <th style={{ textAlign: 'left', padding: '8px' }}>Producto</th>
-                  <th style={{ textAlign: 'center', padding: '8px' }}>Cantidad</th>
-                  <th style={{ textAlign: 'right', padding: '8px' }}>Costo</th>
-                  <th style={{ textAlign: 'right', padding: '8px' }}>Subtotal</th>
-                </tr>
-              </thead>
-              <tbody>
-                {selectedOrder.items?.map((item, index) => (
-                  <tr key={index} style={{ borderBottom: '1px solid #eee' }}>
-                    <td style={{ padding: '8px' }}>{item.product_name}</td>
-                    <td style={{ textAlign: 'center', padding: '8px' }}>{item.quantity}</td>
-                    <td style={{ textAlign: 'right', padding: '8px' }}>${parseFloat(item.unit_cost).toFixed(2)}</td>
-                    <td style={{ textAlign: 'right', padding: '8px' }}>${parseFloat(item.subtotal).toFixed(2)}</td>
-                  </tr>
-                ))}
-                <tr style={{ fontWeight: 'bold', fontSize: '16px' }}>
-                  <td colSpan="3" style={{ textAlign: 'right', padding: '12px 8px' }}>TOTAL:</td>
-                  <td style={{ textAlign: 'right', padding: '12px 8px' }}>${parseFloat(selectedOrder.total).toFixed(2)}</td>
-                </tr>
-              </tbody>
-            </table>
+            <div style={{ padding: '0 30px 30px' }}>
+              <h4 style={{ color: 'var(--text-primary)', marginBottom: '15px' }}>Productos</h4>
+              <div className="premium-table-container">
+                <table className="premium-table">
+                  <thead>
+                    <tr>
+                      <th style={{ textAlign: 'left' }}>Producto</th>
+                      <th style={{ textAlign: 'center' }}>Cantidad</th>
+                      <th style={{ textAlign: 'right' }}>Costo</th>
+                      <th style={{ textAlign: 'right' }}>Subtotal</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {selectedOrder.items?.map((item, index) => (
+                      <tr key={index}>
+                        <td>{item.product_name}</td>
+                        <td style={{ textAlign: 'center' }}>{item.quantity}</td>
+                        <td style={{ textAlign: 'right' }}>${parseFloat(item.unit_cost).toFixed(2)}</td>
+                        <td style={{ textAlign: 'right' }}>${parseFloat(item.subtotal).toFixed(2)}</td>
+                      </tr>
+                    ))}
+                    <tr style={{ fontWeight: 'bold', fontSize: '16px' }}>
+                      <td colSpan="3" style={{ textAlign: 'right', padding: '20px 15px' }}>TOTAL:</td>
+                      <td style={{ textAlign: 'right', padding: '20px 15px', color: 'var(--accent-pink)' }}>${parseFloat(selectedOrder.total).toFixed(2)}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
 
-            <div className="form-actions" style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
-              <button onClick={() => setSelectedOrder(null)} style={{ padding: '10px 20px', background: '#6c757d', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
+            <div className="modal-premium-footer">
+              <button onClick={() => setSelectedOrder(null)} className="premium-btn-secondary">
                 Cerrar
               </button>
             </div>
@@ -499,67 +583,66 @@ const PurchaseOrders = () => {
         </div>
       )}
 
-      <div className="orders-table" style={{ background: 'white', borderRadius: '8px', overflow: 'hidden', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
+      <div className="premium-table-container">
         {filteredOrders.length === 0 ? (
-          <div className="empty-state" style={{ textAlign: 'center', padding: '40px' }}>
-            <i className="fas fa-file-invoice" style={{ fontSize: '3em', color: '#ccc', marginBottom: '20px' }}></i>
-            <h3>No hay órdenes de compra</h3>
-            <p>Crea tu primera orden para empezar a gestionar compras</p>
-            <button
-              className="btn btn-primary"
-              onClick={() => setShowForm(true)}
-              style={{ padding: '10px 20px', background: '#007bff', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', marginTop: '15px' }}
-            >
-              <i className="fas fa-plus" style={{ marginRight: '8px' }}></i>
-              Crear Primera Orden
-            </button>
+          <div className="empty-state" style={{ textAlign: 'center', padding: '80px 40px', background: 'var(--bg-card)', borderRadius: '20px' }}>
+            <i className="fas fa-file-invoice" style={{ fontSize: '4rem', color: 'var(--border-color)', marginBottom: '20px', display: 'block' }}></i>
+            <h3 style={{ color: 'var(--text-primary)' }}>No hay órdenes de compra</h3>
+            <p style={{ color: 'var(--text-muted)' }}>Crea tu primera orden para empezar a gestionar compras</p>
           </div>
         ) : (
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <table className="premium-table">
             <thead>
-              <tr style={{ background: '#f8f9fa', borderBottom: '2px solid #dee2e6' }}>
-                <th style={{ padding: '12px', textAlign: 'left' }}>Orden #</th>
-                <th style={{ padding: '12px', textAlign: 'left' }}>Proveedor</th>
-                <th style={{ padding: '12px', textAlign: 'center' }}>Fecha</th>
-                <th style={{ padding: '12px', textAlign: 'right' }}>Total</th>
-                <th style={{ padding: '12px', textAlign: 'center' }}>Estado</th>
-                <th style={{ padding: '12px', textAlign: 'center' }}>Acciones</th>
+              <tr>
+                <th>Orden #</th>
+                <th>Proveedor</th>
+                <th style={{ textAlign: 'center' }}>Fecha</th>
+                <th style={{ textAlign: 'right' }}>Total</th>
+                <th style={{ textAlign: 'center' }}>Estado</th>
+                <th style={{ textAlign: 'center' }}>Acciones</th>
               </tr>
             </thead>
             <tbody>
               {filteredOrders.map(order => (
-                <tr key={order.id} style={{ borderBottom: '1px solid #dee2e6' }}>
-                  <td style={{ padding: '12px' }}>{order.order_number}</td>
-                  <td style={{ padding: '12px' }}>{order.supplier?.name || 'N/A'}</td>
-                  <td style={{ padding: '12px', textAlign: 'center' }}>{new Date(order.order_date).toLocaleDateString()}</td>
-                  <td style={{ padding: '12px', textAlign: 'right', fontWeight: 'bold' }}>${parseFloat(order.total).toFixed(2)}</td>
-                  <td style={{ padding: '12px', textAlign: 'center' }}>{getStatusBadge(order.status)}</td>
-                  <td style={{ padding: '12px', textAlign: 'center' }}>
-                    <button
-                      onClick={() => viewDetails(order.id)}
-                      style={{ background: 'none', border: 'none', color: '#007bff', cursor: 'pointer', fontSize: '16px', marginRight: '8px' }}
-                      title="Ver Detalles"
-                    >
-                      <i className="fas fa-eye"></i>
-                    </button>
-                    {order.status === 'pending' && (
-                      <>
-                        <button
-                          onClick={() => handleReceive(order.id)}
-                          style={{ background: 'none', border: 'none', color: '#28a745', cursor: 'pointer', fontSize: '16px', marginRight: '8px' }}
-                          title="Marcar como Recibida"
-                        >
-                          <i className="fas fa-check"></i>
-                        </button>
-                        <button
-                          onClick={() => handleCancel(order.id)}
-                          style={{ background: 'none', border: 'none', color: '#dc3545', cursor: 'pointer', fontSize: '16px' }}
-                          title="Cancelar"
-                        >
-                          <i className="fas fa-times"></i>
-                        </button>
-                      </>
-                    )}
+                <tr key={order.id}>
+                  <td style={{ fontWeight: '600' }}>{order.order_number}</td>
+                  <td>{order.supplier?.name || 'N/A'}</td>
+                  <td style={{ textAlign: 'center' }}>{new Date(order.order_date).toLocaleDateString()}</td>
+                  <td style={{ textAlign: 'right', fontWeight: 'bold', color: 'var(--accent-pink)' }}>
+                    ${parseFloat(order.total).toFixed(2)}
+                  </td>
+                  <td style={{ textAlign: 'center' }}>{getStatusBadge(order.status)}</td>
+                  <td style={{ textAlign: 'center' }}>
+                    <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
+                      <button
+                        className="btn-icon"
+                        onClick={() => viewDetails(order.id)}
+                        style={{ background: 'var(--bg-tertiary)', color: 'var(--text-primary)', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '8px', cursor: 'pointer' }}
+                        title="Ver Detalles"
+                      >
+                        <i className="fas fa-eye"></i>
+                      </button>
+                      {order.status === 'pending' && (
+                        <>
+                          <button
+                            className="btn-icon"
+                            onClick={() => handleReceive(order.id)}
+                            style={{ background: 'rgba(76, 175, 80, 0.1)', color: '#4caf50', border: 'none', borderRadius: '8px', padding: '8px', cursor: 'pointer' }}
+                            title="Marcar como Recibida"
+                          >
+                            <i className="fas fa-check"></i>
+                          </button>
+                          <button
+                            className="btn-icon"
+                            onClick={() => handleCancel(order.id)}
+                            style={{ background: 'rgba(232, 85, 94, 0.1)', color: '#e8555e', border: 'none', borderRadius: '8px', padding: '8px', cursor: 'pointer' }}
+                            title="Cancelar"
+                          >
+                            <i className="fas fa-times"></i>
+                          </button>
+                        </>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}

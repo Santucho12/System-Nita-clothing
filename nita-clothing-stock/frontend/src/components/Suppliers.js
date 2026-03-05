@@ -287,7 +287,7 @@ const Suppliers = () => {
 
           .supplier-card-premium .card-accent {
             height: 4px;
-            background: linear-gradient(90deg, #f73194, #ff6fb8, #f73194);
+            background: var(--accent-pink);
             background-size: 200% 100%;
           }
           .supplier-card-premium:hover .card-accent {
@@ -358,7 +358,7 @@ const Suppliers = () => {
         <button
           onClick={() => setShowForm(true)}
           style={{
-            padding: '11px 24px', color: 'white', background: '#f73194',
+            padding: '11px 24px', color: 'white', background: 'var(--accent-pink)',
             border: 'none', borderRadius: '12px', cursor: 'pointer',
             display: 'flex', alignItems: 'center', gap: '8px',
             fontSize: '14px', fontWeight: '700', transition: 'all 0.2s',
@@ -449,7 +449,7 @@ const Suppliers = () => {
           >
             {/* Header del modal */}
             <div style={{
-              background: 'linear-gradient(135deg, #f73194 0%, #ff6fb8 100%)',
+              background: 'var(--accent-pink)',
               padding: '24px 32px',
               display: 'flex', justifyContent: 'space-between', alignItems: 'center'
             }}>
@@ -477,8 +477,8 @@ const Suppliers = () => {
                   fontSize: '18px', cursor: 'pointer', display: 'flex',
                   alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s'
                 }}
-                onMouseOver={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.35)'}
-                onMouseOut={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.2)'}
+                onMouseOver={(e) => e.currentTarget.style.background = 'var(--bg-hover)'}
+                onMouseOut={(e) => e.currentTarget.style.background = 'var(--bg-tertiary)'}
               >
                 ×
               </button>
@@ -573,7 +573,7 @@ const Suppliers = () => {
                 <button
                   type="submit"
                   style={{
-                    padding: '12px 32px', background: '#f73194', color: 'white',
+                    padding: '12px 32px', background: 'var(--accent-pink)', color: 'white',
                     border: 'none', borderRadius: '12px', cursor: 'pointer',
                     fontSize: '14px', fontWeight: '700', transition: 'all 0.2s',
                     boxShadow: '0 4px 14px rgba(247,49,148,0.25)'
@@ -612,7 +612,7 @@ const Suppliers = () => {
             <button
               onClick={() => setShowForm(true)}
               style={{
-                padding: '12px 28px', color: 'white', background: '#f73194',
+                padding: '12px 28px', color: 'white', background: 'var(--accent-pink)',
                 border: 'none', borderRadius: '12px', cursor: 'pointer',
                 display: 'inline-flex', alignItems: 'center', gap: '8px',
                 fontSize: '14px', fontWeight: '700',
@@ -740,8 +740,8 @@ const Suppliers = () => {
                   {supplier.notes && (
                     <div style={{
                       display: 'flex', alignItems: 'center', gap: '6px',
-                      padding: '6px 12px', background: '#fffbeb', borderRadius: '8px',
-                      fontSize: '12px', color: '#92400e', fontWeight: '500', maxWidth: '160px'
+                      padding: '6px 12px', background: 'var(--bg-tertiary)', borderRadius: '8px',
+                      fontSize: '12px', color: 'var(--text-secondary)', fontWeight: '500', maxWidth: '160px'
                     }}>
                       <FaStickyNote style={{ fontSize: '10px', flexShrink: 0 }} />
                       <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{supplier.notes}</span>

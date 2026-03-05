@@ -36,32 +36,40 @@
 }
 
 .alert-count.active {
-  background: #ff5252;
+  background: var(--accent-pink);
   color: white;
   animation: pulse 2s infinite;
 }
 
 @keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.7; }
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.7;
+  }
 }
 
 .btn-refresh {
   padding: 8px 16px;
-  background: #2196F3;
-  color: white;
-  border: none;
+  background: var(--accent-pink-light);
+  color: var(--accent-pink);
+  border: 1px solid var(--accent-pink);
   border-radius: 4px;
   cursor: pointer;
   display: flex;
   align-items: center;
   gap: 8px;
   font-size: 14px;
-  transition: background 0.3s;
+  transition: all 0.3s;
 }
 
 .btn-refresh:hover {
-  background: #1976D2;
+  background: var(--accent-pink);
+  color: white;
 }
 
 .alerts-tabs {
@@ -87,18 +95,18 @@
 }
 
 .alerts-tabs button:hover {
-  border-color: #2196F3;
-  color: #2196F3;
+  border-color: var(--accent-pink);
+  color: var(--accent-pink);
 }
 
 .alerts-tabs button.active {
-  border-color: #2196F3;
-  background: #2196F3;
+  border-color: var(--accent-pink);
+  background: var(--accent-pink);
   color: white;
 }
 
 .alerts-tabs button .badge {
-  background: #ff5252;
+  background: var(--accent-pink);
   color: white;
   padding: 2px 8px;
   border-radius: 10px;
@@ -109,14 +117,14 @@
 
 .alerts-tabs button.active .badge {
   background: white;
-  color: #2196F3;
+  color: var(--accent-pink);
 }
 
 .alerts-content {
   background: var(--bg-card, white);
   padding: 24px;
   border-radius: 12px;
-  box-shadow: var(--shadow, 0 2px 8px rgba(0,0,0,0.1));
+  box-shadow: var(--shadow, 0 2px 8px rgba(0, 0, 0, 0.1));
 }
 
 .alert-section h2 {
@@ -163,11 +171,13 @@
 }
 
 .text-warning {
-  color: #ff9800;
+  color: var(--accent-pink);
+  font-weight: 700;
 }
 
 .text-danger {
-  color: #f44336;
+  color: var(--accent-pink);
+  font-weight: 700;
 }
 
 .status-badge {
@@ -196,7 +206,7 @@
 
 .empty-state i {
   font-size: 48px;
-  color: #4CAF50;
+  color: var(--accent-pink);
   margin-bottom: 15px;
 }
 
@@ -216,7 +226,7 @@
   font-size: 48px;
   margin-bottom: 15px;
   display: block;
-  color: #2196F3;
+  color: var(--accent-pink);
 }
 
 @media (max-width: 768px) {
@@ -225,20 +235,20 @@
     align-items: flex-start;
     gap: 15px;
   }
-  
+
   .alerts-tabs {
     flex-direction: column;
   }
-  
+
   .alerts-tabs button {
     width: 100%;
     justify-content: center;
   }
-  
+
   .alerts-table {
     font-size: 12px;
   }
-  
+
   .alerts-table th,
   .alerts-table td {
     padding: 8px;

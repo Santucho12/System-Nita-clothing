@@ -2,7 +2,7 @@
 
 .advanced-reports-container {
   padding: 20px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: var(--bg-secondary);
   min-height: 100vh;
 }
 
@@ -139,9 +139,9 @@
 }
 
 .view-tabs button.active {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: var(--accent-pink);
   color: white;
-  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 8px 15px var(--accent-pink-light);
 }
 
 /* ==================== KPIs GRID ==================== */
@@ -270,7 +270,7 @@
   align-items: center;
   margin-bottom: 20px;
   padding-bottom: 15px;
-  border-bottom: 2px solid var(--border-color, #f0f0f0);
+  border-bottom: 2px solid var(--border-color);
 }
 
 .chart-header h3 {
@@ -361,7 +361,7 @@
 
 .payment-bar {
   height: 12px;
-  background: var(--bg-tertiary, #f0f0f0);
+  background: var(--bg-tertiary);
   border-radius: 20px;
   overflow: hidden;
 }
@@ -394,7 +394,7 @@
 }
 
 .day-item:hover {
-  background: #667eea;
+  background: var(--accent-pink);
   color: white;
   transform: translateX(5px);
 }
@@ -402,7 +402,7 @@
 .day-item .rank {
   font-weight: 700;
   font-size: 1.2rem;
-  color: #667eea;
+  color: var(--accent-pink);
   min-width: 40px;
 }
 
@@ -436,10 +436,10 @@
   align-items: center;
   gap: 15px;
   padding: 16px 20px;
-  background: white;
+  background: var(--bg-card);
   border-radius: 12px;
-  border: 1px solid #f1f5f9;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
   transition: all 0.3s ease;
 }
 
@@ -456,10 +456,10 @@
   width: 45px;
   height: 45px;
   border-radius: 14px;
-  background: #f1f5f9;
+  background: var(--bg-tertiary);
   font-weight: 800;
   font-size: 1.1rem;
-  color: #94a3b8;
+  color: var(--text-muted);
 }
 
 .ranking-position .position.top {
@@ -475,7 +475,7 @@
 
 .ranking-details h4 {
   margin: 0 0 8px 0;
-  color: #1e293b;
+  color: var(--text-heading);
   font-size: 1.05rem;
   font-weight: 800;
 }
@@ -485,7 +485,7 @@
   flex-wrap: wrap;
   gap: 10px;
   font-size: 0.85rem;
-  color: #64748b;
+  color: var(--text-muted);
 }
 
 .ranking-stats span {
@@ -493,10 +493,10 @@
   align-items: center;
   gap: 6px;
   font-weight: 600;
-  background: #f8fafc;
+  background: var(--bg-tertiary);
   padding: 4px 10px;
   border-radius: 8px;
-  border: 1px solid #f1f5f9;
+  border: 1px solid var(--border-color);
 }
 
 .ranking-badge {
@@ -532,17 +532,17 @@
   flex-direction: column;
   gap: 12px;
   padding: 18px;
-  background: #f8fafc;
+  background: var(--bg-card);
   border-radius: 12px;
-  border: 1px solid #f1f5f9;
+  border: 1px solid var(--border-color);
   transition: all 0.3s ease;
 }
 
 .roi-item:hover {
-  background: white;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+  background: var(--bg-hover);
+  box-shadow: var(--shadow);
   transform: translateY(-2px);
-  border-color: #e2e8f0;
+  border-color: var(--accent-pink);
 }
 
 .roi-info {
@@ -552,23 +552,24 @@
 }
 
 .cat-name {
-  color: #1e293b;
+  color: var(--text-heading);
   font-size: 1.05rem;
   font-weight: 800;
 }
 
 .roi-value {
-  color: #059669;
-  background: #ecfdf5;
-  padding: 4px 10px;
+  color: var(--accent-pink);
+  background: var(--accent-pink-light);
+  padding: 4px 12px;
   border-radius: 8px;
   font-size: 0.95rem;
   font-weight: 800;
+  border: 1px solid var(--accent-pink-light);
 }
 
 .roi-bar {
   height: 8px;
-  background: #e2e8f0;
+  background: var(--bg-tertiary);
   border-radius: 10px;
   overflow: hidden;
 }
@@ -578,6 +579,7 @@
   border-radius: 10px;
   transition: width 0.6s ease;
 }
+
 
 /* ==================== STOCK ALERTS ==================== */
 
@@ -638,24 +640,24 @@
   margin: 0;
   font-size: 1.5rem;
   font-weight: 700;
-  color: var(--text-heading, #2c3e50);
+  color: var(--text-primary);
 }
 
 /* ==================== SECTION HEADER ==================== */
 
 .section-header {
-  background: var(--bg-card, white);
+  background: var(--bg-card);
   padding: 25px 30px;
   border-radius: 16px;
   margin-bottom: 25px;
-  box-shadow: var(--shadow, 0 4px 20px rgba(0, 0, 0, 0.08));
+  box-shadow: var(--shadow);
 }
 
 .section-header h2 {
   margin: 0;
   font-size: 2rem;
   font-weight: 700;
-  color: var(--text-heading, #2c3e50);
+  color: var(--text-heading);
   display: flex;
   align-items: center;
   gap: 15px;
@@ -720,19 +722,20 @@
 
 .top-days-list::-webkit-scrollbar-track,
 .products-ranking::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: var(--bg-secondary);
   border-radius: 10px;
 }
 
 .top-days-list::-webkit-scrollbar-thumb,
 .products-ranking::-webkit-scrollbar-thumb {
-  background: #667eea;
+  background: var(--accent-pink);
   border-radius: 10px;
 }
 
 .top-days-list::-webkit-scrollbar-thumb:hover,
 .products-ranking::-webkit-scrollbar-thumb:hover {
-  background: #764ba2;
+  background: var(--accent-pink);
+  filter: brightness(0.8);
 }
 
 /* ==================== RESPONSIVE ==================== */

@@ -569,15 +569,15 @@ const Products = () => {
             white-space: nowrap;
           }
           .clear-filters-chip:hover {
-            background: #fee2e2;
-            border-color: #fecaca;
-            color: #dc2626;
+            background: var(--accent-pink-light);
+            border-color: var(--accent-pink);
+            color: var(--accent-pink);
           }
 
           /* ---- Form Styles ---- */
           .form-input:focus {
-            border-color: #f73194 !important;
-            box-shadow: 0 0 0 3px rgba(247, 49, 148, 0.1) !important;
+            border-color: var(--accent-pink) !important;
+            box-shadow: 0 0 0 3px var(--accent-pink-light) !important;
             outline: none !important;
           }
 
@@ -588,7 +588,7 @@ const Products = () => {
             display: flex; align-items: center; gap: 8px;
             text-transform: uppercase; letter-spacing: 0.02em;
           }
-          .label-premium svg { color: #f73194; font-size: 14px; }
+          .label-premium svg { color: var(--accent-pink); font-size: 14px; }
 
           .input-premium {
             width: 100%; padding: 12px 16px;
@@ -608,36 +608,22 @@ const Products = () => {
           }
 
           .no-image-placeholder-premium {
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
-            background: #f1f5f9;
-            color: #94a3b8;
-            gap: 12px;
+            background: var(--bg-tertiary);
             transition: all 0.3s ease;
+            overflow: hidden;
           }
           .no-image-placeholder-premium svg {
-            font-size: 48px;
-            opacity: 0.4;
-            color: #f73194;
-          }
-          .no-image-placeholder-premium span {
-            font-size: 11px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            opacity: 0.6;
-          }
-
-          .product-card-premium:hover .no-image-placeholder-premium {
-            background: #fce7f3;
-          }
-          .product-card-premium:hover .no-image-placeholder-premium svg {
-            transform: scale(1.1);
-            opacity: 0.7;
+            font-size: 100px;
+            opacity: 0.2;
+            color: var(--text-muted);
           }
         `}
       </style>
@@ -656,7 +642,7 @@ const Products = () => {
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '18px' }}>
           <div style={{
-            background: 'linear-gradient(135deg, #fff0f7, #ffe0ef)',
+            background: 'var(--accent-pink-light)',
             padding: '14px',
             borderRadius: '16px',
             display: 'flex',
@@ -731,8 +717,7 @@ const Products = () => {
             />
           </div>
 
-          {/* Separador vertical */}
-          <div style={{ width: '1px', height: '36px', background: '#e2e8f0', flexShrink: 0 }} />
+          {/* Separador vertical eliminado */}
 
           {/* Categoría */}
           <div style={{ flex: '1 1 140px', display: 'flex', gap: '6px', alignItems: 'center' }}>
@@ -857,11 +842,11 @@ const Products = () => {
             {/* Header del Modal */}
             <div style={{
               padding: '24px 32px',
-              borderBottom: '1px solid #f1f5f9',
+              borderBottom: '1px solid var(--border-color)',
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
-              background: '#fff'
+              background: 'var(--bg-card)'
             }}>
               <div>
                 <h3 style={{ margin: 0, fontSize: '22px', fontWeight: '800', color: 'var(--text-heading)', display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -877,7 +862,7 @@ const Products = () => {
               <button
                 onClick={resetForm}
                 style={{
-                  background: '#f1f5f9',
+                  background: 'var(--bg-tertiary)',
                   border: 'none',
                   width: '36px',
                   height: '36px',
@@ -886,11 +871,11 @@ const Products = () => {
                   alignItems: 'center',
                   justifyContent: 'center',
                   cursor: 'pointer',
-                  color: '#64748b',
+                  color: 'var(--text-muted)',
                   transition: 'all 0.2s'
                 }}
-                onMouseOver={(e) => { e.currentTarget.style.background = '#ffeef5'; e.currentTarget.style.color = '#f73194'; }}
-                onMouseOut={(e) => { e.currentTarget.style.background = '#f1f5f9'; e.currentTarget.style.color = '#64748b'; }}
+                onMouseOver={(e) => { e.currentTarget.style.background = 'var(--accent-pink-light)'; e.currentTarget.style.color = '#f73194'; }}
+                onMouseOut={(e) => { e.currentTarget.style.background = 'var(--bg-tertiary)'; e.currentTarget.style.color = 'var(--text-muted)'; }}
               >
                 <FaTimes />
               </button>
@@ -900,25 +885,25 @@ const Products = () => {
               <div style={{ display: 'grid', gridTemplateColumns: '350px 1fr', gap: '0' }}>
 
                 {/* Lateral Izquierdo: IMÁGENES */}
-                <div style={{ padding: '32px', background: '#f8fafc', borderRight: '1px solid #f1f5f9' }}>
-                  <label style={{ display: 'block', marginBottom: '16px', fontWeight: '700', fontSize: '14px', color: '#475569', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                <div style={{ padding: '32px', background: 'var(--bg-tertiary)', borderRight: '1px solid var(--border-color)' }}>
+                  <label style={{ display: 'block', marginBottom: '16px', fontWeight: '700', fontSize: '14px', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                     Fotos del Producto
                   </label>
 
                   <div
                     style={{
-                      border: '2px dashed #cbd5e1',
+                      border: '2px dashed var(--border-color)',
                       borderRadius: '20px',
                       padding: '24px',
                       textAlign: 'center',
-                      background: 'white',
+                      background: 'var(--bg-card)',
                       transition: 'all 0.3s ease',
                       cursor: 'pointer',
                       position: 'relative',
                       overflow: 'hidden'
                     }}
                     onMouseOver={(e) => e.currentTarget.style.borderColor = '#f73194'}
-                    onMouseOut={(e) => e.currentTarget.style.borderColor = '#cbd5e1'}
+                    onMouseOut={(e) => e.currentTarget.style.borderColor = 'var(--border-color)'}
                   >
                     <input
                       type="file"
@@ -940,24 +925,24 @@ const Products = () => {
                             />
                           </div>
                         ))}
-                        <div style={{ border: '2px dashed #e2e8f0', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', color: '#94a3b8', minHeight: '80px' }}>
+                        <div style={{ border: '2px dashed var(--border-color)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', color: 'var(--text-muted)', minHeight: '80px' }}>
                           <FaPlus />
                         </div>
                       </div>
                     ) : (
                       <div style={{ padding: '20px 0' }}>
-                        <div style={{ fontSize: '48px', color: '#cbd5e1', marginBottom: '12px' }}>
+                        <div style={{ fontSize: '48px', color: 'var(--text-muted)', marginBottom: '12px' }}>
                           <FaImage />
                         </div>
-                        <p style={{ margin: 0, fontSize: '14px', fontWeight: '600', color: '#64748b' }}>Subir fotos</p>
+                        <p style={{ margin: 0, fontSize: '14px', fontWeight: '600', color: 'var(--text-secondary)' }}>Subir fotos</p>
                       </div>
                     )}
                   </div>
 
-                  <div style={{ marginTop: '24px', padding: '16px', background: '#fffbeb', borderRadius: '16px', border: '1px solid #fef3c7' }}>
+                  <div style={{ marginTop: '24px', padding: '16px', background: 'var(--bg-hover)', borderRadius: '16px', border: '1px solid var(--border-color)' }}>
                     <div style={{ display: 'flex', gap: '10px' }}>
                       <FaExclamationTriangle style={{ color: '#d97706', marginTop: '2px' }} />
-                      <p style={{ margin: 0, fontSize: '12px', color: '#92400e', lineHeight: '1.5' }}>
+                      <p style={{ margin: 0, fontSize: '12px', color: 'var(--text-secondary)', lineHeight: '1.5' }}>
                         <strong>Tip Pro:</strong> Las fotos con fondo claro y buena iluminación se van a ver mejor.
                       </p>
                     </div>
@@ -999,18 +984,18 @@ const Products = () => {
                   </div>
 
                   {/* Sección de Precios con Cálculo de Margen */}
-                  <div style={{ background: '#f1f5f9', padding: '24px', borderRadius: '20px', marginBottom: '24px' }}>
+                  <div style={{ background: 'var(--bg-tertiary)', padding: '24px', borderRadius: '20px', marginBottom: '24px' }}>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '20px', alignItems: 'center' }}>
                       <div className="form-group-premium">
-                        <label className="label-premium" style={{ color: '#475569' }}><FaDollarSign /> Precio Costo</label>
-                        <input type="number" name="cost_price" value={formData.cost_price} onChange={handleInputChange} placeholder="0.00" className="input-premium" style={{ background: 'white' }} />
+                        <label className="label-premium" style={{ color: 'var(--text-secondary)' }}><FaDollarSign /> Precio Costo</label>
+                        <input type="number" name="cost_price" value={formData.cost_price} onChange={handleInputChange} placeholder="0.00" className="input-premium" />
                       </div>
                       <div className="form-group-premium">
                         <label className="label-premium" style={{ color: '#f73194' }}><FaDollarSign /> Precio Venta</label>
-                        <input type="number" name="sale_price" value={formData.sale_price} onChange={handleInputChange} placeholder="0.00" className="input-premium" style={{ background: 'white', borderColor: '#f73194' }} />
+                        <input type="number" name="sale_price" value={formData.sale_price} onChange={handleInputChange} placeholder="0.00" className="input-premium" style={{ borderColor: '#f73194' }} />
                       </div>
                       <div style={{ textAlign: 'center' }}>
-                        <span style={{ fontSize: '11px', color: '#64748b', fontWeight: '700', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>Margen Est.</span>
+                        <span style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: '700', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>Margen Est.</span>
                         {formData.sale_price && formData.cost_price && Number(formData.sale_price) > 0 ? (
                           <div style={{
                             fontSize: '20px',
@@ -1043,8 +1028,8 @@ const Products = () => {
               {/* Footer de Acciones */}
               <div style={{
                 padding: '24px 32px',
-                background: 'white',
-                borderTop: '1px solid #f1f5f9',
+                background: 'var(--bg-card)',
+                borderTop: '1px solid var(--border-color)',
                 display: 'flex',
                 justifyContent: 'flex-end',
                 gap: '16px',
@@ -1058,15 +1043,15 @@ const Products = () => {
                   style={{
                     padding: '12px 28px',
                     borderRadius: '14px',
-                    border: '1px solid #e2e8f0',
-                    background: 'white',
-                    color: '#64748b',
+                    border: '1px solid var(--border-color)',
+                    background: 'var(--bg-tertiary)',
+                    color: 'var(--text-secondary)',
                     fontWeight: '600',
                     cursor: 'pointer',
                     transition: 'all 0.2s'
                   }}
-                  onMouseOver={(e) => e.currentTarget.style.background = '#f8fafc'}
-                  onMouseOut={(e) => e.currentTarget.style.background = 'white'}
+                  onMouseOver={(e) => e.currentTarget.style.background = 'var(--bg-hover)'}
+                  onMouseOut={(e) => e.currentTarget.style.background = 'var(--bg-tertiary)'}
                 >
                   Cancelar
                 </button>
@@ -1144,7 +1129,6 @@ const Products = () => {
                   ) : (
                     <div className="no-image-placeholder-premium">
                       <FaImage />
-                      <span>Sin imagen</span>
                     </div>
                   )}
 
@@ -1172,7 +1156,7 @@ const Products = () => {
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginBottom: '8px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                       <span className="product-category-tag">{getCategoryName(product.categoria_id || product.category_id)}</span>
-                      <span style={{ fontSize: '10px', color: '#94a3b8', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                      <span style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                         SKU {product.sku || product.codigo || '-'}
                       </span>
                     </div>
@@ -1185,8 +1169,8 @@ const Products = () => {
                   <div style={{ display: 'flex', gap: '6px', marginBottom: '14px', flexWrap: 'wrap' }}>
                     {(product.tallas || product.size) && (
                       <span style={{
-                        fontSize: '11px', background: '#f1f5f9', padding: '3px 10px',
-                        borderRadius: '6px', color: '#475569', fontWeight: '600',
+                        fontSize: '11px', background: 'var(--bg-tertiary)', padding: '3px 10px',
+                        borderRadius: '6px', color: 'var(--text-secondary)', fontWeight: '600',
                         display: 'inline-flex', alignItems: 'center', gap: '4px'
                       }}>
                         <FaRulerVertical style={{ fontSize: '9px', color: '#94a3b8' }} />
@@ -1262,7 +1246,7 @@ const Products = () => {
                 <h2 className="detail-title">{detailProduct.name || detailProduct.nombre}</h2>
 
                 <div style={{ display: 'flex', gap: '10px', marginBottom: '30px' }}>
-                  <span style={{ background: '#f1f5f9', padding: '6px 12px', borderRadius: '6px', fontSize: '12px', color: '#475569', fontWeight: '600' }}>
+                  <span style={{ background: 'var(--bg-tertiary)', padding: '6px 12px', borderRadius: '6px', fontSize: '12px', color: 'var(--text-secondary)', fontWeight: '600' }}>
                     SKU: {detailProduct.codigo || detailProduct.sku || 'N/A'}
                   </span>
                   <span style={{
@@ -1316,7 +1300,7 @@ const Products = () => {
                 </div>
 
                 {detailProduct.notas && (
-                  <div style={{ marginTop: 'auto', padding: '15px', background: '#fff9c4', borderRadius: '12px', fontSize: '13px', color: '#856404' }}>
+                  <div style={{ marginTop: 'auto', padding: '15px', background: 'var(--bg-tertiary)', borderRadius: '12px', fontSize: '13px', color: 'var(--text-secondary)', border: '1px solid var(--border-color)' }}>
                     <strong>Notas:</strong> {detailProduct.notas}
                   </div>
                 )}
@@ -1447,9 +1431,9 @@ const Products = () => {
                   style={{
                     padding: '12px 24px',
                     borderRadius: '12px',
-                    border: '1px solid #e2e8f0',
-                    background: 'white',
-                    color: '#64748b',
+                    border: '1px solid var(--border-color)',
+                    background: 'var(--bg-tertiary)',
+                    color: 'var(--text-muted)',
                     fontWeight: '600',
                     cursor: 'pointer'
                   }}
@@ -1462,11 +1446,11 @@ const Products = () => {
                     padding: '12px 28px',
                     borderRadius: '12px',
                     border: 'none',
-                    background: '#f73194',
+                    background: 'var(--accent-pink)',
                     color: 'white',
                     fontWeight: '700',
                     cursor: 'pointer',
-                    boxShadow: '0 4px 12px rgba(247, 49, 148, 0.2)'
+                    boxShadow: '0 4px 12px var(--accent-pink-light)'
                   }}
                 >
                   <FaPlus style={{ marginRight: '8px' }} />

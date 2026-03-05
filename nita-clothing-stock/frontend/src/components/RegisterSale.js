@@ -421,21 +421,22 @@ export default function RegisterSale() {
             width: 32px;
             height: 32px;
             border-radius: 10px;
-            background: #fee2e2;
-            color: #ef4444;
-            border: none;
+            background: var(--bg-tertiary);
+            color: var(--accent-pink);
+            border: 1px solid var(--border-color);
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            box-shadow: 0 4px 10px rgba(239, 68, 68, 0.2);
+            box-shadow: var(--shadow-sm);
             transition: all 0.2s ease;
             z-index: 10;
           }
 
           .remove-item-btn:hover {
-            background: #ef4444;
+            background: var(--accent-pink);
             color: white;
+            border-color: var(--accent-pink);
             transform: rotate(90deg) scale(1.1);
           }
 
@@ -443,7 +444,7 @@ export default function RegisterSale() {
             width: 100%;
             padding: 20px;
             border-radius: 20px;
-            background: linear-gradient(135deg, #f73194 0%, #ff6b9d 100%);
+            background: var(--gradient-pink);
             color: white;
             font-size: 20px;
             font-weight: 900;
@@ -453,13 +454,13 @@ export default function RegisterSale() {
             align-items: center;
             justify-content: center;
             gap: 15px;
-            box-shadow: 0 10px 25px rgba(247, 49, 148, 0.3);
+            box-shadow: 0 10px 25px var(--accent-pink-light);
             transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
           }
 
           .btn-register-sale:hover:not(:disabled) {
             transform: translateY(-4px);
-            box-shadow: 0 15px 35px rgba(247, 49, 148, 0.4);
+            box-shadow: 0 15px 35px var(--accent-pink-light);
           }
 
           .btn-register-sale:disabled {
@@ -469,9 +470,10 @@ export default function RegisterSale() {
           }
 
           .summary-header {
-            background: #283344;
+            background: #1e293b;
+            border-bottom: 1px solid var(--border-color);
             padding: 30px;
-            color: white;
+            color: #f8fafc;
             text-align: center;
           }
 
@@ -481,6 +483,8 @@ export default function RegisterSale() {
             margin: 15px 0;
             display: block;
             letter-spacing: -0.03em;
+            color: #ffffff;
+            text-shadow: 0 4px 12px rgba(0,0,0,0.2);
           }
 
           .search-method-toggle {
@@ -530,7 +534,7 @@ export default function RegisterSale() {
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '22px' }}>
           <div style={{
-            background: 'linear-gradient(135deg, var(--accent-pink-light), #ffe0ef)',
+            background: 'var(--accent-pink-light)',
             width: '60px', height: '60px',
             borderRadius: '20px',
             display: 'flex',
@@ -680,8 +684,8 @@ export default function RegisterSale() {
                       {item.product_id && (
                         <div style={{
                           position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)',
-                          fontSize: '11px', fontWeight: '800', background: '#f1f5f9',
-                          padding: '6px 12px', borderRadius: '8px', color: '#475569'
+                          fontSize: '11px', fontWeight: '800', background: 'var(--bg-tertiary)',
+                          padding: '6px 12px', borderRadius: '8px', color: 'var(--text-secondary)'
                         }}>
                           MÁX: {item.stock_available}
                         </div>
@@ -709,17 +713,17 @@ export default function RegisterSale() {
 
                 {item.product_id && (
                   <div style={{
-                    marginTop: '15px', padding: '15px 20px', background: '#f8fafc',
+                    marginTop: '15px', padding: '15px 20px', background: 'var(--bg-tertiary)',
                     borderRadius: '14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                    border: '1px solid #f1f5f9'
+                    border: '1px solid var(--border-color)'
                   }}>
                     <div style={{ display: 'flex', gap: '20px' }}>
 
-                      <span style={{ fontSize: '13px', color: '#64748b', fontWeight: '600' }}>
-                        Producto: <span style={{ color: '#1e293b' }}>{item.product_name}</span>
+                      <span style={{ fontSize: '13px', color: 'var(--text-secondary)', fontWeight: '600' }}>
+                        Producto: <span style={{ color: 'var(--text-primary)' }}>{item.product_name}</span>
                       </span>
                     </div>
-                    <div style={{ fontSize: '18px', fontWeight: '850', color: '#f73194' }}>
+                    <div style={{ fontSize: '18px', fontWeight: '850', color: 'var(--accent-pink)' }}>
                       {formatCurrency(Number(item.quantity) * Number(item.unit_price))}
                     </div>
                   </div>
@@ -736,17 +740,17 @@ export default function RegisterSale() {
         <div className="animate-fade-in" style={{ animationDelay: '0.2s' }}>
           <div className="nita-card" style={{ position: 'sticky', top: '30px' }}>
             <div className="summary-header">
-              <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', opacity: 0.8, marginBottom: '5px' }}>
-                <FaCheckCircle style={{ color: '#f73194', fontSize: '12px' }} />
-                <span style={{ fontSize: '11px', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Resumen de Pago</span>
+              <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', opacity: 0.9, marginBottom: '8px' }}>
+                <FaCheckCircle style={{ color: 'var(--accent-pink)', fontSize: '12px' }} />
+                <span style={{ fontSize: '11px', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.12em', color: '#94a3b8' }}>Resumen de Pago</span>
               </div>
-              <span style={{ fontSize: '15px', color: 'rgba(255,255,255,0.7)', fontWeight: '500' }}>Total a pagar</span>
+              <span style={{ fontSize: '15px', color: '#94a3b8', fontWeight: '600' }}>Total a pagar</span>
               <span className="summary-total">{formatCurrency(calculateTotal())}</span>
             </div>
 
             <div style={{ padding: '30px' }}>
               <div className="nita-input-group">
-                <label className="nita-label"><FaEnvelope /> Email del Cliente <span style={{ color: '#f73194' }}>*</span></label>
+                <label className="nita-label"><FaEnvelope /> Email del Cliente <span style={{ color: 'var(--accent-pink)' }}>*</span></label>
                 <div style={{ position: 'relative' }}>
                   <FaEnvelope style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
                   <input
@@ -793,7 +797,7 @@ export default function RegisterSale() {
                       className="nita-input"
                       style={{ paddingRight: '35px' }}
                     />
-                    <span style={{ position: 'absolute', right: '16px', top: '50%', transform: 'translateY(-50%)', color: '#f73194', fontWeight: '800', fontSize: '13px' }}>%</span>
+                    <span style={{ position: 'absolute', right: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--accent-pink)', fontWeight: '800', fontSize: '13px' }}>%</span>
                   </div>
                 </div>
                 <div className="nita-input-group">

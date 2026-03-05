@@ -70,7 +70,7 @@ const ExchangeReturns = () => {
     try {
       setLoading(true);
       const queryParams = new URLSearchParams();
-      
+
       if (filters.type) queryParams.append('type', filters.type);
       if (filters.status) queryParams.append('status', filters.status);
       if (filters.customer_name) queryParams.append('customer_name', filters.customer_name);
@@ -242,7 +242,7 @@ const ExchangeReturns = () => {
       setLoading(true);
       await api.post('/cambios-devoluciones', formData);
       toast.success('Cambio/devolución registrado exitosamente');
-      
+
       // Reset form
       setFormData({
         type: 'return',
@@ -268,7 +268,7 @@ const ExchangeReturns = () => {
 
   const handleStatusUpdate = async (id, newStatus) => {
     const notes = window.prompt('Notas de aprobación (opcional):');
-    
+
     try {
       setLoading(true);
       await api.patch(`/cambios-devoluciones/${id}/status`, {
@@ -322,38 +322,40 @@ const ExchangeReturns = () => {
 
   const getStatusBadge = (status) => {
     const badges = {
-      pending: { label: 'Pendiente', color: '#f39c12' },
-      approved: { label: 'Aprobado', color: '#27ae60' },
-      rejected: { label: 'Rechazado', color: '#e74c3c' },
-      completed: { label: 'Completado', color: '#3498db' },
-      cancelled: { label: 'Cancelado', color: '#95a5a6' }
+      pending: { label: 'Pendiente', color: 'rgba(243, 156, 18, 0.2)', textColor: '#f39c12' },
+      approved: { label: 'Aprobado', color: 'rgba(39, 174, 96, 0.2)', textColor: '#27ae60' },
+      rejected: { label: 'Rechazado', color: 'rgba(231, 76, 60, 0.2)', textColor: '#e74c3c' },
+      completed: { label: 'Completado', color: 'rgba(52, 152, 219, 0.2)', textColor: '#3498db' },
+      cancelled: { label: 'Cancelado', color: 'var(--bg-tertiary)', textColor: 'var(--text-muted)' }
     };
 
-    const badge = badges[status] || { label: status, color: '#95a5a6' };
-    return <span style={{ 
-      backgroundColor: badge.color, 
-      color: 'white', 
-      padding: '4px 10px', 
-      borderRadius: '12px',
-      fontSize: '0.85em',
-      fontWeight: 'bold'
+    const badge = badges[status] || { label: status, color: 'var(--bg-tertiary)', textColor: 'var(--text-muted)' };
+    return <span style={{
+      backgroundColor: badge.color,
+      color: badge.textColor,
+      padding: '4px 12px',
+      borderRadius: '8px',
+      fontSize: '0.75rem',
+      fontWeight: '700',
+      textTransform: 'uppercase'
     }}>{badge.label}</span>;
   };
 
   const getTypeBadge = (type) => {
     const badges = {
-      return: { label: 'Devolución', color: '#e67e22' },
-      exchange: { label: 'Cambio', color: '#9b59b6' }
+      return: { label: 'Devolución', color: 'rgba(230, 126, 34, 0.2)', textColor: '#e67e22' },
+      exchange: { label: 'Cambio', color: 'rgba(155, 89, 182, 0.2)', textColor: '#9b59b6' }
     };
 
-    const badge = badges[type] || { label: type, color: '#95a5a6' };
+    const badge = badges[type] || { label: type, color: 'var(--bg-tertiary)', textColor: 'var(--text-muted)' };
     return <span style={{
       backgroundColor: badge.color,
-      color: 'white',
-      padding: '4px 10px',
-      borderRadius: '12px',
-      fontSize: '0.85em',
-      fontWeight: 'bold'
+      color: badge.textColor,
+      padding: '4px 12px',
+      borderRadius: '8px',
+      fontSize: '0.75rem',
+      fontWeight: '700',
+      textTransform: 'uppercase'
     }}>{badge.label}</span>;
   };
 
@@ -371,19 +373,19 @@ const ExchangeReturns = () => {
 
       {/* Tabs */}
       <div className="tabs">
-        <button 
+        <button
           className={activeTab === 'list' ? 'tab-active' : ''}
           onClick={() => setActiveTab('list')}
         >
           📋 Lista
         </button>
-        <button 
+        <button
           className={activeTab === 'create' ? 'tab-active' : ''}
           onClick={() => setActiveTab('create')}
         >
           ➕ Nuevo
         </button>
-        <button 
+        <button
           className={activeTab === 'stats' ? 'tab-active' : ''}
           onClick={() => setActiveTab('stats')}
         >
@@ -501,15 +503,15 @@ const ExchangeReturns = () => {
                         <td>{new Date(er.created_at).toLocaleDateString()}</td>
                         <td>{getTypeBadge(er.type)}</td>
                         <td>
-                          <div>{er.customer_name}</div>
-                          <small style={{ color: '#7f8c8d' }}>{er.customer_email}</small>
+                          <div style={{ color: 'var(--text-primary)', fontWeight: '600' }}>{er.customer_name}</div>
+                          <small style={{ color: 'var(--text-muted)' }}>{er.customer_email}</small>
                         </td>
                         <td>#{er.original_sale_id}</td>
                         <td>{er.items_count || 0}</td>
                         <td>${parseFloat(er.refund_amount || 0).toFixed(2)}</td>
                         <td>{getStatusBadge(er.status)}</td>
                         <td>
-                          <button 
+                          <button
                             onClick={() => openDetail(er.id)}
                             className="btn-detail"
                             title="Ver detalle"
@@ -582,9 +584,9 @@ const ExchangeReturns = () => {
 
             <div className="form-group">
               <label>Venta Original: *</label>
-              <select 
-                name="original_sale_id" 
-                value={formData.original_sale_id} 
+              <select
+                name="original_sale_id"
+                value={formData.original_sale_id}
                 onChange={handleFormChange}
                 required
               >
@@ -596,7 +598,7 @@ const ExchangeReturns = () => {
                 ))}
               </select>
               {sales.length === 0 && formData.customer_email && (
-                <small style={{ color: '#e74c3c' }}>
+                <small style={{ color: 'var(--accent-pink)' }}>
                   No se encontraron ventas para este cliente
                 </small>
               )}
@@ -610,9 +612,9 @@ const ExchangeReturns = () => {
               <div className="form-row">
                 <div className="form-group">
                   <label>Producto: *</label>
-                  <select 
-                    name="product_id" 
-                    value={currentItem.product_id} 
+                  <select
+                    name="product_id"
+                    value={currentItem.product_id}
                     onChange={handleItemChange}
                   >
                     <option value="">Seleccionar...</option>
@@ -676,9 +678,9 @@ const ExchangeReturns = () => {
                 <div className="form-row">
                   <div className="form-group">
                     <label>Nuevo Producto:</label>
-                    <select 
-                      name="new_product_id" 
-                      value={currentItem.new_product_id} 
+                    <select
+                      name="new_product_id"
+                      value={currentItem.new_product_id}
                       onChange={handleItemChange}
                     >
                       <option value="">Seleccionar...</option>
@@ -722,8 +724,8 @@ const ExchangeReturns = () => {
                         <div>Cambio por: Producto #{item.new_product_id} (x{item.new_quantity})</div>
                       )}
                     </div>
-                    <button 
-                      type="button" 
+                    <button
+                      type="button"
                       onClick={() => handleRemoveItem(index)}
                       className="btn-remove-item"
                     >
@@ -775,8 +777,8 @@ const ExchangeReturns = () => {
               <button type="submit" className="btn-submit" disabled={loading}>
                 {loading ? 'Guardando...' : 'Registrar Cambio/Devolución'}
               </button>
-              <button 
-                type="button" 
+              <button
+                type="button"
                 onClick={() => setActiveTab('list')}
                 className="btn-cancel"
               >
@@ -889,7 +891,7 @@ const ExchangeReturns = () => {
         <div className="modal-overlay" onClick={() => setShowDetailModal(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <button className="modal-close" onClick={() => setShowDetailModal(false)}>✖</button>
-            
+
             <h3>Detalle de {selectedER.type === 'return' ? 'Devolución' : 'Cambio'} #{selectedER.id}</h3>
 
             <div className="detail-grid">
@@ -955,8 +957,8 @@ const ExchangeReturns = () => {
                     <td>{item.reason_notes || '-'}</td>
                     {selectedER.type === 'exchange' && (
                       <td>
-                        {item.new_product_name ? 
-                          `${item.new_product_name} (x${item.new_quantity})` : 
+                        {item.new_product_name ?
+                          `${item.new_product_name} (x${item.new_quantity})` :
                           'N/A'
                         }
                       </td>
@@ -969,13 +971,13 @@ const ExchangeReturns = () => {
             <div className="modal-actions">
               {selectedER.status === 'pending' && (
                 <>
-                  <button 
+                  <button
                     onClick={() => handleStatusUpdate(selectedER.id, 'approved')}
                     className="btn-approve"
                   >
                     ✔️ Aprobar
                   </button>
-                  <button 
+                  <button
                     onClick={() => handleStatusUpdate(selectedER.id, 'rejected')}
                     className="btn-reject"
                   >
@@ -985,7 +987,7 @@ const ExchangeReturns = () => {
               )}
 
               {selectedER.status === 'approved' && (
-                <button 
+                <button
                   onClick={() => handleStatusUpdate(selectedER.id, 'completed')}
                   className="btn-complete"
                 >
@@ -994,7 +996,7 @@ const ExchangeReturns = () => {
               )}
 
               {['pending', 'rejected'].includes(selectedER.status) && (
-                <button 
+                <button
                   onClick={() => handleDelete(selectedER.id)}
                   className="btn-delete"
                 >

@@ -218,7 +218,7 @@ class Sale {
     }
 
     // RotaciÃ³n de categorÃ­as
-        static async getCategoryRotation() {
+    static async getCategoryRotation() {
         const sql = `
             SELECT 
                 c.nombre as category_name,
@@ -620,7 +620,7 @@ class Sale {
     }
 
     // Obtener estadÃ­sticas de ventas del mes
-        static async getSalesOfMonth() {
+    static async getSalesOfMonth() {
         try {
             const [rows] = await database.query(`
                 SELECT COUNT(*) as total_sales, COALESCE(SUM(total), 0) as total_amount

@@ -24,7 +24,15 @@ export default function Customers() {
   const { items: sortedCustomers, requestSort, sortConfig } = useSortableData(customers, { key: 'name', direction: 'ascending' });
 
   // Hook de ordenado para segmentación
-  const { items: sortedSegmentation, requestSort: requestSortSeg, sortConfig: sortConfigSeg } = useSortableData(segmentation, { key: 'total_spent', direction: 'descending' });
+  const { items: sortedSegmentation, requestSort: requestSortSeg, sortConfig: sortConfigSeg } = useSortableData(segmentation, {
+    key: 'total_spent',
+    direction: 'descending',
+    keyTypes: {
+      total_spent: 'number',
+      purchase_count: 'number',
+      last_purchase: 'date'
+    }
+  });
 
   useEffect(() => {
     fetchCustomers();
@@ -252,7 +260,7 @@ export default function Customers() {
                             .customer-card-dynamic:hover {
                               transform: scale(1.03);
                               box-shadow: 0 10px 25px rgba(247,49,148,0.1) !important;
-                              border-color: #fce7f3 !important;
+                              border-color: var(--accent-pink) !important;
                             }
                           `}
                         </style>
@@ -325,7 +333,7 @@ export default function Customers() {
                                 Gastado
                               </span>
                               <span style={{ fontSize: '15px', color: '#10b981', fontWeight: '800' }}>
-                                ${Number(totalSpent).toLocaleString('es-AR')}
+                                {formatCurrency(totalSpent)}
                               </span>
                             </div>
                           </div>
@@ -373,20 +381,30 @@ export default function Customers() {
                   <thead>
                     <tr>
 
-                      <th onClick={() => requestSortSeg('email')} style={{ cursor: 'pointer' }}>
-                        Mail {sortConfigSeg?.key === 'email' && (sortConfigSeg.direction === 'ascending' ? <FaSortUp /> : <FaSortDown />)}
+                      <th onClick={() => requestSortSeg('email')} style={{ cursor: 'pointer', textAlign: 'center', verticalAlign: 'middle' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyItems: 'center', justifyContent: 'center', gap: '5px' }}>
+                          Mail {sortConfigSeg?.key === 'email' && (sortConfigSeg.direction === 'ascending' ? <FaSortUp /> : <FaSortDown />)}
+                        </div>
                       </th>
-                      <th onClick={() => requestSortSeg('purchase_count')} style={{ cursor: 'pointer', textAlign: 'center' }}>
-                        Compras {sortConfigSeg?.key === 'purchase_count' && (sortConfigSeg.direction === 'ascending' ? <FaSortUp /> : <FaSortDown />)}
+                      <th onClick={() => requestSortSeg('purchase_count')} style={{ cursor: 'pointer', textAlign: 'center', verticalAlign: 'middle' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyItems: 'center', justifyContent: 'center', gap: '5px' }}>
+                          Compras {sortConfigSeg?.key === 'purchase_count' && (sortConfigSeg.direction === 'ascending' ? <FaSortUp /> : <FaSortDown />)}
+                        </div>
                       </th>
-                      <th onClick={() => requestSortSeg('total_spent')} style={{ cursor: 'pointer', textAlign: 'right' }}>
-                        Inversión Total {sortConfigSeg?.key === 'total_spent' && (sortConfigSeg.direction === 'ascending' ? <FaSortUp /> : <FaSortDown />)}
+                      <th onClick={() => requestSortSeg('total_spent')} style={{ cursor: 'pointer', textAlign: 'center', verticalAlign: 'middle' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyItems: 'center', justifyContent: 'center', gap: '5px' }}>
+                          Inversión Total {sortConfigSeg?.key === 'total_spent' && (sortConfigSeg.direction === 'ascending' ? <FaSortUp /> : <FaSortDown />)}
+                        </div>
                       </th>
-                      <th onClick={() => requestSortSeg('last_purchase')} style={{ cursor: 'pointer', textAlign: 'center' }}>
-                        Última Compra {sortConfigSeg?.key === 'last_purchase' && (sortConfigSeg.direction === 'ascending' ? <FaSortUp /> : <FaSortDown />)}
+                      <th onClick={() => requestSortSeg('last_purchase')} style={{ cursor: 'pointer', textAlign: 'center', verticalAlign: 'middle' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyItems: 'center', justifyContent: 'center', gap: '5px' }}>
+                          Última Compra {sortConfigSeg?.key === 'last_purchase' && (sortConfigSeg.direction === 'ascending' ? <FaSortUp /> : <FaSortDown />)}
+                        </div>
                       </th>
-                      <th onClick={() => requestSortSeg('segment')} style={{ cursor: 'pointer', textAlign: 'center' }}>
-                        Compra seguido? {sortConfigSeg?.key === 'segment' && (sortConfigSeg.direction === 'ascending' ? <FaSortUp /> : <FaSortDown />)}
+                      <th onClick={() => requestSortSeg('segment')} style={{ cursor: 'pointer', textAlign: 'center', verticalAlign: 'middle' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyItems: 'center', justifyContent: 'center', gap: '5px' }}>
+                          Compra seguido? {sortConfigSeg?.key === 'segment' && (sortConfigSeg.direction === 'ascending' ? <FaSortUp /> : <FaSortDown />)}
+                        </div>
                       </th>
                     </tr>
                   </thead>
@@ -394,11 +412,11 @@ export default function Customers() {
                     {sortedSegmentation.map(c => (
                       <tr key={c.email}>
 
-                        <td style={{ fontSize: '13px', opacity: 0.8 }}>{c.email}</td>
-                        <td style={{ textAlign: 'center', fontWeight: '700' }}>{c.purchase_count || 0}</td>
-                        <td style={{ textAlign: 'right', fontWeight: '700', color: 'var(--accent-pink)' }}>{formatCurrency(c.total_spent || 0)}</td>
-                        <td style={{ textAlign: 'center', fontSize: '13px' }}>{c.last_purchase?.slice(0, 10) || 'Sin compras'}</td>
-                        <td style={{ textAlign: 'center' }}>
+                        <td style={{ fontSize: '13px', opacity: 0.8, textAlign: 'center', verticalAlign: 'middle' }}>{c.email}</td>
+                        <td style={{ textAlign: 'center', fontWeight: '700', verticalAlign: 'middle' }}>{c.purchase_count || 0}</td>
+                        <td style={{ textAlign: 'center', fontWeight: '700', color: 'var(--accent-pink)', verticalAlign: 'middle' }}>{formatCurrency(c.total_spent || 0)}</td>
+                        <td style={{ textAlign: 'center', fontSize: '13px', verticalAlign: 'middle' }}>{c.last_purchase?.slice(0, 10) || 'Sin compras'}</td>
+                        <td style={{ textAlign: 'center', verticalAlign: 'middle' }}>
                           <span className={`segment-pill ${getSegmentClass(c.segment)}`}>
                             {c.segment === 'VIP' && <FaDollarSign style={{ fontSize: '10px' }} />}
                             {c.segment}
@@ -433,7 +451,7 @@ export default function Customers() {
                         <p>{selectedCustomer.email}</p>
                         <div style={{ marginTop: '15px', display: 'flex', gap: '10px' }}>
                           {selectedCustomer.phone && (
-                            <span style={{ background: 'rgba(255,255,255,0.2)', padding: '5px 12px', borderRadius: '20px', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <span style={{ background: 'var(--bg-tertiary)', padding: '5px 12px', borderRadius: '20px', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '6px', color: 'white' }}>
                               <FaPhone style={{ fontSize: '10px' }} /> {selectedCustomer.phone}
                             </span>
                           )}
@@ -446,7 +464,7 @@ export default function Customers() {
 
                     <div className="modal-body">
                       <div className="stats-grid">
-                        <div className="stat-premium-card" style={{ background: 'rgba(247, 49, 148, 0.03)' }}>
+                        <div className="stat-premium-card" style={{ background: 'var(--bg-tertiary)' }}>
                           <div className="stat-icon-circle" style={{ background: 'var(--accent-pink-light)', color: 'var(--accent-pink)' }}>
                             <FaShoppingBag />
                           </div>
@@ -454,7 +472,7 @@ export default function Customers() {
                           <span className="label-muted">Compras Realizadas</span>
                         </div>
 
-                        <div className="stat-premium-card" style={{ background: 'rgba(40, 167, 69, 0.03)' }}>
+                        <div className="stat-premium-card" style={{ background: 'var(--bg-tertiary)' }}>
                           <div className="stat-icon-circle" style={{ background: 'rgba(40, 167, 69, 0.1)', color: '#28a745' }}>
                             <FaDollarSign />
                           </div>
@@ -462,27 +480,27 @@ export default function Customers() {
                           <span className="label-muted">Inversión Acumulada</span>
                         </div>
 
-                        <div className="stat-premium-card" style={{ background: 'rgba(255, 193, 7, 0.03)' }}>
+                        <div className="stat-premium-card" style={{ background: 'var(--bg-tertiary)' }}>
                           <div className="stat-icon-circle" style={{ background: 'rgba(255, 193, 7, 0.1)', color: '#ffc107' }}>
                             <FaCalendarAlt />
                           </div>
-                          <span className="val-large" style={{ fontSize: '18px', color: '#856404' }}>{customerStats?.last_purchase?.slice(0, 10) || 'N/A'}</span>
-                          <span className="label-muted">Última Visita</span>
+                          <span className="val-large" style={{ fontSize: '18px', color: 'var(--text-heading)' }}>{customerStats?.last_purchase?.slice(0, 10) || 'N/A'}</span>
+                          <span className="label-muted">Última Compra</span>
                         </div>
                       </div>
 
                       <div className="modal-section-title">
                         <FaShoppingBag />
-                        <h3>Historial de Movimientos</h3>
+                        <h3>Historial de Compras</h3>
                       </div>
 
                       <div className="table-wrapper" style={{ boxShadow: 'none', border: '1px solid var(--border-color)', background: 'var(--bg-tertiary)' }}>
                         <table className="premium-table">
                           <thead>
                             <tr>
-                              <th style={{ background: 'transparent' }}>Fecha de Compra</th>
-                              <th style={{ background: 'transparent' }}>Resumen de Productos</th>
-                              <th style={{ background: 'transparent', textAlign: 'right' }}>Total Transacción</th>
+                              <th style={{ background: 'transparent', textAlign: 'center', verticalAlign: 'middle' }}>Fecha de Compra</th>
+                              <th style={{ background: 'transparent', textAlign: 'center', verticalAlign: 'middle' }}>Resumen de Productos</th>
+                              <th style={{ background: 'transparent', textAlign: 'center', verticalAlign: 'middle' }}>Total Transacción</th>
                             </tr>
                           </thead>
                           <tbody>
@@ -495,9 +513,9 @@ export default function Customers() {
                             ) : (
                               purchaseHistory.map(s => (
                                 <tr key={s.id}>
-                                  <td style={{ fontWeight: '600' }}>{s.sale_date?.slice(0, 10)}</td>
-                                  <td style={{ fontSize: '13px' }}>{s.items}</td>
-                                  <td style={{ textAlign: 'right', fontWeight: '700', color: 'var(--accent-pink)' }}>{formatCurrency(s.total || 0)}</td>
+                                  <td style={{ fontWeight: '600', textAlign: 'center', verticalAlign: 'middle' }}>{s.sale_date?.slice(0, 10)}</td>
+                                  <td style={{ fontSize: '13px', textAlign: 'center', verticalAlign: 'middle' }}>{s.items}</td>
+                                  <td style={{ textAlign: 'center', fontWeight: '700', color: 'var(--accent-pink)', verticalAlign: 'middle' }}>{formatCurrency(s.total || 0)}</td>
                                 </tr>
                               ))
                             )}

@@ -27,9 +27,21 @@
 }
 
 @keyframes bell-ring {
-  0%, 100% { transform: rotate(0deg); }
-  10%, 30% { transform: rotate(-10deg); }
-  20%, 40% { transform: rotate(10deg); }
+
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+
+  10%,
+  30% {
+    transform: rotate(-10deg);
+  }
+
+  20%,
+  40% {
+    transform: rotate(10deg);
+  }
 }
 
 .notification-badge {
@@ -48,8 +60,15 @@
 }
 
 @keyframes badge-pulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.1); }
+
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.1);
+  }
 }
 
 .connection-status {
@@ -63,11 +82,12 @@
 }
 
 .connection-status.connected {
-  background: #28a745;
+  background: var(--accent-pink);
+  box-shadow: 0 0 5px var(--accent-pink-light);
 }
 
 .connection-status.disconnected {
-  background: #dc3545;
+  background: var(--text-muted);
 }
 
 .notification-overlay {
@@ -101,6 +121,7 @@
     opacity: 0;
     transform: translateY(-10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -238,11 +259,12 @@
 }
 
 .status-indicator.online {
-  color: #28a745;
+  color: var(--accent-pink);
+  font-weight: 600;
 }
 
 .status-indicator.offline {
-  color: #dc3545;
+  color: var(--text-muted);
 }
 
 /* Responsive */

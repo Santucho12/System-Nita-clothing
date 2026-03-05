@@ -51,7 +51,7 @@
   padding: 11.2px 16px;
   /* Reducido 3% adicional para altura */
   border-radius: 10px;
-  color: #64748b;
+  color: var(--text-muted);
   text-decoration: none;
   font-weight: 600;
   font-size: 12.3px;
@@ -101,7 +101,7 @@
   top: 25%;
   height: 50%;
   width: 3.5px;
-  background: #f73194;
+  background: var(--accent-pink);
   border-radius: 0 4px 4px 0;
 }
 
@@ -131,17 +131,17 @@
 }
 
 .sidebar-logout-btn:hover {
-  background: #f73194;
+  background: var(--accent-pink);
   color: white;
-  border-color: #f73194;
-  box-shadow: 0 4px 12px rgba(247, 49, 148, 0.2);
+  border-color: var(--accent-pink);
+  box-shadow: 0 4px 12px var(--accent-pink-light);
 }
 
 .sidebar-footer-info {
   margin-top: 14px;
   text-align: center;
   font-size: 10.2px;
-  color: #94a3b8;
+  color: var(--text-muted);
   font-weight: 600;
   letter-spacing: 0.05em;
   text-transform: uppercase;
@@ -200,7 +200,7 @@
 }
 
 .sidebar-modal-btn {
-  background: #f73194;
+  background: var(--accent-pink);
   color: white;
   border: none;
   border-radius: 12px;
@@ -211,9 +211,9 @@
 }
 
 .sidebar-modal-btn:hover {
-  background: #d42079;
+  background: var(--accent-pink-dark, #d42079);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(247, 49, 148, 0.25);
+  box-shadow: 0 4px 12px var(--accent-pink-light);
 }
 
 @media (max-width: 900px) {

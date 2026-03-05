@@ -72,15 +72,17 @@
 
 /* Accent Colors */
 .metric-card.primary {
-  border-left: 4px solid #3b82f6;
+  border-left: 4px solid var(--accent-pink);
 }
 
 .metric-card.success {
-  border-left: 4px solid #10b981;
+  border-left: 4px solid var(--accent-pink);
+  opacity: 0.9;
 }
 
 .metric-card.warning {
-  border-left: 4px solid #f59e0b;
+  border-left: 4px solid var(--accent-pink);
+  opacity: 0.8;
 }
 
 /* Charts Grid */
@@ -125,7 +127,7 @@
   align-items: center;
   height: 100vh;
   font-size: 1.2rem;
-  color: #3b82f6;
+  color: var(--accent-pink);
   font-weight: 600;
 }
 
