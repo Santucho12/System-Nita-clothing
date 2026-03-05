@@ -75,15 +75,20 @@ const Suppliers = () => {
       return;
     }
 
+    const finalData = { ...formData };
+    if (finalData.website && !finalData.website.includes('://')) {
+      finalData.website = 'https://' + finalData.website;
+    }
+
     try {
       const token = localStorage.getItem('token');
       if (editingSupplier) {
-        await axios.put(`${API_URL}/proveedores/${editingSupplier.id}`, formData, {
+        await axios.put(`${API_URL}/proveedores/${editingSupplier.id}`, finalData, {
           headers: { Authorization: `Bearer ${token}` }
         });
         toast.success('Proveedor actualizado exitosamente');
       } else {
-        await axios.post(`${API_URL}/proveedores`, formData, {
+        await axios.post(`${API_URL}/proveedores`, finalData, {
           headers: { Authorization: `Bearer ${token}` }
         });
         toast.success('Proveedor creado exitosamente');
@@ -514,9 +519,9 @@ const Suppliers = () => {
                 <div>
                   <label className="form-label-premium"><FaGlobe /> Sitio Web</label>
                   <input
-                    type="url" name="website"
+                    type="text" name="website"
                     value={formData.website} onChange={handleInputChange}
-                    placeholder="https://ejemplo.com"
+                    placeholder="ejemplo.com"
                     className="form-input-premium"
                   />
                 </div>
