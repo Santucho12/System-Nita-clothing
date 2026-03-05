@@ -7,7 +7,7 @@ import { toast } from 'react-toastify';
 import { Link } from 'react-router-dom';
 import { formatCurrency, formatInteger, formatNumber } from '../utils/formatters';
 import {
-  FaHome, FaTshirt, FaDollarSign, FaShoppingCart, FaChartLine,
+  FaHome, FaTshirt, FaDollarSign, FaShoppingCart, FaChartLine, FaChartBar,
   FaTrophy, FaStar, FaPlus, FaSync, FaBox, FaMoneyBillWave,
   FaStore, FaArrowRight, FaTag, FaPalette, FaChevronRight, FaBolt, FaUsers
 } from 'react-icons/fa';
@@ -79,7 +79,7 @@ const Dashboard = () => {
   }
 
   return (
-    <div style={{ padding: '30px', background: 'var(--bg-gradient)', minHeight: '100vh' }}>
+    <div style={{ padding: '20px 30px', background: 'var(--bg-secondary)', minHeight: '100vh' }}>
       <style>
         {`
           @keyframes perspective3DFlip {
@@ -100,12 +100,12 @@ const Dashboard = () => {
           .stat-card {
             animation: perspective3DFlip 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) both;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            background: white;
+            background: var(--bg-card);
             border-radius: 12px;
             overflow: hidden;
             display: flex;
             flex-direction: column;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05) !important;
+            box-shadow: var(--shadow-sm) !important;
             height: 250px; /* Altura reducida */
             padding: 0 !important; /* Elimina el borde blanco del CSS externo */
           }
@@ -121,12 +121,12 @@ const Dashboard = () => {
             align-items: center;
             justify-content: center;
             flex: 3; /* Ocupa el 75% */
-            background: white;
-            padding: 15px 10px 5px 10px;
+            background: var(--bg-card);
+            padding: 10px 10px 4px 10px;
           }
 
           .stat-icon-wrapper {
-            background: #fff0f7;
+            background: var(--accent-pink-light);
             width: 38px;
             height: 38px;
             border-radius: 10px;
@@ -153,8 +153,8 @@ const Dashboard = () => {
           }
 
           .stat-card-footer {
-            background: #f1f5f9;
-            border-top: 1px solid #e2e8f0;
+            background: var(--bg-tertiary);
+            border-top: 1px solid var(--border-color);
             flex: 1; /* Ocupa el 25% exacto */
             display: flex;
             width: 100%;
@@ -208,9 +208,9 @@ const Dashboard = () => {
           }
 
           .btn-gray {
-            background: #f1f5f9;
-            color: #475569 !important;
-            border: 1px solid #e2e8f0 !important;
+            background: var(--bg-tertiary);
+            color: var(--text-secondary) !important;
+            border: 1px solid var(--border-color) !important;
             transition: all 0.3s ease;
             border-radius: 12px !important;
           }
@@ -236,16 +236,17 @@ const Dashboard = () => {
       {/* Header Premium - Estética Stack Vertical */}
       <div className="page-header" style={{
         marginBottom: '40px',
-        background: 'white',
-        padding: '30px 40px',
+        background: 'var(--bg-card)',
+        padding: '20px 40px',
         borderRadius: '24px',
-        boxShadow: '0 4px 20px rgba(0,0,0,0.03)',
+        boxShadow: 'var(--shadow-sm)',
         textAlign: 'left',
-        border: '1px solid #f1f5f9',
+        border: '1px solid var(--border-color)',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'flex-start',
-        gap: '20px'
+        gap: '20px',
+        marginTop: '-20px'
       }}>
         {/* Fila 1: Badge + Fecha */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -261,8 +262,8 @@ const Dashboard = () => {
             alignItems: 'center',
             gap: '8px'
           }}>
-            <FaChartLine style={{ fontSize: '16px' }} />
-            PANEL DE CONTROL
+            <FaChartBar style={{ fontSize: '14px' }} />
+            SISTEMA ACTIVO
           </div>
           <span style={{ color: '#cbd5e1', fontSize: '18px' }}>•</span>
           <span style={{ color: '#64748b', fontSize: '14px', fontWeight: '500' }}>
@@ -279,8 +280,8 @@ const Dashboard = () => {
             fontWeight: '850',
             letterSpacing: '-0.02em'
           }}>
+            Hola, <span style={{ color: '#f73194' }}>Nita Clothing</span> <span style={{ display: 'inline-block', animation: 'waveHand 2.5s infinite', transformOrigin: '70% 70%' }}>👋</span>
           </h1>
-
         </div>
 
         {/* Fila 3: Subtítulo */}
@@ -292,6 +293,7 @@ const Dashboard = () => {
           maxWidth: '850px',
           lineHeight: '1.5'
         }}>
+          Aquí tienes el resumen administrativo de tu tienda de ropa.
         </p>
 
         <style>
@@ -340,7 +342,7 @@ const Dashboard = () => {
           </div>
           <div className="stat-card-footer">
             <Link to="/products" className="stat-footer-link">
-              Ver inventario
+              Ver stock
               <FaArrowRight style={{ fontSize: '10px' }} />
             </Link>
           </div>
@@ -374,7 +376,7 @@ const Dashboard = () => {
           </div>
           <div className="stat-card-footer">
             <Link to="/reports/advanced" className="stat-footer-link">
-              Ver reportes
+              Ver estadísticas
               <FaArrowRight style={{ fontSize: '10px' }} />
             </Link>
           </div>
@@ -383,8 +385,8 @@ const Dashboard = () => {
 
       {/* Categorías más vendidas del mes */}
       {topCategories.length > 0 && (
-        <div className="top-categories-section" style={{ background: 'white', borderRadius: '12px', padding: '30px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', marginBottom: '30px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px', paddingBottom: '15px', borderBottom: '2px solid #f0f0f0' }}>
+        <div className="top-categories-section" style={{ background: 'white', borderRadius: '12px', padding: '20px 30px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', marginBottom: '30px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px', paddingBottom: '10px', borderBottom: '2px solid #f0f0f0' }}>
             <h2 style={{ margin: 0, fontSize: '24px', fontWeight: '600', color: '#333', display: 'flex', alignItems: 'center', gap: '10px' }}>
               <FaTrophy style={{ color: '#f73194', fontSize: '28px' }} />
               Categorías Más Vendidas del Mes
@@ -392,7 +394,7 @@ const Dashboard = () => {
             <Link
               to="/reports/advanced"
               className="btn-gray"
-              style={{ padding: '11px 24px', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '10px', fontSize: '14px', fontWeight: '700' }}
+              style={{ padding: '6px 24px', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '10px', fontSize: '14px', fontWeight: '700' }}
             >
               Ver reportes completos
               <FaChartLine style={{ fontSize: '16px' }} />
@@ -407,7 +409,7 @@ const Dashboard = () => {
                 style={{
                   display: 'flex',
                   alignItems: 'center',
-                  padding: '20px',
+                  padding: '14px 20px',
                   background: '#f8f9fa',
                   borderRadius: '10px',
                   border: '1px solid #e9ecef',
@@ -416,7 +418,7 @@ const Dashboard = () => {
               >
                 {/* Ranking Badge */}
                 <div style={{
-                  background: index === 0 ? 'linear-gradient(135deg, #FFD700 0%, #FFA500 100%)' : index === 1 ? 'linear-gradient(135deg, #C0C0C0 0%, #808080 100%)' : 'linear-gradient(135deg, #CD7F32 0%, #8B4513 100%)',
+                  background: index === 0 ? 'linear-gradient(135deg, #FFD700 0%, #FFA500 100%)' : index === 1 ? 'linear-gradient(135deg, #C0C0C0 0%, #808080 100%)' : 'linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%)',
                   width: '50px',
                   height: '50px',
                   borderRadius: '12px',
@@ -426,8 +428,8 @@ const Dashboard = () => {
                   flexShrink: 0
                 }}>
                   <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                    <FaStar style={{ fontSize: '18px', color: 'white' }} />
-                    <span style={{ fontSize: '12px', fontWeight: '700', color: 'white' }}>#{index + 1}</span>
+                    <FaStar style={{ fontSize: '18px', color: index === 2 ? '#1E88E5' : 'white' }} />
+                    <span style={{ fontSize: '12px', fontWeight: '700', color: index === 2 ? '#1E88E5' : 'white' }}>#{index + 1}</span>
                   </div>
                 </div>
 
@@ -457,7 +459,7 @@ const Dashboard = () => {
                   to="/categories"
                   className="btn-pink"
                   style={{
-                    padding: '12px 24px',
+                    padding: '7px 24px',
                     color: 'white',
                     border: 'none',
                     textDecoration: 'none',
@@ -480,8 +482,8 @@ const Dashboard = () => {
       )}
 
       {/* Acciones rápidas */}
-      <div className="quick-actions-section" style={{ background: 'white', borderRadius: '12px', padding: '30px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
-        <h2 style={{ margin: '0 0 25px 0', fontSize: '24px', fontWeight: '600', color: '#333', display: 'flex', alignItems: 'center', gap: '10px', paddingBottom: '15px', borderBottom: '2px solid #f0f0f0' }}>
+      <div className="quick-actions-section" style={{ background: 'white', borderRadius: '12px', padding: '20px 30px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
+        <h2 style={{ margin: '0 0 25px 0', fontSize: '24px', fontWeight: '600', color: '#333', display: 'flex', alignItems: 'center', gap: '10px', paddingBottom: '10px', borderBottom: '2px solid #f0f0f0' }}>
           <FaBolt style={{ color: '#f59e0b', fontSize: '28px' }} />
           Acciones Rápidas
         </h2>
@@ -494,7 +496,7 @@ const Dashboard = () => {
             style={{
               display: 'flex',
               alignItems: 'center',
-              padding: '24px 28px',
+              padding: '17px 28px',
               background: 'white',
               borderRadius: '24px',
               textDecoration: 'none',
@@ -527,7 +529,7 @@ const Dashboard = () => {
             style={{
               display: 'flex',
               alignItems: 'center',
-              padding: '24px 28px',
+              padding: '17px 28px',
               background: 'white',
               borderRadius: '24px',
               textDecoration: 'none',
@@ -560,7 +562,7 @@ const Dashboard = () => {
             style={{
               display: 'flex',
               alignItems: 'center',
-              padding: '24px 28px',
+              padding: '17px 28px',
               background: 'white',
               borderRadius: '24px',
               textDecoration: 'none',
@@ -581,7 +583,7 @@ const Dashboard = () => {
             </div>
             <div style={{ flex: 1 }}>
               <h3 style={{ margin: '0 0 4px 0', fontSize: '18px', fontWeight: '850', color: '#1e293b', letterSpacing: '-0.01em' }}>Clientes</h3>
-              <p style={{ margin: 0, fontSize: '13px', color: '#64748b', fontWeight: '500', lineHeight: '1.4' }}>Base de datos de fidelidad</p>
+              <p style={{ margin: 0, fontSize: '13px', color: '#64748b', fontWeight: '500', lineHeight: '1.4' }}>Base de datos de clientes</p>
             </div>
             <FaChevronRight style={{ color: '#cbd5e1', fontSize: '14px' }} />
           </Link>

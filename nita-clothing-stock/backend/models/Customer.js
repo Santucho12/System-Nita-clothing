@@ -15,9 +15,18 @@ class Customer {
         return await database.get(sql, [email], connection);
     }
 
-    // Listar clientes
+    // Listar clientes con estadísticas básicas
     static async getAll(connection = null) {
-        const sql = `SELECT * FROM customers WHERE deleted_at IS NULL ORDER BY created_at DESC`;
+        const sql = `
+            SELECT c.*, 
+                   COUNT(s.id) as purchase_count, 
+                   COALESCE(SUM(s.total), 0) as total_spent
+            FROM customers c
+            LEFT JOIN sales s ON c.email = s.customer_email
+            WHERE c.deleted_at IS NULL
+            GROUP BY c.email
+            ORDER BY c.created_at DESC
+        `;
         return await database.all(sql, [], connection);
     }
 

@@ -5,13 +5,13 @@
   left: 0;
   height: 100vh;
   width: 272px;
-  background: #ffffff;
+  background: var(--bg-sidebar);
   display: flex;
   flex-direction: column;
   align-items: stretch;
   z-index: 1000;
-  border-right: 1px solid #f1f5f9;
-  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.02);
+  border-right: 1px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
   transition: all 0.3s ease;
 }
 
@@ -19,12 +19,14 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 22px 18px;
-  margin-bottom: 5px;
+  padding: 15px 15px 0px 15px;
+  /* Reducido de 25px a 20px */
+  margin-bottom: -15px;
 }
 
 .sidebar-logo img {
-  max-width: 135px;
+  max-width: 165px;
+  /* Aumentado un 10% de 150px */
   height: auto;
   transition: transform 0.3s ease;
 }
@@ -79,8 +81,8 @@
 }
 
 .sidebar-link:hover {
-  background: #f8fafc;
-  color: #f73194;
+  background: var(--bg-hover);
+  color: var(--accent-pink);
 }
 
 .sidebar-link:hover svg {
@@ -88,8 +90,8 @@
 }
 
 .sidebar-link.active {
-  background: #fff0f7;
-  color: #f73194;
+  background: var(--accent-pink-light);
+  color: var(--accent-pink);
 }
 
 .sidebar-link.active::before {
@@ -106,8 +108,8 @@
 .sidebar-footer {
   margin-top: auto;
   padding: 22px 14px;
-  border-top: 1px solid #f1f5f9;
-  background: #f8fafc;
+  border-top: 1px solid var(--border-color);
+  background: var(--bg-sidebar);
 }
 
 .sidebar-logout-btn {
@@ -117,15 +119,15 @@
   gap: 9px;
   width: 100%;
   padding: 9.7px;
-  background: white;
-  color: #f73194;
-  border: 1px solid #fee2e2;
+  background: var(--bg-card);
+  color: var(--accent-pink);
+  border: 1px solid var(--border-color);
   border-radius: 11px;
   cursor: pointer;
   font-size: 13.1px;
   font-weight: 700;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+  transition: all 0.6s ease;
+  box-shadow: var(--shadow-sm);
 }
 
 .sidebar-logout-btn:hover {
@@ -133,7 +135,6 @@
   color: white;
   border-color: #f73194;
   box-shadow: 0 4px 12px rgba(247, 49, 148, 0.2);
-  transform: translateY(-2px);
 }
 
 .sidebar-footer-info {
@@ -162,9 +163,9 @@
 }
 
 .sidebar-modal {
-  background: white;
+  background: var(--bg-card);
   border-radius: 20px;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  box-shadow: var(--shadow-lg);
   padding: 40px;
   width: 100%;
   max-width: 400px;
@@ -187,13 +188,13 @@
 .sidebar-modal-title {
   font-size: 20px;
   font-weight: 800;
-  color: #1e293b;
+  color: var(--text-heading);
   margin-bottom: 12px;
 }
 
 .sidebar-modal-desc {
   font-size: 15px;
-  color: #64748b;
+  color: var(--text-secondary);
   margin-bottom: 24px;
   line-height: 1.5;
 }

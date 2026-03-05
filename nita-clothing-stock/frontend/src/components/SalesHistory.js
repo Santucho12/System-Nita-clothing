@@ -11,6 +11,8 @@ import {
 } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 import './SalesHistory.css';
+import PremiumModal from './PremiumModal';
+import './PremiumModal.css';
 
 const defaultFilters = {
   start_date: '',
@@ -31,6 +33,18 @@ export default function SalesHistory() {
   const [error, setError] = useState(null);
   const [showFilters, setShowFilters] = useState(true);
   const [showComingSoon, setShowComingSoon] = useState(false);
+
+  const [premiumModal, setPremiumModal] = useState({
+    show: false,
+    type: 'info',
+    title: '',
+    message: '',
+    confirmText: 'Aceptar',
+    cancelText: 'Cancelar',
+    onConfirm: () => { },
+    inputValue: '',
+    onInputChange: (val) => setPremiumModal(prev => ({ ...prev, inputValue: val }))
+  });
 
   // Configuración de tipos para el ordenado
   const sortOptions = React.useMemo(() => ({
@@ -116,31 +130,41 @@ export default function SalesHistory() {
   const handleSendEmail = () => setShowComingSoon(true);
   const handleExportPDF = () => setShowComingSoon(true);
 
-  const handleCancelSale = async (sale) => {
+  const handleCancelSale = (sale) => {
     if (!sale || !sale.id) {
       toast.error('No se pudo identificar la venta a cancelar');
       return;
     }
     const saleId = sale.id;
-    if (window.confirm(`¿Estás seguro de que deseas cancelar la venta #${saleId}?`)) {
-      try {
-        setLoading(true);
-        console.log('Cancelando venta ID:', saleId);
-        const response = await api.delete(`/ventas/${saleId}`);
-        if (response.data.success) {
-          toast.success('Venta cancelada exitosamente.');
-          fetchSales();
-          setSelectedSale(null);
-        } else {
-          toast.error(response.data.message || 'Error al cancelar la venta');
+
+    setPremiumModal({
+      show: true,
+      type: 'danger',
+      title: 'Cancelar Venta',
+      message: `¿Estás seguro de que deseas cancelar la venta #${saleId}?.`,
+      confirmText: 'Cancelar Venta',
+      cancelText: 'Cerrar',
+      onConfirm: async () => {
+        try {
+          setLoading(true);
+          const response = await api.delete(`/ventas/${saleId}`);
+          if (response.data.success) {
+            toast.success('Venta cancelada exitosamente.');
+            fetchSales();
+            setSelectedSale(null);
+          } else {
+            toast.error(response.data.message || 'Error al cancelar la venta');
+          }
+          setPremiumModal(prev => ({ ...prev, show: false }));
+        } catch (error) {
+          console.error('Error al cancelar venta:', error);
+          toast.error('Error al cancelar la venta. Por favor, intente de nuevo.');
+          setPremiumModal(prev => ({ ...prev, show: false }));
+        } finally {
+          setLoading(false);
         }
-      } catch (error) {
-        console.error('Error al cancelar venta:', error);
-        toast.error('Error al cancelar la venta. Por favor, intente de nuevo.');
-      } finally {
-        setLoading(false);
       }
-    }
+    });
   };
 
   const getStatusBadge = (status) => {
@@ -180,12 +204,12 @@ export default function SalesHistory() {
     <div className="sales-history-container">
       {/* ═══════ HERO HEADER ═══════ */}
       <div className="products-hero" style={{
-        background: 'white',
+        background: 'var(--bg-card)',
         borderRadius: '20px',
         padding: '28px 36px',
         marginBottom: '24px',
-        boxShadow: '0 4px 20px rgba(0,0,0,0.04)',
-        border: '1px solid rgba(0,0,0,0.04)',
+        boxShadow: 'var(--shadow-sm)',
+        border: '1px solid var(--border-color)',
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center'
@@ -202,10 +226,10 @@ export default function SalesHistory() {
             <FaHistory style={{ color: '#f73194', fontSize: '26px' }} />
           </div>
           <div>
-            <h1 style={{ margin: 0, fontSize: '24px', fontWeight: '800', color: '#1e293b', letterSpacing: '-0.02em' }}>
+            <h1 style={{ margin: 0, fontSize: '24px', fontWeight: '800', color: 'var(--text-heading)', letterSpacing: '-0.02em' }}>
               Historial de Ventas
             </h1>
-            <p style={{ margin: '2px 0 0', fontSize: '14px', color: '#94a3b8', fontWeight: '500' }}>
+            <p style={{ margin: '2px 0 0', fontSize: '14px', color: 'var(--text-muted)', fontWeight: '500' }}>
               {total} venta{total !== 1 ? 's' : ''} registradas en el sistema
             </p>
           </div>
@@ -215,13 +239,13 @@ export default function SalesHistory() {
           <button
             onClick={() => setShowFilters(!showFilters)}
             style={{
-              padding: '11px 22px', color: '#475569', background: '#f1f5f9',
-              border: '1px solid #e2e8f0', borderRadius: '12px', cursor: 'pointer',
+              padding: '11px 22px', color: 'var(--text-primary)', background: 'var(--bg-tertiary)',
+              border: '1px solid var(--border-color)', borderRadius: '12px', cursor: 'pointer',
               display: 'flex', alignItems: 'center', gap: '8px',
               fontSize: '14px', fontWeight: '600', transition: 'all 0.2s'
             }}
-            onMouseOver={(e) => { e.currentTarget.style.background = '#e2e8f0'; }}
-            onMouseOut={(e) => { e.currentTarget.style.background = '#f1f5f9'; }}
+            onMouseOver={(e) => { e.currentTarget.style.background = 'var(--bg-hover)'; }}
+            onMouseOut={(e) => { e.currentTarget.style.background = 'var(--bg-tertiary)'; }}
           >
             <FaFilter />
             {showFilters ? 'Ocultar Filtros' : 'Filtrar Datos'}
@@ -231,16 +255,16 @@ export default function SalesHistory() {
 
       {showFilters && (
         <div className="products-filters-bar" style={{
-          background: 'white',
+          background: 'var(--bg-card)',
           borderRadius: '20px',
           padding: '20px 28px',
           marginBottom: '28px',
-          boxShadow: '0 4px 20px rgba(0,0,0,0.04)',
-          border: '1px solid rgba(0,0,0,0.04)'
+          boxShadow: 'var(--shadow-sm)',
+          border: '1px solid var(--border-color)'
         }}>
           <div className="filter-grid" style={{ display: 'flex', gap: '14px', alignItems: 'center', flexWrap: 'wrap' }}>
             <div style={{ flex: '1 1 125px', position: 'relative' }}>
-              <FaCalendarAlt style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', fontSize: '14px', zIndex: 1, pointerEvents: 'none' }} />
+              <FaCalendarAlt style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: '#f73194', fontSize: '14px', zIndex: 1, pointerEvents: 'none' }} />
               <input
                 type="date"
                 name="start_date"
@@ -251,7 +275,7 @@ export default function SalesHistory() {
               />
             </div>
             <div style={{ flex: '1 1 125px', position: 'relative' }}>
-              <FaCalendarAlt style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', fontSize: '14px', zIndex: 1, pointerEvents: 'none' }} />
+              <FaCalendarAlt style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: '#f73194', fontSize: '14px', zIndex: 1, pointerEvents: 'none' }} />
               <input
                 type="date"
                 name="end_date"
@@ -262,7 +286,7 @@ export default function SalesHistory() {
               />
             </div>
             <div style={{ flex: '1 1 120px', position: 'relative' }}>
-              <FaHashtag style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', fontSize: '14px', zIndex: 1, pointerEvents: 'none' }} />
+              <FaHashtag style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: '#f73194', fontSize: '14px', zIndex: 1, pointerEvents: 'none' }} />
               <input
                 type="text"
                 name="sale_number"
@@ -274,7 +298,7 @@ export default function SalesHistory() {
               />
             </div>
             <div style={{ flex: '2.5 1 180px', position: 'relative' }}>
-              <FaEnvelope style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', fontSize: '14px', zIndex: 1, pointerEvents: 'none' }} />
+              <FaEnvelope style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: '#f73194', fontSize: '14px', zIndex: 1, pointerEvents: 'none' }} />
               <input
                 type="text"
                 name="customer_email"
@@ -286,7 +310,7 @@ export default function SalesHistory() {
               />
             </div>
             <div style={{ flex: '1.5 1 160px', position: 'relative' }}>
-              <FaCreditCard style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', fontSize: '14px', zIndex: 1, pointerEvents: 'none' }} />
+              <FaCreditCard style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: '#f73194', fontSize: '14px', zIndex: 1, pointerEvents: 'none' }} />
               <select
                 name="payment_method"
                 value={filters.payment_method}
@@ -328,6 +352,16 @@ export default function SalesHistory() {
         </div>
       )}
 
+      <div className="full-width-stat-card">
+        <div className="stat-icon-box">
+          <FaFileInvoice />
+        </div>
+        <div className="stat-info-info">
+          <span className="stat-label-text">Total Ventas</span>
+          <span className="stat-value-text">{total}</span>
+        </div>
+      </div>
+
       {loading && !selectedSale ? (
         <div className="loading-premium animate-fade-in">
           <div className="spinner-premium"></div>
@@ -357,31 +391,41 @@ export default function SalesHistory() {
                   <th>Fecha</th>
                   <th>Cliente</th>
                   <th>Pago</th>
-                  <th onClick={() => requestSort('total')} style={{ cursor: 'pointer', textAlign: 'right' }}>
+                  <th onClick={() => requestSort('total')} style={{ cursor: 'pointer' }}>
                     Total {sortConfig?.key === 'total' && (sortConfig.direction === 'ascending' ? <FaSortUp /> : <FaSortDown />)}
                   </th>
-                  <th style={{ textAlign: 'center' }}>Estado</th>
-                  <th style={{ textAlign: 'center' }}>Acción</th>
+                  <th>Estado</th>
+                  <th>Acción</th>
                 </tr>
               </thead>
               <tbody>
                 {sortedSales.map((sale) => (
                   <tr key={sale.id} className="table-row-item">
                     <td style={{ fontWeight: '700', color: '#f73194 !important' }}>#{sale.id}</td>
-                    <td style={{ fontSize: '13px' }}>
-                      {new Date(sale.created_at).toLocaleDateString()} {new Date(sale.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    <td style={{ fontSize: '13px', padding: '12px 10px' }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', alignItems: 'center' }}>
+                        <span style={{ fontWeight: '800', color: '#f73194', textTransform: 'uppercase', fontSize: '11px', letterSpacing: '0.02em' }}>
+                          {new Date(sale.created_at).toLocaleDateString('es-ES', { weekday: 'long' })}
+                        </span>
+                        <span style={{ fontWeight: '700', color: 'var(--text-primary)', fontSize: '14px' }}>
+                          {new Date(sale.created_at).toLocaleDateString()}
+                        </span>
+                        <span style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: '500' }}>
+                          {new Date(sale.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} hs
+                        </span>
+                      </div>
                     </td>
                     <td style={{ fontSize: '13px', opacity: 0.8 }}>{sale.customer_email || 'Particular'}</td>
                     <td>
-                      <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center' }}>
                         {getPaymentMethodIcon(sale.payment_method)}
                         {sale.payment_method}
                       </span>
                     </td>
-                    <td style={{ textAlign: 'right', fontWeight: '800', color: '#f73194' }}>
+                    <td style={{ fontWeight: '800', color: '#f73194' }}>
                       {formatCurrency(sale.total)}
                     </td>
-                    <td style={{ textAlign: 'center' }}>{getStatusBadge(sale.status)}</td>
+                    <td>{getStatusBadge(sale.status)}</td>
                     <td style={{ textAlign: 'center' }}>
                       <button onClick={() => handleShowDetail(sale)} className="premium-btn premium-btn-primary" style={{ padding: '6px 12px', fontSize: '12px' }}>
                         Detalle
@@ -447,9 +491,9 @@ export default function SalesHistory() {
                 <table className="modal-product-table">
                   <thead>
                     <tr>
-                      <th>Artículo</th>
+                      <th>Producto</th>
                       <th style={{ textAlign: 'center' }}>Cant.</th>
-                      <th style={{ textAlign: 'right' }}>Unitario</th>
+                      <th style={{ textAlign: 'right' }}>Precio</th>
                       <th style={{ textAlign: 'right' }}>Total</th>
                     </tr>
                   </thead>
@@ -520,6 +564,18 @@ export default function SalesHistory() {
           </div>
         </div>
       )}
+      <PremiumModal
+        show={premiumModal.show}
+        type={premiumModal.type}
+        title={premiumModal.title}
+        message={premiumModal.message}
+        inputValue={premiumModal.inputValue}
+        onInputChange={premiumModal.onInputChange}
+        onConfirm={premiumModal.onConfirm}
+        onCancel={() => setPremiumModal(prev => ({ ...prev, show: false }))}
+        confirmText={premiumModal.confirmText}
+        cancelText={premiumModal.cancelText}
+      />
     </div>
   );
 }

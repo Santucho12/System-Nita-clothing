@@ -186,15 +186,15 @@ function AdvancedReports() {
 
   // Componentes de KPIs
   const KPICard = ({ title, value, subtitle, icon: Icon, color }) => (
-    <div className="kpi-card" style={{ borderTop: `4px solid ${color}`, background: 'white', padding: '24px', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
+    <div className="kpi-card" style={{ borderTop: `4px solid ${color}`, background: 'var(--bg-card)', padding: '24px', borderRadius: '12px', boxShadow: 'var(--shadow)' }}>
       <div className="kpi-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '15px' }}>
         <div className="kpi-icon" style={{ background: `${color}20`, color, width: '48px', height: '48px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' }}>
           <Icon />
         </div>
       </div>
-      <h3 className="kpi-title" style={{ fontSize: '14px', color: '#666', margin: '0 0 8px 0', fontWeight: '500' }}>{title}</h3>
-      <div className="kpi-value" style={{ fontSize: '28px', color: '#333', fontWeight: '700', margin: '0 0 8px 0' }}>{value}</div>
-      <div className="kpi-subtitle" style={{ fontSize: '13px', color: '#999', margin: 0 }}>{subtitle}</div>
+      <h3 className="kpi-title" style={{ fontSize: '14px', color: 'var(--text-secondary)', margin: '0 0 8px 0', fontWeight: '500' }}>{title}</h3>
+      <div className="kpi-value" style={{ fontSize: '28px', color: 'var(--text-primary)', fontWeight: '700', margin: '0 0 8px 0' }}>{value}</div>
+      <div className="kpi-subtitle" style={{ fontSize: '13px', color: 'var(--text-muted)', margin: 0 }}>{subtitle}</div>
     </div>
   );
 
@@ -219,9 +219,9 @@ function AdvancedReports() {
 
   if (loading) {
     return (
-      <div className="loading-container" style={{ textAlign: 'center', padding: '80px', background: 'white', borderRadius: '16px', margin: '30px' }}>
-        <div style={{ fontSize: '48px', color: '#f73194', marginBottom: '20px' }}>⏳</div>
-        <p style={{ fontSize: '18px', color: '#666' }}>Cargando reportes ejecutivos...</p>
+      <div className="loading-container" style={{ textAlign: 'center', padding: '80px', background: 'var(--bg-card)', borderRadius: '16px', margin: '30px' }}>
+        <div style={{ fontSize: '48px', color: 'var(--accent-pink)', marginBottom: '20px' }}>⏳</div>
+        <p style={{ fontSize: '18px', color: 'var(--text-secondary)' }}>Cargando reportes ejecutivos...</p>
       </div>
     );
   }
@@ -277,38 +277,38 @@ function AdvancedReports() {
       {/* Header del Dashboard */}
       {/* ═══════ HERO HEADER ═══════ */}
       <div className="products-hero" style={{
-        background: 'white',
+        background: 'var(--bg-card)',
         borderRadius: '20px',
         padding: '28px 36px',
         marginBottom: '24px',
-        boxShadow: '0 4px 20px rgba(0,0,0,0.04)',
-        border: '1px solid rgba(0,0,0,0.04)',
+        boxShadow: 'var(--shadow)',
+        border: '1px solid var(--border-color)',
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center'
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '18px' }}>
           <div style={{
-            background: 'linear-gradient(135deg, #fff0f7, #ffe0ef)',
+            background: 'var(--accent-pink-light)',
             padding: '14px',
             borderRadius: '16px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center'
           }}>
-            <FaChartBar style={{ color: '#f73194', fontSize: '26px' }} />
+            <FaChartBar style={{ color: 'var(--accent-pink)', fontSize: '26px' }} />
           </div>
           <div>
-            <h1 style={{ margin: 0, fontSize: '24px', fontWeight: '800', color: '#1e293b', letterSpacing: '-0.02em' }}>
+            <h1 style={{ margin: 0, fontSize: '24px', fontWeight: '800', color: 'var(--text-heading)', letterSpacing: '-0.02em' }}>
               Reportes y Estadísticas
             </h1>
-            <p style={{ margin: '2px 0 0', fontSize: '14px', color: '#94a3b8', fontWeight: '500' }}>
-              Análisis integral del rendimiento de tu negocio
+            <p style={{ margin: '2px 0 0', fontSize: '14px', color: 'var(--text-muted)', fontWeight: '500' }}>
+              Análisis del rendimiento de tu negocio
             </p>
           </div>
         </div>
 
-        <div style={{ display: 'flex', gap: '8px', background: '#f8fafc', padding: '6px', borderRadius: '14px', border: '1px solid #e2e8f0' }}>
+        <div style={{ display: 'flex', gap: '8px', background: 'var(--bg-tertiary)', padding: '6px', borderRadius: '14px', border: '1px solid var(--border-color)' }}>
           {['today', 'week', 'month', 'quarter', 'year'].map(period => (
             <button
               key={period}
@@ -316,8 +316,8 @@ function AdvancedReports() {
               style={{
                 padding: '8px 16px', border: 'none', borderRadius: '10px', cursor: 'pointer',
                 fontSize: '13px', fontWeight: '600',
-                background: selectedPeriod === period ? '#f73194' : 'transparent',
-                color: selectedPeriod === period ? 'white' : '#64748b',
+                background: selectedPeriod === period ? 'var(--accent-pink)' : 'transparent',
+                color: selectedPeriod === period ? 'white' : 'var(--text-secondary)',
                 transition: 'all 0.2s ease',
                 boxShadow: selectedPeriod === period ? '0 4px 10px rgba(247,49,148,0.2)' : 'none'
               }}
@@ -335,8 +335,8 @@ function AdvancedReports() {
       {/* Navegación de vistas */}
       <div className="view-tabs" style={{
         display: 'flex', gap: '12px', marginBottom: '28px',
-        background: 'white', padding: '12px 20px', borderRadius: '20px',
-        boxShadow: '0 4px 20px rgba(0,0,0,0.04)', border: '1px solid rgba(0,0,0,0.04)',
+        background: 'var(--bg-card)', padding: '12px 20px', borderRadius: '20px',
+        boxShadow: 'var(--shadow-sm)', border: '1px solid var(--border-color)',
         flexWrap: 'wrap'
       }}>
         {[
@@ -351,14 +351,14 @@ function AdvancedReports() {
             style={{
               padding: '10px 20px', border: 'none', borderRadius: '12px', cursor: 'pointer',
               fontSize: '14px', fontWeight: '700',
-              background: activeView === tab.id ? '#f73194' : '#f1f5f9',
-              color: activeView === tab.id ? 'white' : '#64748b',
+              background: activeView === tab.id ? 'var(--accent-pink)' : 'var(--bg-tertiary)',
+              color: activeView === tab.id ? 'white' : 'var(--text-secondary)',
               display: 'flex', alignItems: 'center', gap: '8px',
               transition: 'all 0.2s ease',
               boxShadow: activeView === tab.id ? '0 4px 12px rgba(247,49,148,0.2)' : 'none'
             }}
-            onMouseOver={(e) => { if (activeView !== tab.id) { e.currentTarget.style.background = '#e2e8f0'; e.currentTarget.style.transform = 'translateY(-1px)'; } }}
-            onMouseOut={(e) => { if (activeView !== tab.id) { e.currentTarget.style.background = '#f1f5f9'; e.currentTarget.style.transform = 'translateY(0)'; } }}
+            onMouseOver={(e) => { if (activeView !== tab.id) { e.currentTarget.style.background = 'var(--bg-hover)'; e.currentTarget.style.transform = 'translateY(-1px)'; } }}
+            onMouseOut={(e) => { if (activeView !== tab.id) { e.currentTarget.style.background = 'var(--bg-tertiary)'; e.currentTarget.style.transform = 'translateY(0)'; } }}
           >
             <tab.icon /> {tab.label}
           </button>
@@ -391,7 +391,7 @@ function AdvancedReports() {
               <KPICard
                 title="Ticket Promedio"
                 value={formatCurrency(kpis.avgTicket || 0)}
-                subtitle="Por transacción"
+                subtitle="Por venta"
                 icon={FaReceipt}
                 color="#FF9800"
               />
@@ -421,7 +421,7 @@ function AdvancedReports() {
 
           {/* KPIs Fijos - No dependen de la fecha */}
           <div style={{ marginBottom: '8px' }}>
-            <span style={{ fontSize: '13px', color: '#999', fontStyle: 'italic', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+            <span style={{ fontSize: '13px', color: 'var(--text-muted)', fontStyle: 'italic', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
               📌 Valores fijos — no dependen del período seleccionado
             </span>
           </div>
@@ -568,7 +568,7 @@ function AdvancedReports() {
                         <div
                           className="roi-fill"
                           style={{
-                            width: `${Math.min(roi, 100)}%`,
+                            width: `${Math.min(roi / 2, 100)}%`,
                             background: COLORS[index % COLORS.length]
                           }}
                         ></div>

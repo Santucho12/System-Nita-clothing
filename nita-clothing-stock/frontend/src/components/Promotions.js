@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './Promotions.css';
+import PremiumModal from './PremiumModal';
+import './PremiumModal.css';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
@@ -13,7 +15,6 @@ const Promotions = () => {
   const [editingPromotion, setEditingPromotion] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('');
-
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -26,6 +27,18 @@ const Promotions = () => {
     start_date: '',
     end_date: '',
     status: 'activa'
+  });
+
+  const [premiumModal, setPremiumModal] = useState({
+    show: false,
+    type: 'info',
+    title: '',
+    message: '',
+    confirmText: 'Aceptar',
+    cancelText: 'Cancelar',
+    onConfirm: () => { },
+    inputValue: '',
+    onInputChange: (val) => setPremiumModal(prev => ({ ...prev, inputValue: val }))
   });
 
   useEffect(() => {
@@ -44,7 +57,14 @@ const Promotions = () => {
       setPromotions(response.data);
     } catch (error) {
       console.error('Error al cargar promociones:', error);
-      alert('Error al cargar promociones');
+      setPremiumModal({
+        show: true,
+        type: 'info',
+        title: 'Error',
+        message: 'No se pudieron cargar las promociones. Por favor, intente de nuevo.',
+        confirmText: 'Aceptar',
+        onConfirm: () => setPremiumModal(prev => ({ ...prev, show: false }))
+      });
     } finally {
       setLoading(false);
     }
@@ -78,12 +98,26 @@ const Promotions = () => {
     e.preventDefault();
 
     if (!formData.name || !formData.discount_value) {
-      alert('Por favor complete los campos requeridos');
+      setPremiumModal({
+        show: true,
+        type: 'info',
+        title: 'Atención',
+        message: 'Por favor complete todos los campos requeridos (*)',
+        confirmText: 'Entendido',
+        onConfirm: () => setPremiumModal(prev => ({ ...prev, show: false }))
+      });
       return;
     }
 
     if (formData.discount_type === 'percentage' && formData.discount_value > 100) {
-      alert('El descuento porcentual no puede ser mayor a 100%');
+      setPremiumModal({
+        show: true,
+        type: 'info',
+        title: 'Valor Inválido',
+        message: 'El descuento porcentual no puede ser mayor al 100%',
+        confirmText: 'Corregir',
+        onConfirm: () => setPremiumModal(prev => ({ ...prev, show: false }))
+      });
       return;
     }
 
@@ -100,19 +134,40 @@ const Promotions = () => {
         await axios.put(`${API_URL}/promociones/${editingPromotion.id}`, dataToSend, {
           headers: { Authorization: `Bearer ${token}` }
         });
-        alert('Promoción actualizada exitosamente');
+        setPremiumModal({
+          show: true,
+          type: 'info',
+          title: 'Éxito',
+          message: 'Promoción actualizada correctamente',
+          confirmText: 'Genial',
+          onConfirm: () => setPremiumModal(prev => ({ ...prev, show: false }))
+        });
       } else {
         await axios.post(`${API_URL}/promociones`, dataToSend, {
           headers: { Authorization: `Bearer ${token}` }
         });
-        alert('Promoción creada exitosamente');
+        setPremiumModal({
+          show: true,
+          type: 'info',
+          title: 'Éxito',
+          message: 'Nueva promoción creada correctamente',
+          confirmText: 'Genial',
+          onConfirm: () => setPremiumModal(prev => ({ ...prev, show: false }))
+        });
       }
 
       loadPromotions();
       closeModal();
     } catch (error) {
       console.error('Error al guardar promoción:', error);
-      alert(error.response?.data?.message || 'Error al guardar promoción');
+      setPremiumModal({
+        show: true,
+        type: 'info',
+        title: 'Error al Guardar',
+        message: error.response?.data?.message || 'Ocurrió un error al intentar guardar la promoción.',
+        confirmText: 'Cerrar',
+        onConfirm: () => setPremiumModal(prev => ({ ...prev, show: false }))
+      });
     }
   };
 
@@ -134,20 +189,35 @@ const Promotions = () => {
     setShowModal(true);
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm('¿Está seguro de eliminar esta promoción?')) return;
-
-    try {
-      const token = localStorage.getItem('token');
-      await axios.delete(`${API_URL}/promociones/${id}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      alert('Promoción eliminada exitosamente');
-      loadPromotions();
-    } catch (error) {
-      console.error('Error al eliminar promoción:', error);
-      alert('Error al eliminar promoción');
-    }
+  const handleDelete = (id) => {
+    setPremiumModal({
+      show: true,
+      type: 'danger',
+      title: 'Eliminar Promoción',
+      message: '¿Estás seguro de que quieres eliminar esta promoción? Esta acción no se puede deshacer.',
+      confirmText: 'Eliminar',
+      cancelText: 'Cancelar',
+      onConfirm: async () => {
+        try {
+          const token = localStorage.getItem('token');
+          await axios.delete(`${API_URL}/promociones/${id}`, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          loadPromotions();
+          setPremiumModal(prev => ({ ...prev, show: false }));
+        } catch (error) {
+          console.error('Error al eliminar promoción:', error);
+          setPremiumModal({
+            show: true,
+            type: 'info',
+            title: 'Error',
+            message: 'No se pudo eliminar la promoción.',
+            confirmText: 'Cerrar',
+            onConfirm: () => setPremiumModal(prev => ({ ...prev, show: false }))
+          });
+        }
+      }
+    });
   };
 
   const handleStatusChange = async (id, newStatus) => {
@@ -160,7 +230,14 @@ const Promotions = () => {
       loadPromotions();
     } catch (error) {
       console.error('Error al cambiar estado:', error);
-      alert('Error al cambiar estado');
+      setPremiumModal({
+        show: true,
+        type: 'info',
+        title: 'Error',
+        message: 'No se pudo actualizar el estado de la promoción.',
+        confirmText: 'Cerrar',
+        onConfirm: () => setPremiumModal(prev => ({ ...prev, show: false }))
+      });
     }
   };
 
@@ -526,6 +603,18 @@ const Promotions = () => {
           </div>
         </div>
       )}
+      <PremiumModal
+        show={premiumModal.show}
+        type={premiumModal.type}
+        title={premiumModal.title}
+        message={premiumModal.message}
+        inputValue={premiumModal.inputValue}
+        onInputChange={premiumModal.onInputChange}
+        onConfirm={premiumModal.onConfirm}
+        onCancel={() => setPremiumModal(prev => ({ ...prev, show: false }))}
+        confirmText={premiumModal.confirmText}
+        cancelText={premiumModal.cancelText}
+      />
     </div>
   );
 };

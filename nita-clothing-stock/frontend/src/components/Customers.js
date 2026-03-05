@@ -3,7 +3,7 @@ import { toast } from 'react-toastify';
 import api from '../services/api';
 import { formatCurrency } from '../utils/formatters';
 import useSortableData from '../hooks/useSortableData';
-import { FaUsers, FaSearch, FaChartPie, FaUser, FaEnvelope, FaPhone, FaMapMarkerAlt, FaShoppingBag, FaDollarSign, FaCalendarAlt, FaSortAmountDown, FaSortUp, FaSortDown } from 'react-icons/fa';
+import { FaUsers, FaSearch, FaChartPie, FaUser, FaEnvelope, FaPhone, FaMapMarkerAlt, FaShoppingBag, FaDollarSign, FaCalendarAlt, FaSortAmountDown, FaSortUp, FaSortDown, FaArrowRight } from 'react-icons/fa';
 import '../components/Sidebar.css';
 import './Customers.css';
 
@@ -85,6 +85,17 @@ export default function Customers() {
     setPurchaseHistory([]);
   };
 
+  useEffect(() => {
+    if (showModal) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [showModal]);
+
   const filteredCustomers = sortedCustomers.filter(customer =>
     customer.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     customer.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -92,8 +103,9 @@ export default function Customers() {
   );
 
   const getSegmentClass = (segment) => {
-    if (segment === 'VIP') return 'segment-vip';
-    if (segment === 'Regular') return 'segment-regular';
+    const s = String(segment || '').toUpperCase();
+    if (s.includes('FRECUENTE') || s.includes('VIP')) return 'segment-vip';
+    if (s.includes('NORMAL') || s.includes('REGULAR')) return 'segment-regular';
     return 'segment-new';
   };
 
@@ -101,33 +113,33 @@ export default function Customers() {
     <div className="customers-container" style={{ padding: '30px', background: 'var(--bg-secondary)', minHeight: '100vh' }}>
       {/* ═══════ HERO HEADER ═══════ */}
       <div className="products-hero" style={{
-        background: 'white',
+        background: 'var(--bg-card)',
         borderRadius: '20px',
         padding: '28px 36px',
         marginBottom: '24px',
-        boxShadow: '0 4px 20px rgba(0,0,0,0.04)',
-        border: '1px solid rgba(0,0,0,0.04)',
+        boxShadow: 'var(--shadow)',
+        border: '1px solid var(--border-color)',
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center'
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '18px' }}>
           <div style={{
-            background: 'linear-gradient(135deg, #fff0f7, #ffe0ef)',
+            background: 'var(--accent-pink-light)',
             padding: '14px',
             borderRadius: '16px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center'
           }}>
-            <FaUsers style={{ color: '#f73194', fontSize: '26px' }} />
+            <FaUsers style={{ color: 'var(--accent-pink)', fontSize: '26px' }} />
           </div>
           <div>
-            <h1 style={{ margin: 0, fontSize: '24px', fontWeight: '800', color: '#1e293b', letterSpacing: '-0.02em' }}>
+            <h1 style={{ margin: 0, fontSize: '24px', fontWeight: '800', color: 'var(--text-heading)', letterSpacing: '-0.02em' }}>
               Gestión de Clientes
             </h1>
-            <p style={{ margin: '2px 0 0', fontSize: '14px', color: '#94a3b8', fontWeight: '500' }}>
-              {view === 'list' ? `${customers.length} clientes en tu base de datos` : 'Análisis inteligente del comportamiento de compra'}
+            <p style={{ margin: '2px 0 0', fontSize: '14px', color: 'var(--text-muted)', fontWeight: '500' }}>
+              {view === 'list' ? `${customers.length} clientes en tu base de datos` : 'Análisis del comportamiento de compra'}
             </p>
           </div>
         </div>
@@ -137,8 +149,8 @@ export default function Customers() {
             onClick={() => { setView('list'); fetchCustomers(); }}
             style={{
               padding: '11px 22px',
-              color: view === 'list' ? 'white' : '#475569',
-              background: view === 'list' ? '#f73194' : '#f1f5f9',
+              color: view === 'list' ? 'white' : 'var(--text-secondary)',
+              background: view === 'list' ? 'var(--accent-pink)' : 'var(--bg-tertiary)',
               border: 'none',
               borderRadius: '12px', cursor: 'pointer',
               display: 'flex', alignItems: 'center', gap: '8px',
@@ -153,8 +165,8 @@ export default function Customers() {
             onClick={fetchSegmentation}
             style={{
               padding: '11px 22px',
-              color: view === 'segmentation' ? 'white' : '#475569',
-              background: view === 'segmentation' ? '#f73194' : '#f1f5f9',
+              color: view === 'segmentation' ? 'white' : 'var(--text-secondary)',
+              background: view === 'segmentation' ? 'var(--accent-pink)' : 'var(--bg-tertiary)',
               border: 'none',
               borderRadius: '12px', cursor: 'pointer',
               display: 'flex', alignItems: 'center', gap: '8px',
@@ -163,7 +175,7 @@ export default function Customers() {
             }}
           >
             <FaChartPie />
-            Segmentación
+            Analisis
           </button>
         </div>
       </div>
@@ -181,15 +193,15 @@ export default function Customers() {
           {view === 'list' && (
             <div className="animate-fade-in">
               <div className="products-filters-bar" style={{
-                background: 'white',
+                background: 'var(--bg-card)',
                 borderRadius: '20px',
                 padding: '20px 28px',
                 marginBottom: '28px',
-                boxShadow: '0 4px 20px rgba(0,0,0,0.04)',
-                border: '1px solid rgba(0,0,0,0.04)'
+                boxShadow: 'var(--shadow)',
+                border: '1px solid var(--border-color)'
               }}>
                 <div style={{ position: 'relative' }}>
-                  <FaSearch style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', fontSize: '15px', zIndex: 1, pointerEvents: 'none' }} />
+                  <FaSearch style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', fontSize: '15px', zIndex: 1, pointerEvents: 'none' }} />
                   <input
                     type="text"
                     placeholder="Buscar por nombre, email o teléfono de cliente..."
@@ -210,41 +222,139 @@ export default function Customers() {
                     <p style={{ color: 'var(--text-secondary)', fontSize: '16px', margin: '0', maxWidth: '450px', marginLeft: 'auto', marginRight: 'auto', lineHeight: '1.6' }}>No pudimos encontrar clientes que coincidan con tu búsqueda. Prueba con otros términos.</p>
                   </div>
                 ) : (
-                  filteredCustomers.map((customer, index) => (
-                    <div key={customer.email} className="premium-customer-card" style={{ animationDelay: `${index * 0.05}s` }}>
-                      <div className="card-top-accent"></div>
-                      <div className="card-content">
-                        <div className="card-header">
-                          <h3 className="customer-name">{customer.name || 'Cliente Sin Nombre'}</h3>
-                          <button
-                            className="view-detail-btn"
-                            onClick={() => fetchCustomerDetail(customer.email)}
-                          >
-                            Ver Perfil
-                          </button>
-                        </div>
+                  filteredCustomers.map((customer, index) => {
+                    const email = customer.email || "Sin email";
+                    const initial = email.charAt(0).toUpperCase();
+                    // Usamos valores por defecto en caso de que el endpoint principal no traiga las estadísticas
+                    const purchases = customer.purchase_count || 0;
+                    const totalSpent = customer.total_spent || 0;
 
-                        <div className="customer-details">
-                          <div className="customer-info-row">
-                            <FaEnvelope className="info-icon" />
-                            <span style={{ wordBreak: 'break-all' }}>{customer.email}</span>
+                    return (
+                      <div
+                        key={customer.email}
+                        className="customer-card-dynamic"
+                        style={{
+                          background: 'var(--bg-card)',
+                          borderRadius: '20px',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          boxShadow: 'var(--shadow)',
+                          border: '1px solid var(--border-color)',
+                          transition: 'all 0.3s ease',
+                          cursor: 'pointer',
+                          animationDelay: `${index * 0.05}s`,
+                          overflow: 'hidden'
+                        }}
+                        onClick={() => fetchCustomerDetail(customer.email)}
+                      >
+                        <style>
+                          {`
+                            .customer-card-dynamic:hover {
+                              transform: scale(1.03);
+                              box-shadow: 0 10px 25px rgba(247,49,148,0.1) !important;
+                              border-color: #fce7f3 !important;
+                            }
+                          `}
+                        </style>
+
+                        <div className="card-top-accent"></div>
+                        <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+
+                          {/* Cabecera: Avatar y Email */}
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                            <div style={{
+                              width: '50px',
+                              height: '50px',
+                              borderRadius: '16px',
+                              background: 'var(--accent-pink-light)',
+                              color: 'var(--accent-pink)',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              fontSize: '22px',
+                              fontWeight: '800',
+                              flexShrink: 0
+                            }}>
+                              {initial}
+                            </div>
+                            <div style={{ overflow: 'hidden', flex: 1 }}>
+                              <h3 style={{
+                                margin: '0 0 4px 0',
+                                fontSize: '16px',
+                                fontWeight: '700',
+                                color: 'var(--text-primary)',
+                                whiteSpace: 'nowrap',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis'
+                              }}>
+                                {email}
+                              </h3>
+                              <span style={{
+                                fontSize: '12px',
+                                color: 'var(--text-muted)',
+                                fontWeight: '600',
+                                background: 'var(--bg-tertiary)',
+                                padding: '4px 10px',
+                                borderRadius: '100px'
+                              }}>
+                                Cliente
+                              </span>
+                            </div>
                           </div>
-                          {customer.phone && (
-                            <div className="customer-info-row">
-                              <FaPhone className="info-icon" />
-                              <span>{customer.phone}</span>
+
+                          {/* Estadísticas Automáticas */}
+                          <div style={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            background: 'var(--bg-tertiary)',
+                            padding: '16px',
+                            borderRadius: '14px'
+                          }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                              <span style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: '700', textTransform: 'uppercase' }}>
+                                Compras
+                              </span>
+                              <span style={{ fontSize: '15px', color: 'var(--text-primary)', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                <FaShoppingBag style={{ color: 'var(--accent-pink)', fontSize: '12px' }} />
+                                {purchases}
+                              </span>
                             </div>
-                          )}
-                          {customer.address && (
-                            <div className="customer-info-row">
-                              <FaMapMarkerAlt className="info-icon" />
-                              <span>{customer.address}</span>
+
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', textAlign: 'right' }}>
+                              <span style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: '700', textTransform: 'uppercase' }}>
+                                Gastado
+                              </span>
+                              <span style={{ fontSize: '15px', color: '#10b981', fontWeight: '800' }}>
+                                ${Number(totalSpent).toLocaleString('es-AR')}
+                              </span>
                             </div>
-                          )}
+                          </div>
+
+                          {/* Botonera de acciones (sutil) */}
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '4px' }}>
+                            <button style={{
+                              background: 'transparent',
+                              border: 'none',
+                              color: 'var(--text-muted)',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '8px',
+                              fontSize: '13px',
+                              fontWeight: '600',
+                              padding: '8px 0',
+                              cursor: 'pointer'
+                            }}>
+                              <FaEnvelope style={{ fontSize: '14px' }} /> Ver Perfil
+                            </button>
+
+                            <div style={{ color: 'var(--border-color)' }}>
+                              <FaArrowRight fontSize="14px" />
+                            </div>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))
+                    );
+                  })
                 )}
               </div>
             </div>
@@ -253,7 +363,7 @@ export default function Customers() {
           {view === 'segmentation' && (
             <div className="segmentation-container animate-fade-in">
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
-                <h3 style={{ margin: 0, fontSize: '22px', color: 'var(--text-heading)', fontWeight: '700' }}>Segmentación de Inteligencia de Clientes</h3>
+                <h3 style={{ margin: 0, fontSize: '22px', color: 'var(--text-heading)', fontWeight: '700' }}>Comportamiento de compras de Clientes</h3>
                 <div style={{ fontSize: '13px', color: 'var(--text-muted)', background: 'var(--bg-tertiary)', padding: '6px 12px', borderRadius: '8px' }}>
                   Total Clientes: {sortedSegmentation.length}
                 </div>
@@ -264,7 +374,7 @@ export default function Customers() {
                     <tr>
 
                       <th onClick={() => requestSortSeg('email')} style={{ cursor: 'pointer' }}>
-                        Contacto {sortConfigSeg?.key === 'email' && (sortConfigSeg.direction === 'ascending' ? <FaSortUp /> : <FaSortDown />)}
+                        Mail {sortConfigSeg?.key === 'email' && (sortConfigSeg.direction === 'ascending' ? <FaSortUp /> : <FaSortDown />)}
                       </th>
                       <th onClick={() => requestSortSeg('purchase_count')} style={{ cursor: 'pointer', textAlign: 'center' }}>
                         Compras {sortConfigSeg?.key === 'purchase_count' && (sortConfigSeg.direction === 'ascending' ? <FaSortUp /> : <FaSortDown />)}
@@ -273,10 +383,10 @@ export default function Customers() {
                         Inversión Total {sortConfigSeg?.key === 'total_spent' && (sortConfigSeg.direction === 'ascending' ? <FaSortUp /> : <FaSortDown />)}
                       </th>
                       <th onClick={() => requestSortSeg('last_purchase')} style={{ cursor: 'pointer', textAlign: 'center' }}>
-                        Última Actividad {sortConfigSeg?.key === 'last_purchase' && (sortConfigSeg.direction === 'ascending' ? <FaSortUp /> : <FaSortDown />)}
+                        Última Compra {sortConfigSeg?.key === 'last_purchase' && (sortConfigSeg.direction === 'ascending' ? <FaSortUp /> : <FaSortDown />)}
                       </th>
                       <th onClick={() => requestSortSeg('segment')} style={{ cursor: 'pointer', textAlign: 'center' }}>
-                        Segmento {sortConfigSeg?.key === 'segment' && (sortConfigSeg.direction === 'ascending' ? <FaSortUp /> : <FaSortDown />)}
+                        Compra seguido? {sortConfigSeg?.key === 'segment' && (sortConfigSeg.direction === 'ascending' ? <FaSortUp /> : <FaSortDown />)}
                       </th>
                     </tr>
                   </thead>
@@ -327,7 +437,7 @@ export default function Customers() {
                               <FaPhone style={{ fontSize: '10px' }} /> {selectedCustomer.phone}
                             </span>
                           )}
-                          <span style={{ background: 'var(--accent-pink)', border: '1px solid rgba(255,255,255,0.4)', padding: '5px 12px', borderRadius: '20px', fontSize: '12px', fontWeight: '700' }}>
+                          <span style={{ background: 'var(--accent-pink)', border: '1px solid var(--border-color)', padding: '5px 12px', borderRadius: '20px', fontSize: '12px', fontWeight: '700' }}>
                             {customerStats?.segment || 'CLIENTE'}
                           </span>
                         </div>

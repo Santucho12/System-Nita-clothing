@@ -33,9 +33,16 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    // Extraer información detallada del error
+    // Personalizar mensaje para errores comunes
+    let friendlyMessage = error.response?.data?.message || error.message || 'Error desconocido';
+
+    // Error de SKU duplicado (MySQL)
+    if (friendlyMessage.includes('Duplicate entry') && friendlyMessage.includes('codigo')) {
+      friendlyMessage = 'El código SKU ya está en uso por otro producto. Por favor, usa uno diferente.';
+    }
+
     const detailedError = {
-      message: error.response?.data?.message || error.message || 'Error desconocido',
+      message: friendlyMessage,
       status: error.response?.status,
       data: error.response?.data,
       originalError: error
@@ -62,7 +69,7 @@ export const categoryService = {
       const response = await api.get('/categorias');
       return response.data;
     } catch (error) {
-      throw new Error(error.message || error.data?.message || 'Error obteniendo categorías');
+      throw error;
     }
   },
 
@@ -134,7 +141,7 @@ export const productService = {
       const response = await api.get('/productos', { params });
       return response.data;
     } catch (error) {
-      throw new Error(error.message || 'Error obteniendo productos');
+      throw error;
     }
   },
 
@@ -237,8 +244,7 @@ export const productService = {
       const response = await api.post('/productos', dataToSend, { headers });
       return response.data;
     } catch (error) {
-      console.error('[API] Error in create:', error.response?.data || error.message);
-      throw new Error(error.response?.data?.message || 'Error creando producto');
+      throw error;
     }
   },
 
@@ -286,8 +292,7 @@ export const productService = {
       const response = await api.put(`/productos/${id}`, dataToSend, { headers });
       return response.data;
     } catch (error) {
-      console.error('[API] Error in update:', error.response?.data || error.message);
-      throw new Error(error.response?.data?.message || 'Error actualizando producto');
+      throw error;
     }
   },
 

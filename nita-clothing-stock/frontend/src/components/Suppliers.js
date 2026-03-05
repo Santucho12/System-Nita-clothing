@@ -3,6 +3,8 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 import useSortableData from '../hooks/useSortableData';
 import { FaTruck, FaPlus, FaEdit, FaTrash, FaPhone, FaMapMarkerAlt, FaGlobe, FaShoppingCart, FaStickyNote, FaSearch, FaTimes, FaUser, FaEnvelope } from 'react-icons/fa';
+import PremiumModal from './PremiumModal';
+import './PremiumModal.css';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
@@ -21,6 +23,18 @@ const Suppliers = () => {
     website: '',
     min_purchase: '',
     notes: ''
+  });
+
+  const [premiumModal, setPremiumModal] = useState({
+    show: false,
+    type: 'info',
+    title: '',
+    message: '',
+    confirmText: 'Aceptar',
+    cancelText: 'Cancelar',
+    onConfirm: () => { },
+    inputValue: '',
+    onInputChange: (val) => setPremiumModal(prev => ({ ...prev, inputValue: val }))
   });
 
   // Hook de ordenado
@@ -95,19 +109,29 @@ const Suppliers = () => {
     setShowForm(true);
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm('¿Estás seguro de que quieres eliminar este proveedor?')) {
-      try {
-        const token = localStorage.getItem('token');
-        await axios.delete(`${API_URL}/proveedores/${id}`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        toast.success('Proveedor eliminado exitosamente');
-        loadSuppliers();
-      } catch (error) {
-        toast.error('Error eliminando proveedor: ' + (error.response?.data?.message || error.message));
+  const handleDelete = (id) => {
+    setPremiumModal({
+      show: true,
+      type: 'danger',
+      title: 'Eliminar Proveedor',
+      message: '¿Estás seguro de que quieres eliminar este proveedor? Esta acción no se puede deshacer.',
+      confirmText: 'Eliminar',
+      cancelText: 'Cancelar',
+      onConfirm: async () => {
+        try {
+          const token = localStorage.getItem('token');
+          await axios.delete(`${API_URL}/proveedores/${id}`, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          toast.success('Proveedor eliminado exitosamente');
+          loadSuppliers();
+          setPremiumModal(prev => ({ ...prev, show: false }));
+        } catch (error) {
+          toast.error('Error eliminando proveedor: ' + (error.response?.data?.message || error.message));
+          setPremiumModal(prev => ({ ...prev, show: false }));
+        }
       }
-    }
+    });
   };
 
   const resetForm = () => {
@@ -168,32 +192,32 @@ const Suppliers = () => {
           .nita-search-input {
             width: 100%;
             padding: 13px 18px 13px 44px;
-            border: 2px solid #e2e8f0;
+            border: 2px solid var(--border-color);
             border-radius: 14px;
             font-size: 15px;
             font-weight: 500;
-            color: #1e293b;
-            background: #f8fafc;
+            color: var(--text-primary);
+            background: var(--bg-input);
             transition: all 0.25s ease;
             box-sizing: border-box;
           }
           .nita-search-input:focus {
             outline: none;
-            border-color: #f73194;
-            background: #fff;
-            box-shadow: 0 0 0 4px rgba(247,49,148,0.08);
+            border-color: var(--accent-pink);
+            background: var(--bg-card);
+            box-shadow: 0 0 0 4px var(--accent-pink-light);
           }
-          .nita-search-input::placeholder { color: #94a3b8; font-weight: 400; }
+          .nita-search-input::placeholder { color: var(--text-muted); font-weight: 400; }
 
           .nita-filter-select {
             width: 100%;
             padding: 13px 36px 13px 14px;
-            border: 2px solid #e2e8f0;
+            border: 2px solid var(--border-color);
             border-radius: 14px;
             font-size: 14px;
             font-weight: 500;
-            color: #1e293b;
-            background: #f8fafc;
+            color: var(--text-primary);
+            background: var(--bg-input);
             cursor: pointer;
             transition: all 0.25s ease;
             box-sizing: border-box;
@@ -205,36 +229,36 @@ const Suppliers = () => {
           }
           .nita-filter-select:focus {
             outline: none;
-            border-color: #f73194;
-            background-color: #fff;
-            box-shadow: 0 0 0 4px rgba(247,49,148,0.08);
+            border-color: var(--accent-pink);
+            background-color: var(--bg-card);
+            box-shadow: 0 0 0 4px var(--accent-pink-light);
           }
 
           /* ---- Form Premium ---- */
           .form-input-premium {
             width: 100%;
             padding: 12px 16px;
-            border: 2px solid #f1f5f9;
+            border: 2px solid var(--border-light);
             border-radius: 12px;
             font-size: 15px;
             font-weight: 500;
-            color: #1e293b;
+            color: var(--text-primary);
             transition: all 0.2s ease;
-            background: #f8fafc;
+            background: var(--bg-input);
             box-sizing: border-box;
           }
           .form-input-premium:focus {
             outline: none;
-            border-color: #f73194;
-            background: white;
-            box-shadow: 0 0 0 4px rgba(247,49,148,0.08);
+            border-color: var(--accent-pink);
+            background: var(--bg-card);
+            box-shadow: 0 0 0 4px var(--accent-pink-light);
           }
-          .form-input-premium::placeholder { color: #94a3b8; }
+          .form-input-premium::placeholder { color: var(--text-muted); }
 
           .form-label-premium {
             font-size: 13px;
             font-weight: 700;
-            color: #475569;
+            color: var(--text-secondary);
             display: flex;
             align-items: center;
             gap: 8px;
@@ -242,16 +266,16 @@ const Suppliers = () => {
             text-transform: uppercase;
             letter-spacing: 0.03em;
           }
-          .form-label-premium svg { color: #f73194; font-size: 13px; }
+          .form-label-premium svg { color: var(--accent-pink); font-size: 13px; }
 
           /* ---- Card Premium ---- */
           .supplier-card-premium {
-            background: white;
+            background: var(--bg-card);
             border-radius: 20px;
             padding: 0;
             overflow: hidden;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.04);
-            border: 1px solid rgba(0,0,0,0.04);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
             transition: all 0.35s cubic-bezier(0.165, 0.84, 0.44, 1);
             position: relative;
           }
@@ -281,9 +305,9 @@ const Suppliers = () => {
             gap: 6px;
             padding: 8px 16px;
             border-radius: 50px;
-            border: 1px solid #e2e8f0;
-            background: white;
-            color: #64748b;
+            border: 1px solid var(--border-color);
+            background: var(--bg-card);
+            color: var(--text-muted);
             font-size: 13px;
             font-weight: 600;
             cursor: pointer;
@@ -291,41 +315,41 @@ const Suppliers = () => {
             white-space: nowrap;
           }
           .clear-filters-chip:hover {
-            background: #fee2e2;
-            border-color: #fecaca;
-            color: #dc2626;
+            background: var(--bg-hover);
+            border-color: var(--accent-pink);
+            color: var(--accent-pink);
           }
         `}
       </style>
 
       {/* ═══════ HERO HEADER ═══════ */}
       <div className="products-hero" style={{
-        background: 'white',
+        background: 'var(--bg-card)',
         borderRadius: '20px',
         padding: '28px 36px',
         marginBottom: '24px',
-        boxShadow: '0 4px 20px rgba(0,0,0,0.04)',
-        border: '1px solid rgba(0,0,0,0.04)',
+        boxShadow: 'var(--shadow)',
+        border: '1px solid var(--border-color)',
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center'
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '18px' }}>
           <div style={{
-            background: 'linear-gradient(135deg, #fff0f7, #ffe0ef)',
+            background: 'var(--accent-pink-light)',
             padding: '14px',
             borderRadius: '16px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center'
           }}>
-            <FaTruck style={{ color: '#f73194', fontSize: '26px' }} />
+            <FaTruck style={{ color: 'var(--accent-pink)', fontSize: '26px' }} />
           </div>
           <div>
-            <h1 style={{ margin: 0, fontSize: '24px', fontWeight: '800', color: '#1e293b', letterSpacing: '-0.02em' }}>
+            <h1 style={{ margin: 0, fontSize: '24px', fontWeight: '800', color: 'var(--text-heading)', letterSpacing: '-0.02em' }}>
               Proveedores
             </h1>
-            <p style={{ margin: '2px 0 0', fontSize: '14px', color: '#94a3b8', fontWeight: '500' }}>
+            <p style={{ margin: '2px 0 0', fontSize: '14px', color: 'var(--text-muted)', fontWeight: '500' }}>
               {suppliers.length} proveedor{suppliers.length !== 1 ? 'es' : ''} registrado{suppliers.length !== 1 ? 's' : ''} en el sistema
             </p>
           </div>
@@ -356,12 +380,12 @@ const Suppliers = () => {
 
       {/* ═══════ FILTERS BAR ═══════ */}
       <div className="products-filters-bar" style={{
-        background: 'white',
+        background: 'var(--bg-card)',
         borderRadius: '20px',
         padding: '20px 28px',
         marginBottom: '28px',
-        boxShadow: '0 4px 20px rgba(0,0,0,0.04)',
-        border: '1px solid rgba(0,0,0,0.04)'
+        boxShadow: 'var(--shadow)',
+        border: '1px solid var(--border-color)'
       }}>
         <div style={{ display: 'flex', gap: '14px', alignItems: 'center', flexWrap: 'wrap' }}>
           {/* Buscador con ícono integrado */}
@@ -415,8 +439,8 @@ const Suppliers = () => {
         >
           <div
             style={{
-              background: 'white', borderRadius: '24px',
-              boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)',
+              background: 'var(--bg-card)', borderRadius: '24px',
+              boxShadow: 'var(--shadow-lg)',
               width: '100%', maxWidth: '580px',
               overflow: 'hidden',
               animation: 'modalSlideUp 0.35s cubic-bezier(0.34, 1.56, 0.64, 1)'
@@ -537,12 +561,12 @@ const Suppliers = () => {
                 <button
                   type="button" onClick={resetForm}
                   style={{
-                    padding: '12px 28px', background: '#f1f5f9', color: '#475569',
-                    border: '1px solid #e2e8f0', borderRadius: '12px', cursor: 'pointer',
+                    padding: '12px 28px', background: 'var(--bg-tertiary)', color: 'var(--text-secondary)',
+                    border: '1px solid var(--border-color)', borderRadius: '12px', cursor: 'pointer',
                     fontSize: '14px', fontWeight: '600', transition: 'all 0.2s'
                   }}
-                  onMouseOver={(e) => e.currentTarget.style.background = '#e2e8f0'}
-                  onMouseOut={(e) => e.currentTarget.style.background = '#f1f5f9'}
+                  onMouseOver={(e) => e.currentTarget.style.background = 'var(--bg-hover)'}
+                  onMouseOut={(e) => e.currentTarget.style.background = 'var(--bg-tertiary)'}
                 >
                   Cancelar
                 </button>
@@ -570,19 +594,19 @@ const Suppliers = () => {
         {filteredSuppliers.length === 0 ? (
           <div className="empty-state" style={{
             gridColumn: '1 / -1', textAlign: 'center', padding: '80px 40px',
-            background: 'white', borderRadius: '24px',
-            boxShadow: '0 4px 20px rgba(0,0,0,0.04)', border: '1px solid rgba(0,0,0,0.04)'
+            background: 'var(--bg-card)', borderRadius: '24px',
+            boxShadow: 'var(--shadow)', border: '1px solid var(--border-color)'
           }}>
             <div style={{
-              background: 'linear-gradient(135deg, #fff0f7, #ffe0ef)',
+              background: 'var(--accent-pink-light)',
               width: '100px', height: '100px', borderRadius: '24px',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               margin: '0 auto 24px'
             }}>
-              <FaTruck style={{ fontSize: '44px', color: '#f73194' }} />
+              <FaTruck style={{ fontSize: '44px', color: 'var(--accent-pink)' }} />
             </div>
-            <h3 style={{ fontSize: '22px', color: '#1e293b', margin: '0 0 10px 0', fontWeight: '700' }}>No hay proveedores</h3>
-            <p style={{ color: '#94a3b8', fontSize: '15px', margin: '0 0 28px 0', maxWidth: '340px', marginLeft: 'auto', marginRight: 'auto', lineHeight: '1.5' }}>
+            <h3 style={{ fontSize: '22px', color: 'var(--text-heading)', margin: '0 0 10px 0', fontWeight: '700' }}>No hay proveedores</h3>
+            <p style={{ color: 'var(--text-muted)', fontSize: '15px', margin: '0 0 28px 0', maxWidth: '340px', marginLeft: 'auto', marginRight: 'auto', lineHeight: '1.5' }}>
               Creá tu primer proveedor para gestionar compras y mantener un registro completo.
             </p>
             <button
@@ -618,21 +642,21 @@ const Suppliers = () => {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flex: 1, minWidth: 0 }}>
                     <div style={{
-                      background: 'linear-gradient(135deg, #fff0f7, #ffe0ef)',
+                      background: 'var(--accent-pink-light)',
                       width: '46px', height: '46px', borderRadius: '14px',
                       display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
                     }}>
-                      <FaTruck style={{ color: '#f73194', fontSize: '18px' }} />
+                      <FaTruck style={{ color: 'var(--accent-pink)', fontSize: '18px' }} />
                     </div>
                     <div style={{ minWidth: 0 }}>
-                      <h3 style={{ margin: 0, fontSize: '17px', color: '#1e293b', fontWeight: '700', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      <h3 style={{ margin: 0, fontSize: '17px', color: 'var(--text-heading)', fontWeight: '700', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                         {supplier.name}
                       </h3>
                       <span style={{
                         display: 'inline-flex', alignItems: 'center', gap: '4px',
                         padding: '2px 10px', borderRadius: '6px', fontSize: '11px', fontWeight: '700',
                         marginTop: '4px', textTransform: 'uppercase', letterSpacing: '0.5px',
-                        background: supplier.status === 'active' ? '#f0fdf4' : '#fef2f2',
+                        background: supplier.status === 'active' ? 'rgba(22, 163, 74, 0.1)' : 'rgba(220, 38, 38, 0.1)',
                         color: supplier.status === 'active' ? '#16a34a' : '#dc2626'
                       }}>
                         <span style={{
@@ -651,12 +675,12 @@ const Suppliers = () => {
                       title="Editar"
                       style={{
                         width: '34px', height: '34px', borderRadius: '10px',
-                        background: '#f1f5f9', border: 'none', color: '#64748b',
+                        background: 'var(--bg-secondary)', border: 'none', color: 'var(--text-muted)',
                         cursor: 'pointer', display: 'flex', alignItems: 'center',
                         justifyContent: 'center', fontSize: '13px', transition: 'all 0.2s'
                       }}
-                      onMouseOver={(e) => { e.currentTarget.style.background = '#f73194'; e.currentTarget.style.color = 'white'; }}
-                      onMouseOut={(e) => { e.currentTarget.style.background = '#f1f5f9'; e.currentTarget.style.color = '#64748b'; }}
+                      onMouseOver={(e) => { e.currentTarget.style.background = 'var(--accent-pink)'; e.currentTarget.style.color = 'white'; }}
+                      onMouseOut={(e) => { e.currentTarget.style.background = 'var(--bg-secondary)'; e.currentTarget.style.color = 'var(--text-muted)'; }}
                     >
                       <FaEdit />
                     </button>
@@ -665,12 +689,12 @@ const Suppliers = () => {
                       title="Eliminar"
                       style={{
                         width: '34px', height: '34px', borderRadius: '10px',
-                        background: '#f1f5f9', border: 'none', color: '#64748b',
+                        background: 'var(--bg-secondary)', border: 'none', color: 'var(--text-muted)',
                         cursor: 'pointer', display: 'flex', alignItems: 'center',
                         justifyContent: 'center', fontSize: '13px', transition: 'all 0.2s'
                       }}
                       onMouseOver={(e) => { e.currentTarget.style.background = '#ef4444'; e.currentTarget.style.color = 'white'; }}
-                      onMouseOut={(e) => { e.currentTarget.style.background = '#f1f5f9'; e.currentTarget.style.color = '#64748b'; }}
+                      onMouseOut={(e) => { e.currentTarget.style.background = 'var(--bg-secondary)'; e.currentTarget.style.color = 'var(--text-muted)'; }}
                     >
                       <FaTrash />
                     </button>
@@ -680,20 +704,20 @@ const Suppliers = () => {
                 {/* Info items */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                   {supplier.phone && (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '14px', color: '#475569' }}>
-                      <FaPhone style={{ color: '#94a3b8', fontSize: '13px', flexShrink: 0 }} />
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '14px', color: 'var(--text-secondary)' }}>
+                      <FaPhone style={{ color: 'var(--text-muted)', fontSize: '13px', flexShrink: 0 }} />
                       <span>{supplier.phone}</span>
                     </div>
                   )}
                   {supplier.address && (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '14px', color: '#475569' }}>
-                      <FaMapMarkerAlt style={{ color: '#94a3b8', fontSize: '13px', flexShrink: 0 }} />
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '14px', color: 'var(--text-secondary)' }}>
+                      <FaMapMarkerAlt style={{ color: 'var(--text-muted)', fontSize: '13px', flexShrink: 0 }} />
                       <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{supplier.address}</span>
                     </div>
                   )}
                   {supplier.website && (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '14px', color: '#475569' }}>
-                      <FaGlobe style={{ color: '#94a3b8', fontSize: '13px', flexShrink: 0 }} />
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '14px', color: 'var(--text-secondary)' }}>
+                      <FaGlobe style={{ color: 'var(--text-muted)', fontSize: '13px', flexShrink: 0 }} />
                       <a href={supplier.website} target="_blank" rel="noopener noreferrer"
                         style={{ color: '#f73194', textDecoration: 'none', fontWeight: '500' }}
                         onMouseOver={(e) => e.currentTarget.style.textDecoration = 'underline'}
@@ -706,10 +730,10 @@ const Suppliers = () => {
                 </div>
 
                 {/* Footer: Mínimo de compra + Notas */}
-                <div style={{ marginTop: '18px', paddingTop: '16px', borderTop: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ marginTop: '18px', paddingTop: '16px', borderTop: '1px solid var(--border-light)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <div>
-                    <span style={{ fontSize: '11px', color: '#94a3b8', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Mín. Compra</span>
-                    <p style={{ margin: '2px 0 0', fontSize: '18px', fontWeight: '800', color: '#1e293b' }}>
+                    <span style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Mín. Compra</span>
+                    <p style={{ margin: '2px 0 0', fontSize: '18px', fontWeight: '800', color: 'var(--text-heading)' }}>
                       {supplier.min_purchase ? `$${Number(supplier.min_purchase).toLocaleString()}` : '—'}
                     </p>
                   </div>
@@ -729,6 +753,18 @@ const Suppliers = () => {
           ))
         )}
       </div>
+      <PremiumModal
+        show={premiumModal.show}
+        type={premiumModal.type}
+        title={premiumModal.title}
+        message={premiumModal.message}
+        inputValue={premiumModal.inputValue}
+        onInputChange={premiumModal.onInputChange}
+        onConfirm={premiumModal.onConfirm}
+        onCancel={() => setPremiumModal(prev => ({ ...prev, show: false }))}
+        confirmText={premiumModal.confirmText}
+        cancelText={premiumModal.cancelText}
+      />
     </div>
   );
 };

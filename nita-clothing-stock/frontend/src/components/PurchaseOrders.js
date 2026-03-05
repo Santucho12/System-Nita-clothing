@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import PremiumModal from './PremiumModal';
+import './PremiumModal.css';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
@@ -12,18 +14,30 @@ const PurchaseOrders = () => {
   const [showForm, setShowForm] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [filterStatus, setFilterStatus] = useState('all');
-  
+
   const [formData, setFormData] = useState({
     supplier_id: '',
     expected_date: '',
     items: [],
     notes: ''
   });
-  
+
   const [newItem, setNewItem] = useState({
     product_id: '',
     quantity: 1,
     unit_cost: 0
+  });
+
+  const [premiumModal, setPremiumModal] = useState({
+    show: false,
+    type: 'info',
+    title: '',
+    message: '',
+    confirmText: 'Aceptar',
+    cancelText: 'Cancelar',
+    onConfirm: () => { },
+    inputValue: '',
+    onInputChange: (val) => setPremiumModal(prev => ({ ...prev, inputValue: val }))
   });
 
   useEffect(() => {
@@ -35,13 +49,13 @@ const PurchaseOrders = () => {
       setLoading(true);
       const token = localStorage.getItem('token');
       const headers = { Authorization: `Bearer ${token}` };
-      
+
       const [ordersRes, suppliersRes, productsRes] = await Promise.all([
         axios.get(`${API_URL}/ordenes-compra`, { headers }),
         axios.get(`${API_URL}/proveedores`, { headers }),
         axios.get(`${API_URL}/productos`, { headers })
       ]);
-      
+
       setOrders(ordersRes.data.data || []);
       setSuppliers(suppliersRes.data.data || []);
       setProducts(productsRes.data.data || []);
@@ -102,7 +116,7 @@ const PurchaseOrders = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!formData.supplier_id) {
       toast.error('Seleccione un proveedor');
       return;
@@ -118,7 +132,7 @@ const PurchaseOrders = () => {
       await axios.post(`${API_URL}/ordenes-compra`, formData, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      
+
       toast.success('Orden de compra creada exitosamente');
       resetForm();
       loadData();
@@ -127,40 +141,56 @@ const PurchaseOrders = () => {
     }
   };
 
-  const handleReceive = async (orderId) => {
-    if (!window.confirm('¿Marcar esta orden como recibida? Esto actualizará el stock automáticamente.')) {
-      return;
-    }
+  const handleReceive = (orderId) => {
+    setPremiumModal({
+      show: true,
+      type: 'confirm',
+      title: 'Recibir Orden',
+      message: '¿Marcar esta orden como recibida? Esto actualizará el stock automáticamente.',
+      confirmText: 'Marcar como Recibida',
+      cancelText: 'Cerrar',
+      onConfirm: async () => {
+        try {
+          const token = localStorage.getItem('token');
+          await axios.patch(`${API_URL}/ordenes-compra/${orderId}/recibir`, {}, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
 
-    try {
-      const token = localStorage.getItem('token');
-      await axios.patch(`${API_URL}/ordenes-compra/${orderId}/recibir`, {}, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      
-      toast.success('Orden marcada como recibida y stock actualizado');
-      loadData();
-    } catch (error) {
-      toast.error('Error: ' + (error.response?.data?.message || error.message));
-    }
+          toast.success('Orden marcada como recibida y stock actualizado');
+          loadData();
+          setPremiumModal(prev => ({ ...prev, show: false }));
+        } catch (error) {
+          toast.error('Error: ' + (error.response?.data?.message || error.message));
+          setPremiumModal(prev => ({ ...prev, show: false }));
+        }
+      }
+    });
   };
 
-  const handleCancel = async (orderId) => {
-    if (!window.confirm('¿Cancelar esta orden de compra?')) {
-      return;
-    }
+  const handleCancel = (orderId) => {
+    setPremiumModal({
+      show: true,
+      type: 'danger',
+      title: 'Cancelar Orden',
+      message: '¿Estás seguro de que quieres cancelar esta orden de compra? Esta acción no se puede deshacer.',
+      confirmText: 'Cancelar Orden',
+      cancelText: 'Volver',
+      onConfirm: async () => {
+        try {
+          const token = localStorage.getItem('token');
+          await axios.delete(`${API_URL}/ordenes-compra/${orderId}`, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
 
-    try {
-      const token = localStorage.getItem('token');
-      await axios.delete(`${API_URL}/ordenes-compra/${orderId}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      
-      toast.success('Orden cancelada exitosamente');
-      loadData();
-    } catch (error) {
-      toast.error('Error: ' + (error.response?.data?.message || error.message));
-    }
+          toast.success('Orden cancelada exitosamente');
+          loadData();
+          setPremiumModal(prev => ({ ...prev, show: false }));
+        } catch (error) {
+          toast.error('Error: ' + (error.response?.data?.message || error.message));
+          setPremiumModal(prev => ({ ...prev, show: false }));
+        }
+      }
+    });
   };
 
   const viewDetails = async (orderId) => {
@@ -193,7 +223,7 @@ const PurchaseOrders = () => {
       partial: { bg: '#d1ecf1', color: '#0c5460', text: 'Parcial' },
       cancelled: { bg: '#f8d7da', color: '#721c24', text: 'Cancelada' }
     };
-    
+
     const style = styles[status] || styles.pending;
     return (
       <span style={{ display: 'inline-block', padding: '4px 12px', borderRadius: '12px', fontSize: '12px', fontWeight: 'bold', background: style.bg, color: style.color }}>
@@ -202,8 +232,8 @@ const PurchaseOrders = () => {
     );
   };
 
-  const filteredOrders = filterStatus === 'all' 
-    ? orders 
+  const filteredOrders = filterStatus === 'all'
+    ? orders
     : orders.filter(order => order.status === filterStatus);
 
   const calculateTotal = () => {
@@ -226,7 +256,7 @@ const PurchaseOrders = () => {
           <i className="fas fa-file-invoice" style={{ marginRight: '10px' }}></i>
           Órdenes de Compra
         </h1>
-        <button 
+        <button
           className="btn btn-primary"
           onClick={() => setShowForm(true)}
           style={{ padding: '10px 20px', background: '#007bff', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
@@ -237,25 +267,25 @@ const PurchaseOrders = () => {
       </div>
 
       <div className="filters" style={{ marginBottom: '20px', display: 'flex', gap: '10px' }}>
-        <button 
+        <button
           onClick={() => setFilterStatus('all')}
           style={{ padding: '8px 16px', border: '1px solid #ddd', borderRadius: '4px', background: filterStatus === 'all' ? '#007bff' : 'white', color: filterStatus === 'all' ? 'white' : '#333', cursor: 'pointer' }}
         >
           Todas
         </button>
-        <button 
+        <button
           onClick={() => setFilterStatus('pending')}
           style={{ padding: '8px 16px', border: '1px solid #ddd', borderRadius: '4px', background: filterStatus === 'pending' ? '#007bff' : 'white', color: filterStatus === 'pending' ? 'white' : '#333', cursor: 'pointer' }}
         >
           Pendientes
         </button>
-        <button 
+        <button
           onClick={() => setFilterStatus('received')}
           style={{ padding: '8px 16px', border: '1px solid #ddd', borderRadius: '4px', background: filterStatus === 'received' ? '#007bff' : 'white', color: filterStatus === 'received' ? 'white' : '#333', cursor: 'pointer' }}
         >
           Recibidas
         </button>
-        <button 
+        <button
           onClick={() => setFilterStatus('cancelled')}
           style={{ padding: '8px 16px', border: '1px solid #ddd', borderRadius: '4px', background: filterStatus === 'cancelled' ? '#007bff' : 'white', color: filterStatus === 'cancelled' ? 'white' : '#333', cursor: 'pointer' }}
         >
@@ -270,7 +300,7 @@ const PurchaseOrders = () => {
               <h3>Nueva Orden de Compra</h3>
               <button onClick={resetForm} style={{ background: 'none', border: 'none', fontSize: '24px', cursor: 'pointer' }}>×</button>
             </div>
-            
+
             <form onSubmit={handleSubmit}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '20px' }}>
                 <div>
@@ -354,8 +384,8 @@ const PurchaseOrders = () => {
                       style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '4px' }}
                     />
                   </div>
-                  <button 
-                    type="button" 
+                  <button
+                    type="button"
                     onClick={addItem}
                     style={{ padding: '8px 16px', background: '#28a745', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
                   >
@@ -383,7 +413,7 @@ const PurchaseOrders = () => {
                             <td style={{ textAlign: 'right', padding: '8px' }}>${item.unit_cost.toFixed(2)}</td>
                             <td style={{ textAlign: 'right', padding: '8px' }}>${item.subtotal.toFixed(2)}</td>
                             <td style={{ textAlign: 'center', padding: '8px' }}>
-                              <button 
+                              <button
                                 type="button"
                                 onClick={() => removeItem(index)}
                                 style={{ background: 'none', border: 'none', color: '#dc3545', cursor: 'pointer' }}
@@ -475,7 +505,7 @@ const PurchaseOrders = () => {
             <i className="fas fa-file-invoice" style={{ fontSize: '3em', color: '#ccc', marginBottom: '20px' }}></i>
             <h3>No hay órdenes de compra</h3>
             <p>Crea tu primera orden para empezar a gestionar compras</p>
-            <button 
+            <button
               className="btn btn-primary"
               onClick={() => setShowForm(true)}
               style={{ padding: '10px 20px', background: '#007bff', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', marginTop: '15px' }}
@@ -505,7 +535,7 @@ const PurchaseOrders = () => {
                   <td style={{ padding: '12px', textAlign: 'right', fontWeight: 'bold' }}>${parseFloat(order.total).toFixed(2)}</td>
                   <td style={{ padding: '12px', textAlign: 'center' }}>{getStatusBadge(order.status)}</td>
                   <td style={{ padding: '12px', textAlign: 'center' }}>
-                    <button 
+                    <button
                       onClick={() => viewDetails(order.id)}
                       style={{ background: 'none', border: 'none', color: '#007bff', cursor: 'pointer', fontSize: '16px', marginRight: '8px' }}
                       title="Ver Detalles"
@@ -514,14 +544,14 @@ const PurchaseOrders = () => {
                     </button>
                     {order.status === 'pending' && (
                       <>
-                        <button 
+                        <button
                           onClick={() => handleReceive(order.id)}
                           style={{ background: 'none', border: 'none', color: '#28a745', cursor: 'pointer', fontSize: '16px', marginRight: '8px' }}
                           title="Marcar como Recibida"
                         >
                           <i className="fas fa-check"></i>
                         </button>
-                        <button 
+                        <button
                           onClick={() => handleCancel(order.id)}
                           style={{ background: 'none', border: 'none', color: '#dc3545', cursor: 'pointer', fontSize: '16px' }}
                           title="Cancelar"
@@ -537,6 +567,18 @@ const PurchaseOrders = () => {
           </table>
         )}
       </div>
+      <PremiumModal
+        show={premiumModal.show}
+        type={premiumModal.type}
+        title={premiumModal.title}
+        message={premiumModal.message}
+        inputValue={premiumModal.inputValue}
+        onInputChange={premiumModal.onInputChange}
+        onConfirm={premiumModal.onConfirm}
+        onCancel={() => setPremiumModal(prev => ({ ...prev, show: false }))}
+        confirmText={premiumModal.confirmText}
+        cancelText={premiumModal.cancelText}
+      />
     </div>
   );
 };

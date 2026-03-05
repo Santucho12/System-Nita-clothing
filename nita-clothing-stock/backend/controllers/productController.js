@@ -213,6 +213,17 @@ class ProductController {
                 return res.status(400).json({ success: false, message: 'El nombre es obligatorio' });
             }
 
+            // Validar SKU único antes de crear
+            if (mappedData.codigo) {
+                const exists = await Product.checkSkuExists(mappedData.codigo);
+                if (exists) {
+                    return res.status(400).json({
+                        success: false,
+                        message: `El SKU "${mappedData.codigo}" ya fue usado. Por favor, utiliza uno diferente.`
+                    });
+                }
+            }
+
             const newProduct = await Product.create(mappedData);
             res.status(201).json({ success: true, data: newProduct });
         } catch (error) {
@@ -274,6 +285,17 @@ class ProductController {
             };
 
             Object.keys(mappedData).forEach(key => mappedData[key] === undefined && delete mappedData[key]);
+
+            // Validar SKU único antes de actualizar (excluyendo el actual)
+            if (mappedData.codigo) {
+                const exists = await Product.checkSkuExists(mappedData.codigo, id);
+                if (exists) {
+                    return res.status(400).json({
+                        success: false,
+                        message: `No se puede actualizar el producto: El SKU "${mappedData.codigo}" ya está registrado en otro producto.`
+                    });
+                }
+            }
 
             const updatedProduct = await Product.update(id, mappedData);
             res.status(200).json({ success: true, data: updatedProduct });

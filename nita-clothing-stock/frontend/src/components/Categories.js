@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { categoryService } from '../services/api';
 import { toast } from 'react-toastify';
+import PremiumModal from './PremiumModal';
+import './PremiumModal.css';
 import {
   FaFolderOpen, FaPlus, FaEdit, FaTrash, FaFolder, FaTimes,
   FaSave, FaToggleOn, FaToggleOff, FaCalendarAlt, FaSearch,
@@ -16,6 +18,18 @@ const Categories = () => {
   const [formData, setFormData] = useState({
     name: '',
     description: ''
+  });
+
+  const [premiumModal, setPremiumModal] = useState({
+    show: false,
+    type: 'info',
+    title: '',
+    message: '',
+    confirmText: 'Aceptar',
+    cancelText: 'Cancelar',
+    onConfirm: () => { },
+    inputValue: '',
+    onInputChange: (val) => setPremiumModal(prev => ({ ...prev, inputValue: val }))
   });
 
   useEffect(() => {
@@ -82,16 +96,26 @@ const Categories = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm('¿Estás seguro de que quieres eliminar esta categoría?')) {
-      try {
-        await categoryService.delete(id);
-        toast.success('Categoría eliminada exitosamente');
-        loadCategories();
-      } catch (error) {
-        toast.error('Error eliminando categoría: ' + error.message);
+  const handleDelete = (id) => {
+    setPremiumModal({
+      show: true,
+      type: 'danger',
+      title: 'Eliminar Categoría',
+      message: '¿Estás seguro de que quieres eliminar esta categoría? Esta acción no se puede deshacer.',
+      confirmText: 'Eliminar',
+      cancelText: 'Cancelar',
+      onConfirm: async () => {
+        try {
+          await categoryService.delete(id);
+          toast.success('Categoría eliminada exitosamente');
+          loadCategories();
+          setPremiumModal(prev => ({ ...prev, show: false }));
+        } catch (error) {
+          toast.error('Error eliminando categoría: ' + error.message);
+          setPremiumModal(prev => ({ ...prev, show: false }));
+        }
       }
-    }
+    });
   };
 
   const handleCancel = () => {
@@ -449,6 +473,18 @@ const Categories = () => {
           </div>
         </div>
       )}
+      <PremiumModal
+        show={premiumModal.show}
+        type={premiumModal.type}
+        title={premiumModal.title}
+        message={premiumModal.message}
+        inputValue={premiumModal.inputValue}
+        onInputChange={premiumModal.onInputChange}
+        onConfirm={premiumModal.onConfirm}
+        onCancel={() => setPremiumModal(prev => ({ ...prev, show: false }))}
+        confirmText={premiumModal.confirmText}
+        cancelText={premiumModal.cancelText}
+      />
     </div>
   );
 };

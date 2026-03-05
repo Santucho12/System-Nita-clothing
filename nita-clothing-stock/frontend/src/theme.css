@@ -784,32 +784,32 @@ tr {
 .nita-search-input {
   width: 100%;
   padding: 13px 18px 13px 44px;
-  border: 2px solid #e2e8f0;
+  border: 2px solid var(--border-color);
   border-radius: 14px;
   font-size: 15px;
   font-weight: 500;
-  color: #1e293b;
-  background: #f8fafc;
+  color: var(--text-primary);
+  background: var(--bg-input);
   transition: all 0.25s ease;
   box-sizing: border-box;
 }
 
 .nita-search-input:focus {
   outline: none;
-  border-color: #f73194;
-  background: #fff;
-  box-shadow: 0 0 0 4px rgba(247, 49, 148, 0.08);
+  border-color: var(--accent-pink);
+  background: var(--bg-card);
+  box-shadow: 0 0 0 4px var(--accent-pink-light);
 }
 
 .nita-filter-select {
   width: 100%;
   padding: 13px 36px 13px 14px;
-  border: 2px solid #e2e8f0;
+  border: 2px solid var(--border-color);
   border-radius: 14px;
   font-size: 14px;
   font-weight: 500;
-  color: #1e293b;
-  background: #f8fafc;
+  color: var(--text-primary);
+  background: var(--bg-input);
   cursor: pointer;
   transition: all 0.25s ease;
   box-sizing: border-box;
@@ -822,9 +822,9 @@ tr {
 
 .nita-filter-select:focus {
   outline: none;
-  border-color: #f73194;
-  background-color: #fff;
-  box-shadow: 0 0 0 4px rgba(247, 49, 148, 0.08);
+  border-color: var(--accent-pink);
+  background-color: var(--bg-card);
+  box-shadow: 0 0 0 4px var(--accent-pink-light);
 }
 
 /* For Dark Themes */

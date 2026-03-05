@@ -5,16 +5,18 @@ import {
   FaTshirt, FaPlus, FaEdit, FaTrash, FaCopy, FaSearch,
   FaFileExcel, FaTimes, FaBox, FaDollarSign, FaBarcode, FaTag,
   FaPalette, FaRulerVertical, FaCalendarAlt, FaCheckCircle, FaExclamationTriangle,
-  FaTimesCircle, FaEye, FaSave, FaBoxes, FaUser, FaCamera
+  FaTimesCircle, FaEye, FaSave, FaBoxes, FaUser, FaCamera, FaImage
 } from 'react-icons/fa';
 
 import './Sidebar.css';
+import PremiumModal from './PremiumModal';
+import './PremiumModal.css';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 const BASE_URL = API_URL.replace('/api', '');
 
 const getImageUrl = (path) => {
-  if (!path || path === 'undefined' || path === 'null') return 'https://via.placeholder.com/400x400?text=Sin+Imagen';
+  if (!path || path === 'undefined' || path === 'null') return 'https://placehold.co/400x400?text=Sin+Imagen';
   if (path.startsWith('http')) return path;
   if (path.startsWith('blob:')) return path;
   const cleanPath = path.startsWith('/') ? path : `/${path}`;
@@ -57,6 +59,19 @@ const Products = () => {
   const [categoryFormData, setCategoryFormData] = useState({
     name: '',
     description: ''
+  });
+
+  // Estado para el Modal Premium
+  const [premiumModal, setPremiumModal] = useState({
+    show: false,
+    type: 'info',
+    title: '',
+    message: '',
+    confirmText: 'Aceptar',
+    cancelText: 'Cancelar',
+    onConfirm: () => { },
+    inputValue: '',
+    onInputChange: (val) => setPremiumModal(prev => ({ ...prev, inputValue: val }))
   });
 
   // Guardar y recuperar el último SKU usando localStorage
@@ -258,15 +273,26 @@ const Products = () => {
   };
 
   // Duplicar producto
-  const handleDuplicate = async (product) => {
-    if (!window.confirm('¿Deseas duplicar este producto?')) return;
-    try {
-      await productService.duplicate(product.id);
-      toast.success('Producto duplicado exitosamente');
-      loadProducts();
-    } catch (error) {
-      toast.error('Error duplicando producto: ' + error.message);
-    }
+  const handleDuplicate = (product) => {
+    setPremiumModal({
+      show: true,
+      type: 'confirm',
+      title: 'Duplicar Producto',
+      message: `¿Estás seguro de que deseas duplicar el producto "${product.nombre || product.name}"?`,
+      confirmText: 'Duplicar',
+      cancelText: 'Cancelar',
+      onConfirm: async () => {
+        try {
+          await productService.duplicate(product.id);
+          toast.success('Producto duplicado exitosamente');
+          loadProducts();
+          setPremiumModal(prev => ({ ...prev, show: false }));
+        } catch (error) {
+          toast.error('Error duplicando producto: ' + error.message);
+          setPremiumModal(prev => ({ ...prev, show: false }));
+        }
+      }
+    });
   };
 
   const handleEdit = (product) => {
@@ -301,36 +327,64 @@ const Products = () => {
     setDetailProduct(null);
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm('¿Estás seguro de que quieres eliminar este producto?')) {
-      try {
-        await productService.delete(id);
-        toast.success('Producto eliminado exitosamente');
-        loadProducts();
-      } catch (error) {
-        toast.error('Error eliminando producto: ' + error.message);
+  const handleDelete = (id) => {
+    setPremiumModal({
+      show: true,
+      type: 'danger',
+      title: 'Eliminar Producto',
+      message: '¿Estás seguro de que quieres eliminar este producto? Esta acción no se puede deshacer.',
+      confirmText: 'Eliminar',
+      cancelText: 'Cancelar',
+      onConfirm: async () => {
+        try {
+          await productService.delete(id);
+          toast.success('Producto eliminado exitosamente');
+          loadProducts();
+          setPremiumModal(prev => ({ ...prev, show: false }));
+        } catch (error) {
+          toast.error('Error eliminando producto: ' + error.message);
+          setPremiumModal(prev => ({ ...prev, show: false }));
+        }
       }
-    }
+    });
   };
 
-  const handleUpdateStock = async (productId, currentQuantity) => {
-    const newQuantity = prompt(`Stock actual: ${currentQuantity}\nIngresa la nueva cantidad:`, currentQuantity);
+  const handleUpdateStock = (productId, currentQuantity) => {
+    setPremiumModal({
+      show: true,
+      type: 'prompt',
+      title: 'Actualizar Stock',
+      message: `Stock actual: ${currentQuantity}. Ingresa la nueva cantidad:`,
+      confirmText: 'Actualizar',
+      cancelText: 'Cancelar',
+      inputValue: currentQuantity.toString(),
+      onInputChange: (val) => setPremiumModal(prev => ({ ...prev, inputValue: val })),
+      onConfirm: async () => {
+        // Obtenemos el valor actual del state de premiumModal
+        // pero necesitamos el valor actualizado, así que usamos un wrapper o accedemos al estado actual
+        setPremiumModal(prev => {
+          const quantity = parseInt(prev.inputValue);
+          if (isNaN(quantity) || quantity < 0) {
+            toast.error('La cantidad debe ser un número mayor o igual a 0');
+            return prev;
+          }
 
-    if (newQuantity !== null) {
-      const quantity = parseInt(newQuantity);
-      if (isNaN(quantity) || quantity < 0) {
-        toast.error('La cantidad debe ser un número mayor o igual a 0');
-        return;
-      }
+          (async () => {
+            try {
+              await productService.updateStock(productId, quantity);
+              toast.success('Stock actualizado exitosamente');
+              loadProducts();
+              setPremiumModal(p => ({ ...p, show: false }));
+            } catch (error) {
+              toast.error('Error actualizando stock: ' + error.message);
+              setPremiumModal(p => ({ ...p, show: false }));
+            }
+          })();
 
-      try {
-        await productService.updateStock(productId, quantity);
-        toast.success('Stock actualizado exitosamente');
-        loadProducts();
-      } catch (error) {
-        toast.error('Error actualizando stock: ' + error.message);
+          return prev;
+        });
       }
-    }
+    });
   };
 
   const resetForm = () => {
@@ -455,32 +509,32 @@ const Products = () => {
           .nita-search-input {
             width: 100%;
             padding: 13px 18px 13px 44px;
-            border: 2px solid #e2e8f0;
+            border: 2px solid var(--border-color);
             border-radius: 14px;
             font-size: 15px;
             font-weight: 500;
-            color: #1e293b;
-            background: #f8fafc;
+            color: var(--text-primary);
+            background: var(--bg-secondary);
             transition: all 0.25s ease;
             box-sizing: border-box;
           }
           .nita-search-input:focus {
             outline: none;
-            border-color: #f73194;
-            background: #fff;
-            box-shadow: 0 0 0 4px rgba(247,49,148,0.08);
+            border-color: var(--accent-pink);
+            background: var(--bg-card);
+            box-shadow: 0 0 0 4px var(--accent-pink-light);
           }
           .nita-search-input::placeholder { color: #94a3b8; font-weight: 400; }
 
           .nita-filter-select {
             width: 100%;
             padding: 13px 14px;
-            border: 2px solid #e2e8f0;
+            border: 2px solid var(--border-color);
             border-radius: 14px;
             font-size: 14px;
             font-weight: 500;
-            color: #1e293b;
-            background: #f8fafc;
+            color: var(--text-primary);
+            background: var(--bg-secondary);
             cursor: pointer;
             transition: all 0.25s ease;
             box-sizing: border-box;
@@ -493,9 +547,9 @@ const Products = () => {
           }
           .nita-filter-select:focus {
             outline: none;
-            border-color: #f73194;
-            background-color: #fff;
-            box-shadow: 0 0 0 4px rgba(247,49,148,0.08);
+            border-color: var(--accent-pink);
+            background-color: var(--bg-card);
+            box-shadow: 0 0 0 4px var(--accent-pink-light);
           }
 
           /* ---- Clear filter chip ---- */
@@ -505,9 +559,9 @@ const Products = () => {
             gap: 6px;
             padding: 8px 16px;
             border-radius: 50px;
-            border: 1px solid #e2e8f0;
-            background: white;
-            color: #64748b;
+            border: 1px solid var(--border-color);
+            background: var(--bg-card);
+            color: var(--text-secondary);
             font-size: 13px;
             font-weight: 600;
             cursor: pointer;
@@ -530,7 +584,7 @@ const Products = () => {
           .form-group-premium { display: flex; flex-direction: column; gap: 8px; }
 
           .label-premium {
-            font-size: 13px; font-weight: 700; color: #64748b;
+            font-size: 13px; font-weight: 700; color: var(--text-secondary);
             display: flex; align-items: center; gap: 8px;
             text-transform: uppercase; letter-spacing: 0.02em;
           }
@@ -538,13 +592,13 @@ const Products = () => {
 
           .input-premium {
             width: 100%; padding: 12px 16px;
-            border: 2px solid #f1f5f9; border-radius: 12px;
-            font-size: 15px; font-weight: 500; color: #1e293b;
-            transition: all 0.2s ease; background: #f8fafc;
+            border: 2px solid var(--border-color); border-radius: 12px;
+            font-size: 15px; font-weight: 500; color: var(--text-primary);
+            transition: all 0.2s ease; background: var(--bg-secondary);
           }
           .input-premium:focus {
-            outline: none; border-color: #f73194;
-            background: white; box-shadow: 0 0 0 4px rgba(247,49,148,0.1);
+            outline: none; border-color: var(--accent-pink);
+            background: var(--bg-card); box-shadow: 0 0 0 4px var(--accent-pink-light);
           }
           .input-premium::placeholder { color: #94a3b8; }
 
@@ -552,17 +606,50 @@ const Products = () => {
             from { opacity: 0; transform: translateY(20px) scale(0.98); }
             to { opacity: 1; transform: translateY(0) scale(1); }
           }
+
+          .no-image-placeholder-premium {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: #f1f5f9;
+            color: #94a3b8;
+            gap: 12px;
+            transition: all 0.3s ease;
+          }
+          .no-image-placeholder-premium svg {
+            font-size: 48px;
+            opacity: 0.4;
+            color: #f73194;
+          }
+          .no-image-placeholder-premium span {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            opacity: 0.6;
+          }
+
+          .product-card-premium:hover .no-image-placeholder-premium {
+            background: #fce7f3;
+          }
+          .product-card-premium:hover .no-image-placeholder-premium svg {
+            transform: scale(1.1);
+            opacity: 0.7;
+          }
         `}
       </style>
 
       {/* ═══════ HERO HEADER ═══════ */}
       <div className="products-hero" style={{
-        background: 'white',
+        background: 'var(--bg-card)',
         borderRadius: '20px',
         padding: '28px 36px',
         marginBottom: '24px',
-        boxShadow: '0 4px 20px rgba(0,0,0,0.04)',
-        border: '1px solid rgba(0,0,0,0.04)',
+        boxShadow: 'var(--shadow-sm)',
+        border: '1px solid var(--border-color)',
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center'
@@ -579,10 +666,10 @@ const Products = () => {
             <FaTshirt style={{ color: '#f73194', fontSize: '26px' }} />
           </div>
           <div>
-            <h1 style={{ margin: 0, fontSize: '24px', fontWeight: '800', color: '#1e293b', letterSpacing: '-0.02em' }}>
+            <h1 style={{ margin: 0, fontSize: '24px', fontWeight: '800', color: 'var(--text-heading)', letterSpacing: '-0.02em' }}>
               Stock de Ropa
             </h1>
-            <p style={{ margin: '2px 0 0', fontSize: '14px', color: '#94a3b8', fontWeight: '500' }}>
+            <p style={{ margin: '2px 0 0', fontSize: '14px', color: 'var(--text-muted)', fontWeight: '500' }}>
               {products.filter(p => (Number(p.stock) || 0) > 0).length} en stock y {products.filter(p => (Number(p.stock) || 0) <= 0).length} sin stock
             </p>
           </div>
@@ -592,13 +679,13 @@ const Products = () => {
           <button
             onClick={handleExport}
             style={{
-              padding: '11px 22px', color: '#475569', background: '#f1f5f9',
-              border: '1px solid #e2e8f0', borderRadius: '12px', cursor: 'pointer',
+              padding: '11px 22px', color: 'var(--text-primary)', background: 'var(--bg-tertiary)',
+              border: '1px solid var(--border-color)', borderRadius: '12px', cursor: 'pointer',
               display: 'flex', alignItems: 'center', gap: '8px',
               fontSize: '14px', fontWeight: '600', transition: 'all 0.2s'
             }}
-            onMouseOver={(e) => { e.currentTarget.style.background = '#e2e8f0'; }}
-            onMouseOut={(e) => { e.currentTarget.style.background = '#f1f5f9'; }}
+            onMouseOver={(e) => { e.currentTarget.style.background = 'var(--bg-hover)'; }}
+            onMouseOut={(e) => { e.currentTarget.style.background = 'var(--bg-tertiary)'; }}
           >
             <FaFileExcel />
             Exportar
@@ -623,12 +710,12 @@ const Products = () => {
 
       {/* ═══════ FILTERS BAR ═══════ */}
       <div className="products-filters-bar" style={{
-        background: 'white',
+        background: 'var(--bg-card)',
         borderRadius: '20px',
         padding: '20px 28px',
         marginBottom: '28px',
-        boxShadow: '0 4px 20px rgba(0,0,0,0.04)',
-        border: '1px solid rgba(0,0,0,0.04)'
+        boxShadow: 'var(--shadow-sm)',
+        border: '1px solid var(--border-color)'
       }}>
         <div style={{ display: 'flex', gap: '14px', alignItems: 'center', flexWrap: 'wrap' }}>
 
@@ -752,17 +839,18 @@ const Products = () => {
         >
           <div
             style={{
-              background: 'white',
+              background: 'var(--bg-card)',
               padding: '0',
               borderRadius: '24px',
               maxWidth: '1000px',
               width: '100%',
               maxHeight: '90vh',
               overflow: 'hidden',
-              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+              boxShadow: 'var(--shadow-lg)',
               display: 'flex',
               flexDirection: 'column',
-              animation: 'modalSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1)'
+              animation: 'modalSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
+              border: '1px solid var(--border-color)'
             }}
             onClick={e => e.stopPropagation()}
           >
@@ -776,14 +864,14 @@ const Products = () => {
               background: '#fff'
             }}>
               <div>
-                <h3 style={{ margin: 0, fontSize: '22px', fontWeight: '800', color: '#1e293b', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <div style={{ background: '#fff0f7', color: '#f73194', padding: '10px', borderRadius: '12px', display: 'flex' }}>
+                <h3 style={{ margin: 0, fontSize: '22px', fontWeight: '800', color: 'var(--text-heading)', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div style={{ background: 'var(--accent-pink-light)', color: 'var(--accent-pink)', padding: '10px', borderRadius: '12px', display: 'flex' }}>
                     {editingProduct ? <FaEdit /> : <FaPlus />}
                   </div>
                   {editingProduct ? 'Editar Producto' : 'Crear Nuevo Producto'}
                 </h3>
-                <p style={{ margin: '4px 0 0 46px', fontSize: '13px', color: '#64748b', fontWeight: '500' }}>
-                  {editingProduct ? 'Modifica los detalles del producto existente' : 'Completa los datos para añadir un producto al stock'}
+                <p style={{ margin: '4px 0 0 46px', fontSize: '13px', color: 'var(--text-muted)', fontWeight: '500' }}>
+                  {editingProduct ? 'Modifica los detalles del producto existente' : 'Completa los datos para agregar un producto al stock'}
                 </p>
               </div>
               <button
@@ -814,7 +902,7 @@ const Products = () => {
                 {/* Lateral Izquierdo: IMÁGENES */}
                 <div style={{ padding: '32px', background: '#f8fafc', borderRight: '1px solid #f1f5f9' }}>
                   <label style={{ display: 'block', marginBottom: '16px', fontWeight: '700', fontSize: '14px', color: '#475569', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                    Fotografías del Producto
+                    Fotos del Producto
                   </label>
 
                   <div
@@ -859,10 +947,9 @@ const Products = () => {
                     ) : (
                       <div style={{ padding: '20px 0' }}>
                         <div style={{ fontSize: '48px', color: '#cbd5e1', marginBottom: '12px' }}>
-                          <FaCamera />
+                          <FaImage />
                         </div>
                         <p style={{ margin: 0, fontSize: '14px', fontWeight: '600', color: '#64748b' }}>Subir fotos</p>
-                        <p style={{ margin: '4px 0 0', fontSize: '12px', color: '#94a3b8' }}>JPG, PNG o WebP</p>
                       </div>
                     )}
                   </div>
@@ -871,7 +958,7 @@ const Products = () => {
                     <div style={{ display: 'flex', gap: '10px' }}>
                       <FaExclamationTriangle style={{ color: '#d97706', marginTop: '2px' }} />
                       <p style={{ margin: 0, fontSize: '12px', color: '#92400e', lineHeight: '1.5' }}>
-                        <strong>Tip Pro:</strong> Las fotos con fondo claro y buena iluminación ayudan a vender más rápido.
+                        <strong>Tip Pro:</strong> Las fotos con fondo claro y buena iluminación se van a ver mejor.
                       </p>
                     </div>
                   </div>
@@ -882,7 +969,7 @@ const Products = () => {
                   <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '20px', marginBottom: '24px' }}>
                     <div className="form-group-premium">
                       <label className="label-premium"><FaTshirt /> Nombre del Producto</label>
-                      <input type="text" name="name" value={formData.name} onChange={handleInputChange} placeholder="Ej: Remera Básica Oversize" required className="input-premium" />
+                      <input type="text" name="name" value={formData.name} onChange={handleInputChange} placeholder="Ej: Remera Siena " required className="input-premium" />
                     </div>
                     <div className="form-group-premium">
                       <label className="label-premium"><FaBarcode /> SKU / Código</label>
@@ -1047,11 +1134,19 @@ const Products = () => {
               >
                 {/* Imagen y Badges */}
                 <div className="product-image-wrapper">
-                  <img
-                    src={product.images && product.images.length > 0 ? getImageUrl(product.images[0]) : 'https://via.placeholder.com/400?text=SBN'}
-                    alt={product.name}
-                    onError={e => { e.target.src = 'https://via.placeholder.com/400x400?text=Error+Imagen'; }}
-                  />
+                  {product.images && product.images.length > 0 ? (
+                    <img
+                      src={getImageUrl(product.images[0])}
+                      alt={product.nombre || product.name}
+                      className="product-image-premium"
+                      onError={e => { e.target.src = 'https://placehold.co/400x400?text=Error+Imagen'; }}
+                    />
+                  ) : (
+                    <div className="no-image-placeholder-premium">
+                      <FaImage />
+                      <span>Sin imagen</span>
+                    </div>
+                  )}
 
                   {/* Badge de Stock */}
                   <div className={`product-badge-premium ${isSinStock ? 'status-badge-out' : 'status-badge-active'}`}>
@@ -1074,13 +1169,17 @@ const Products = () => {
 
                 {/* Información */}
                 <div className="product-info-premium">
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                    <span className="product-category-tag">{getCategoryName(product.categoria_id || product.category_id)}</span>
-                    <span style={{ fontSize: '11px', color: '#94a3b8', fontWeight: '600' }}>
-                      SKU {product.sku || product.codigo || '-'}
-                    </span>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginBottom: '8px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <span className="product-category-tag">{getCategoryName(product.categoria_id || product.category_id)}</span>
+                      <span style={{ fontSize: '10px', color: '#94a3b8', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                        SKU {product.sku || product.codigo || '-'}
+                      </span>
+                    </div>
+                    <h3 className="product-name-premium" style={{ margin: 0 }}>
+                      {product.nombre || product.name || 'Sin nombre'}
+                    </h3>
                   </div>
-                  <h3 className="product-name-premium">{product.name}</h3>
 
                   {/* Chips de Talle y Color */}
                   <div style={{ display: 'flex', gap: '6px', marginBottom: '14px', flexWrap: 'wrap' }}>
@@ -1112,15 +1211,7 @@ const Products = () => {
                       <span className="price-value-premium">${product.precio || product.sale_price}</span>
                     </div>
 
-                    <div style={{
-                      display: 'flex', alignItems: 'center', gap: '6px',
-                      padding: '5px 12px', borderRadius: '8px', fontSize: '12px', fontWeight: '700',
-                      background: isSinStock ? '#fef2f2' : product.quantity <= 3 ? '#fffbeb' : '#f0fdf4',
-                      color: isSinStock ? '#dc2626' : product.quantity <= 3 ? '#d97706' : '#16a34a'
-                    }}>
-                      <FaBox style={{ fontSize: '10px' }} />
-                      {product.quantity} uds
-                    </div>
+
                   </div>
                 </div>
               </div>
@@ -1144,7 +1235,7 @@ const Products = () => {
                       src={getImageUrl(detailProduct.images[0])}
                       alt={detailProduct.name}
                       style={{ width: '100%', maxHeight: '400px', objectFit: 'contain', borderRadius: '16px', marginBottom: '20px' }}
-                      onError={e => { e.target.src = 'https://via.placeholder.com/400x400?text=Error+Imagen'; }}
+                      onError={e => { e.target.src = 'https://placehold.co/400x400?text=Error+Imagen'; }}
                     />
                     <div style={{ display: 'flex', gap: '10px', overflowX: 'auto', width: '100%', paddingBottom: '10px' }}>
                       {detailProduct.images.map((img, idx) => (
@@ -1386,6 +1477,19 @@ const Products = () => {
           </div>
         </div>
       )}
+      {/* Modal de Alerta Premium */}
+      <PremiumModal
+        show={premiumModal.show}
+        type={premiumModal.type}
+        title={premiumModal.title}
+        message={premiumModal.message}
+        inputValue={premiumModal.inputValue}
+        onInputChange={premiumModal.onInputChange}
+        onConfirm={premiumModal.onConfirm}
+        onCancel={() => setPremiumModal(prev => ({ ...prev, show: false }))}
+        confirmText={premiumModal.confirmText}
+        cancelText={premiumModal.cancelText}
+      />
     </div>
   );
 };

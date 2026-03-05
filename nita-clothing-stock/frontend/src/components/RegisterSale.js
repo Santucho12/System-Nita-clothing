@@ -215,6 +215,11 @@ export default function RegisterSale() {
       return;
     }
 
+    if (!customerEmail || !customerEmail.trim()) {
+      toast.error('El email del cliente es obligatorio para registrar la venta.');
+      return;
+    }
+
     // Validación extra de stock antes de enviar
     const outOfStockItem = items.find(i => Number(i.quantity) > Number(i.stock_available));
     if (outOfStockItem) {
@@ -265,10 +270,10 @@ export default function RegisterSale() {
           }
 
           .nita-card {
-            background: white;
+            background: var(--bg-card);
             border-radius: 24px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.04);
-            border: 1px solid rgba(0,0,0,0.03);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
             overflow: hidden;
             transition: all 0.3s ease;
           }
@@ -283,7 +288,7 @@ export default function RegisterSale() {
             gap: 8px;
             font-size: 14px;
             font-weight: 700;
-            color: #475569;
+            color: var(--text-secondary);
             margin-bottom: 10px;
             letter-spacing: -0.01em;
           }
@@ -292,19 +297,19 @@ export default function RegisterSale() {
             width: 100%;
             padding: 14px 18px;
             border-radius: 12px;
-            border: 1.5px solid #e2e8f0;
-            background: #f8fafc;
+            border: 1.5px solid var(--border-color);
+            background: var(--bg-input);
             font-size: 15px;
             font-weight: 500;
-            color: #1e293b;
+            color: var(--text-primary);
             transition: all 0.2s ease;
           }
 
           .nita-input:focus {
             outline: none;
-            border-color: #f73194;
-            background: white;
-            box-shadow: 0 0 0 4px rgba(247, 49, 148, 0.08);
+            border-color: var(--accent-pink);
+            background: var(--bg-card);
+            box-shadow: 0 0 0 4px var(--accent-pink-light);
           }
 
           .nita-select {
@@ -318,9 +323,9 @@ export default function RegisterSale() {
           .method-card {
             flex: 1;
             padding: 20px 10px;
-            border: 2px solid #f1f5f9;
+            border: 2px solid var(--border-light);
             border-radius: 18px;
-            background: white;
+            background: var(--bg-card);
             cursor: pointer;
             display: flex;
             flex-direction: column;
@@ -330,14 +335,14 @@ export default function RegisterSale() {
           }
 
           .method-card:hover {
-            border-color: #f73194;
+            border-color: var(--accent-pink);
             transform: translateY(-4px);
-            background: #fff0f7;
+            background: var(--accent-pink-light);
           }
 
           .method-card.active {
-            border-color: #f73194;
-            background: #fff0f7;
+            border-color: var(--accent-pink);
+            background: var(--accent-pink-light);
             box-shadow: 0 8px 16px rgba(247, 49, 148, 0.1);
           }
 
@@ -347,14 +352,14 @@ export default function RegisterSale() {
             display: flex;
             align-items: center;
             justify-content: center;
-            background: #f8fafc;
+            background: var(--bg-tertiary);
             border-radius: 10px;
             margin-bottom: 2px;
           }
 
           .method-card.active .icon-placeholder {
-            background: white;
-            color: #f73194;
+            background: var(--bg-card);
+            color: var(--accent-pink);
           }
 
           .method-name {
@@ -362,20 +367,20 @@ export default function RegisterSale() {
             font-weight: 850;
             text-transform: uppercase;
             letter-spacing: 0.05em;
-            color: #64748b;
+            color: var(--text-muted);
           }
 
           .method-card.active .method-name {
-            color: #f73194;
+            color: var(--accent-pink);
           }
 
           .btn-add-item {
             width: 100%;
             padding: 16px;
-            border: 2px dashed #e2e8f0;
+            border: 2px dashed var(--border-color);
             border-radius: 16px;
-            background: rgba(248, 250, 252, 0.5);
-            color: #64748b;
+            background: var(--bg-tertiary);
+            color: var(--text-muted);
             font-weight: 700;
             font-size: 15px;
             cursor: pointer;
@@ -388,25 +393,25 @@ export default function RegisterSale() {
           }
 
           .btn-add-item:hover {
-            border-color: #f73194;
-            color: #f73194;
-            background: #fff0f7;
+            border-color: var(--accent-pink);
+            color: var(--accent-pink);
+            background: var(--accent-pink-light);
           }
 
           .product-item-card {
             position: relative;
             padding: 25px;
-            background: white;
+            background: var(--bg-card);
             border-radius: 20px;
             margin-bottom: 25px;
-            border: 1px solid #f1f5f9;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+            border: 1px solid var(--border-light);
+            box-shadow: var(--shadow-sm);
             transition: all 0.3s ease;
           }
 
           .product-item-card:hover {
-            box-shadow: 0 8px 24px rgba(0,0,0,0.05);
-            border-color: #e2e8f0;
+            box-shadow: var(--shadow);
+            border-color: var(--border-color);
           }
 
           .remove-item-btn {
@@ -480,7 +485,7 @@ export default function RegisterSale() {
 
           .search-method-toggle {
             display: flex;
-            background: #f1f5f9;
+            background: var(--bg-tertiary);
             padding: 5px;
             border-radius: 12px;
             margin-bottom: 25px;
@@ -504,66 +509,56 @@ export default function RegisterSale() {
           }
 
           .toggle-btn.active {
-            background: white;
-            color: #f73194;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            background: var(--bg-card);
+            color: var(--accent-pink);
+            box-shadow: var(--shadow-sm);
           }
         `}
       </style>
 
       {/* ═══════ HERO HEADER ═══════ */}
       <div className="animate-fade-in" style={{
-        background: 'white',
+        background: 'var(--bg-card)',
         borderRadius: '24px',
         padding: '30px 40px',
         marginBottom: '30px',
-        boxShadow: '0 4px 25px rgba(0,0,0,0.03)',
+        boxShadow: 'var(--shadow)',
         display: 'flex',
         justifyContent: 'space-between',
-        alignItems: 'center'
+        alignItems: 'center',
+        border: '1px solid var(--border-color)'
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '22px' }}>
           <div style={{
-            background: 'linear-gradient(135deg, #f73194, #ff6b9d)',
+            background: 'linear-gradient(135deg, var(--accent-pink-light), #ffe0ef)',
             width: '60px', height: '60px',
             borderRadius: '20px',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center',
-            boxShadow: '0 8px 20px rgba(247, 49, 148, 0.2)'
+            justifyContent: 'center'
           }}>
-            <FaShoppingCart style={{ color: 'white', fontSize: '26px' }} />
+            <FaShoppingCart style={{ color: 'var(--accent-pink)', fontSize: '26px' }} />
           </div>
           <div>
-            <h1 style={{ margin: 0, fontSize: '28px', fontWeight: '900', color: '#1e293b', letterSpacing: '-0.02em' }}>
+            <h1 style={{ margin: 0, fontSize: '28px', fontWeight: '900', color: 'var(--text-heading)', letterSpacing: '-0.02em' }}>
               Registrar Venta
             </h1>
-            <p style={{ margin: '4px 0 0', fontSize: '15px', color: '#64748b', fontWeight: '500' }}>
-              Nueva transacción para Nita Clothing
+            <p style={{ margin: '4px 0 0', fontSize: '15px', color: 'var(--text-muted)', fontWeight: '500' }}>
+              Nueva venta para Nita Clothing
             </p>
           </div>
         </div>
 
-        <div style={{ display: 'flex', gap: '15px' }}>
-          <div style={{
-            padding: '12px 24px', color: '#f73194', background: '#fff0f7',
-            borderRadius: '14px',
-            display: 'flex', alignItems: 'center', gap: '10px',
-            fontSize: '14px', fontWeight: '800', border: '1px solid #ffe0ef'
-          }}>
-            <FaCheckCircle style={{ fontSize: '16px' }} />
-            SISTEMA OPERATIVO
-          </div>
-        </div>
+
       </div>
 
       <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 380px', gap: '35px' }}>
         <div className="animate-fade-in" style={{ animationDelay: '0.1s' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '25px' }}>
-            <h3 style={{ margin: 0, fontSize: '20px', fontWeight: '850', color: '#1e293b', letterSpacing: '-0.02em' }}>
+            <h3 style={{ margin: 0, fontSize: '20px', fontWeight: '850', color: 'var(--text-heading)', letterSpacing: '-0.02em' }}>
               Detalle de Productos
             </h3>
-            <div style={{ height: '3px', flex: 1, background: 'linear-gradient(90deg, #f1f5f9 0%, transparent 100%)', borderRadius: '10px' }}></div>
+            <div style={{ height: '3px', flex: 1, background: 'linear-gradient(90deg, var(--border-color) 0%, transparent 100%)', borderRadius: '10px' }}></div>
           </div>
 
           <div style={{ marginBottom: '30px' }}>
@@ -719,11 +714,9 @@ export default function RegisterSale() {
                     border: '1px solid #f1f5f9'
                   }}>
                     <div style={{ display: 'flex', gap: '20px' }}>
+
                       <span style={{ fontSize: '13px', color: '#64748b', fontWeight: '600' }}>
-                        ID: <span style={{ color: '#1e293b' }}>#{item.product_id}</span>
-                      </span>
-                      <span style={{ fontSize: '13px', color: '#64748b', fontWeight: '600' }}>
-                        Nombre: <span style={{ color: '#1e293b' }}>{item.product_name}</span>
+                        Producto: <span style={{ color: '#1e293b' }}>{item.product_name}</span>
                       </span>
                     </div>
                     <div style={{ fontSize: '18px', fontWeight: '850', color: '#f73194' }}>
@@ -753,16 +746,17 @@ export default function RegisterSale() {
 
             <div style={{ padding: '30px' }}>
               <div className="nita-input-group">
-                <label className="nita-label"><FaEnvelope /> Email del Cliente</label>
+                <label className="nita-label"><FaEnvelope /> Email del Cliente <span style={{ color: '#f73194' }}>*</span></label>
                 <div style={{ position: 'relative' }}>
                   <FaEnvelope style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
                   <input
                     type="email"
-                    placeholder="ejemplo@cliente.com"
+                    placeholder="mail@cliente.com"
                     value={customerEmail}
                     onChange={e => setCustomerEmail(e.target.value)}
                     className="nita-input"
                     style={{ paddingLeft: '45px' }}
+                    required
                   />
                 </div>
               </div>
@@ -773,7 +767,7 @@ export default function RegisterSale() {
                   {[
                     { id: 'efectivo', icon: '💵', label: 'Efectivo' },
                     { id: 'tarjeta', icon: '💳', label: 'Tarjeta' },
-                    { id: 'transferencia', icon: '🏦', label: 'Banco' }
+                    { id: 'transferencia', icon: '🏦', label: 'Transf' }
                   ].map(method => (
                     <div
                       key={method.id}
