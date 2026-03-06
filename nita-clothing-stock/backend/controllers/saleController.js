@@ -207,7 +207,24 @@ class SaleController {
         try {
             const { id } = req.params;
             await Sale.delete(id);
-            res.status(200).json({ success: true, message: 'Venta cancelada y stock restaurado' });
+
+            // Obtener estadísticas actualizadas
+            const [monthlyStats, capitalStats, totalProducts] = await Promise.all([
+                Sale.getMonthlyStats(),
+                Sale.getStockInmovilizado(),
+                require('../models/Product').getCount()
+            ]);
+
+            res.status(200).json({
+                success: true,
+                message: 'Venta cancelada y stock restaurado',
+                stats: {
+                    ventas_mes: monthlyStats.total_sales,
+                    facturacion_mes: monthlyStats.total_revenue,
+                    capital_ropa: capitalStats.total_investment,
+                    total_productos: totalProducts
+                }
+            });
         } catch (error) {
             next(error);
         }

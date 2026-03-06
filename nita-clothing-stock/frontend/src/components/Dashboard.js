@@ -24,6 +24,9 @@ const Dashboard = () => {
 
   useEffect(() => {
     loadDashboardData();
+    const refresh = () => loadDashboardData();
+    window.addEventListener('dashboard:refresh', refresh);
+    return () => window.removeEventListener('dashboard:refresh', refresh);
   }, []);
 
   const loadDashboardData = async () => {

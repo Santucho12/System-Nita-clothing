@@ -1,0 +1,8 @@
+Stats before sale:
+{"pCount":180,"totalSales":406,"capital":"157204828.00","stats":{"stock":1,"estado":"activo"}}
+Creating sale...
+Stats after sale:
+{"pCount":179,"totalSales":407,"capital":"157162191.00","stats":{"stock":0,"estado":"sin_stock"}}
+Cancelling sale ID: 413
+Stats after cancel:
+{"pCount":180,"totalSales":406,"capital":"157204828.00","stats":{"stock":1,"estado":"activo"}}

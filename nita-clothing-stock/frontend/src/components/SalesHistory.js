@@ -66,7 +66,13 @@ export default function SalesHistory() {
     try {
       const response = await api.get('/ventas/history', { params });
       const { data, total: totalCount } = response.data;
-      setSales(data || []);
+      // Ordenar por número de venta visible (sale_number) de mayor a menor
+      const sorted = (data || []).slice().sort((a, b) => {
+        const numA = parseInt((a.sale_number || a.id || "0").toString().replace(/[^0-9]/g, ""), 10);
+        const numB = parseInt((b.sale_number || b.id || "0").toString().replace(/[^0-9]/g, ""), 10);
+        return numB - numA;
+      });
+      setSales(sorted);
       setTotal(totalCount || 0);
     } catch (err) {
       console.error('Error fetching sales:', err);
@@ -152,6 +158,7 @@ export default function SalesHistory() {
             toast.success('Venta cancelada exitosamente.');
             fetchSales();
             setSelectedSale(null);
+            window.dispatchEvent(new Event('dashboard:refresh'));
           } else {
             toast.error(response.data.message || 'Error al cancelar la venta');
           }
