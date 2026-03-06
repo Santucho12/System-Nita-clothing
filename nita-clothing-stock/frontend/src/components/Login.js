@@ -86,7 +86,7 @@ const Login = ({ onLogin }) => {
         </form>
 
         <div className="login-footer">
-          <p>&copy; {new Date().getFullYear()} Nita Clothing | v1.0.0</p>
+          <p>&copy; {new Date().getFullYear()} Nita Clothing </p>
         </div>
       </div>
     </div>

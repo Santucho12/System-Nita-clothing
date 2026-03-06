@@ -44,7 +44,7 @@ const Dashboard = () => {
           params: { startDate, endDate },
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
         }),
-        reportsService.getTopCategories(3)
+        reportsService.getTopCategories(3, startDate, endDate)
       ]);
 
       const productsCount = productsCountResponse.count || 0;
@@ -437,13 +437,13 @@ const Dashboard = () => {
                   <p style={{ margin: '0 0 10px 0', fontSize: '14px', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
                     <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
                       <FaTshirt style={{ color: 'var(--accent-pink)' }} />
-                      {category.products_count} productos
+                      {category.products_count} Modelos
                     </span>
                   </p>
                   <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
                     <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 12px', background: 'var(--bg-tertiary)', color: 'var(--text-primary)', borderRadius: '6px', fontSize: '13px', fontWeight: '600' }}>
                       <FaBox />
-                      {formatInteger(category.total_quantity)} vendidos
+                      {formatInteger(category.total_quantity)}  Productos vendidos
                     </span>
                     <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 12px', background: 'var(--accent-pink-light)', color: 'var(--accent-pink)', borderRadius: '6px', fontSize: '13px', fontWeight: '600' }}>
                       <FaMoneyBillWave />

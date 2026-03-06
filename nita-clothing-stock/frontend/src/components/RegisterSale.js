@@ -440,29 +440,6 @@ export default function RegisterSale() {
             transform: rotate(90deg) scale(1.1);
           }
 
-          .btn-register-sale {
-            width: 100%;
-            padding: 20px;
-            border-radius: 20px;
-            background: var(--gradient-pink);
-            color: white;
-            font-size: 20px;
-            font-weight: 900;
-            border: none;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 15px;
-            box-shadow: 0 10px 25px var(--accent-pink-light);
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-          }
-
-          .btn-register-sale:hover:not(:disabled) {
-            transform: translateY(-4px);
-            box-shadow: 0 15px 35px var(--accent-pink-light);
-          }
-
           .btn-register-sale:disabled {
             opacity: 0.7;
             cursor: not-allowed;
@@ -819,7 +796,24 @@ export default function RegisterSale() {
               <button
                 type="submit"
                 disabled={loading}
-                className="btn-register-sale"
+                className="btn-register-sale btn-pink"
+                style={{
+                  width: '100%',
+                  padding: '20px',
+                  borderRadius: '20px',
+                  color: 'white',
+                  fontSize: '20px',
+                  fontWeight: '900',
+                  border: 'none',
+                  cursor: loading ? 'not-allowed' : 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '15px',
+                  boxShadow: '0 10px 25px var(--accent-pink-light)',
+                  opacity: loading ? 0.7 : 1,
+                  filter: loading ? 'grayscale(0.5)' : 'none'
+                }}
               >
                 {loading ? 'REGISTRANDO...' : (
                   <>

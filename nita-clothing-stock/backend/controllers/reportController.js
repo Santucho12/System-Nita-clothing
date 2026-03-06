@@ -151,7 +151,8 @@ class ReportController {
     static async getTopCategoriesThisMonth(req, res, next) {
         try {
             const limit = parseInt(req.query.limit) || 3;
-            const topCategories = await Sale.getTopCategoriesThisMonth(limit);
+            const { startDate, endDate } = req.query;
+            const topCategories = await Sale.getTopCategoriesThisMonth(limit, startDate, endDate);
             res.json({
                 success: true,
                 message: 'Categorías más vendidas del mes actual',

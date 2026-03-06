@@ -710,7 +710,7 @@ const Products = () => {
             <FaSearch style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', fontSize: '15px', zIndex: 1, pointerEvents: 'none' }} />
             <input
               type="text"
-              placeholder="Buscar por nombre, SKU o color..."
+              placeholder="Buscar por nombre o sku"
               value={searchTerm}
               onChange={(e) => handleSearchInput(e.target.value)}
               className="nita-search-input"

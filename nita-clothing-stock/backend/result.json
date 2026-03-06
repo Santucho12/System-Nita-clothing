@@ -1,0 +1,56 @@
+{
+  "salesStats": {
+    "totalTransactions": 407,
+    "totalSales": "33890047.60",
+    "totalSubtotal": "33962944.00"
+  },
+  "itemsStats": {
+    "total_revenue": "33962944.00"
+  },
+  "salesMonthStats": {
+    "totalTransactions": 283,
+    "totalSales": "23888281.60"
+  },
+  "thisMonthCat": [
+    {
+      "category_name": "Remeras",
+      "total_revenue": "4617791.00",
+      "total_quantity": "154"
+    },
+    {
+      "category_name": "Accesorios",
+      "total_revenue": "3699688.00",
+      "total_quantity": "138"
+    },
+    {
+      "category_name": "Ropa Interior",
+      "total_revenue": "3913988.00",
+      "total_quantity": "132"
+    },
+    {
+      "category_name": "Abrigos",
+      "total_revenue": "3201188.00",
+      "total_quantity": "120"
+    },
+    {
+      "category_name": "Vestidos",
+      "total_revenue": "2245087.00",
+      "total_quantity": "87"
+    },
+    {
+      "category_name": "Deportiva",
+      "total_revenue": "2501674.00",
+      "total_quantity": "84"
+    },
+    {
+      "category_name": "Calzado",
+      "total_revenue": "1779155.00",
+      "total_quantity": "79"
+    },
+    {
+      "category_name": "Pantalones",
+      "total_revenue": "2002607.00",
+      "total_quantity": "70"
+    }
+  ]
+}

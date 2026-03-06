@@ -76,9 +76,13 @@ export const reportsService = {
     },
 
     // Obtener categorías más vendidas
-    getTopCategories: async (limit = 3) => {
+    getTopCategories: async (limit = 3, startDate, endDate) => {
         try {
-            const response = await api.get(`/reportes/top-categories?limit=${limit}`);
+            let url = `/reportes/top-categories?limit=${limit}`;
+            if (startDate && endDate) {
+                url += `&startDate=${startDate}&endDate=${endDate}`;
+            }
+            const response = await api.get(url);
             return response.data;
         } catch (error) {
             throw error.response?.data || { message: 'Error al obtener categorías más vendidas' };

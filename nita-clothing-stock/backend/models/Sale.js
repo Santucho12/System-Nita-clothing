@@ -59,8 +59,8 @@ class Sale {
                 params.push(`%${filters.customer_name}%`);
             }
             if (filters.sale_number) {
-                where.push('s.sale_number LIKE ?');
-                params.push(`%${filters.sale_number}%`);
+                where.push('s.id = ?');
+                params.push(filters.sale_number);
             }
             const whereClause = where.length ? 'WHERE ' + where.join(' AND ') : '';
             const page = filters.page || 1;
@@ -490,9 +490,17 @@ class Sale {
         }
     }
 
-    // Obtener las categorÃ­as mÃ¡s vendidas del mes actual
-    static async getTopCategoriesThisMonth(limit = 3) {
+    // Obtener las categorías más vendidas del mes actual
+    static async getTopCategoriesThisMonth(limit = 3, startDate, endDate) {
         try {
+            let whereClause = "DATE_FORMAT(s.created_at, '%Y-%m') = DATE_FORMAT(NOW(), '%Y-%m')";
+            let params = [];
+
+            if (startDate && endDate) {
+                whereClause = "DATE(s.created_at) >= ? AND DATE(s.created_at) <= ?";
+                params.push(startDate, endDate);
+            }
+
             const sql = `
                 SELECT 
                     c.id as category_id, 
@@ -505,13 +513,13 @@ class Sale {
                 JOIN productos p ON si.product_id = p.id
                 JOIN categorias c ON p.categoria_id = c.id
                 JOIN sales s ON si.sale_id = s.id
-                WHERE DATE_FORMAT(s.created_at, '%Y-%m') = DATE_FORMAT(NOW(), '%Y-%m')
+                WHERE ${whereClause}
                   AND s.status = 'completed'
                 GROUP BY c.id, c.nombre, c.descripcion
                 ORDER BY total_quantity DESC
                 LIMIT ${parseInt(limit)}
             `;
-            const [rows] = await database.query(sql);
+            const [rows] = await database.query(sql, params);
             return rows;
         } catch (error) {
             throw new Error(`Error obteniendo categorÃ­as mÃ¡s vendidas: ${error.message}`);
