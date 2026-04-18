@@ -5,7 +5,7 @@ import {
   FaTshirt, FaPlus, FaEdit, FaTrash, FaCopy, FaSearch,
   FaFileExcel, FaTimes, FaBox, FaDollarSign, FaBarcode, FaTag,
   FaPalette, FaRulerVertical, FaCalendarAlt, FaCheckCircle, FaExclamationTriangle,
-  FaTimesCircle, FaEye, FaSave, FaBoxes, FaUser, FaCamera, FaImage
+  FaTimesCircle, FaEye, FaSave, FaBoxes, FaUser, FaCamera, FaImage, FaArrowUp
 } from 'react-icons/fa';
 
 import './Sidebar.css';
@@ -60,6 +60,8 @@ const Products = () => {
     name: '',
     description: ''
   });
+
+  const [showScrollTop, setShowScrollTop] = useState(false);
 
   // Estado para el Modal Premium
   const [premiumModal, setPremiumModal] = useState({
@@ -146,6 +148,32 @@ const Products = () => {
     // eslint-disable-next-line
   }, [selectedCategory, selectedSize, selectedStatus]);
 
+  // Listener para mostrar/ocultar el botón de scroll
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 400) {
+        setShowScrollTop(true);
+      } else {
+        setShowScrollTop(false);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const scrollToTop = () => {
+    const scrollDuration = 500; // milisegundos
+    const scrollStep = -window.scrollY / (scrollDuration / 15);
+    const scrollInterval = setInterval(() => {
+      if (window.scrollY !== 0) {
+        window.scrollBy(0, scrollStep);
+      } else {
+        clearInterval(scrollInterval);
+      }
+    }, 15);
+  };
+
   const loadInitialData = async () => {
     try {
       setLoading(true);
@@ -159,10 +187,10 @@ const Products = () => {
 
   const loadProducts = async () => {
     try {
-      const response = await productService.getAll();
-      setProducts(response.data || []);
+      // Recargar usando los filtros actuales para no perder la vista del usuario
+      await fetchFilteredProducts(searchTerm, selectedCategory, selectedSize, selectedStatus);
     } catch (error) {
-      toast.error('Error cargando productos: ' + error.message);
+      toast.error('Error recargando productos: ' + error.message);
     }
   };
 
@@ -1474,6 +1502,43 @@ const Products = () => {
         confirmText={premiumModal.confirmText}
         cancelText={premiumModal.cancelText}
       />
+
+      {/* Botón Volver Arriba */}
+      {showScrollTop && (
+        <button
+          onClick={scrollToTop}
+          style={{
+            position: 'fixed',
+            bottom: '40px',
+            right: '40px',
+            width: '54px',
+            height: '54px',
+            borderRadius: '50%',
+            background: '#f73194',
+            color: 'white',
+            border: 'none',
+            boxShadow: '0 8px 24px rgba(247, 49, 148, 0.4)',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '22px',
+            zIndex: 1000,
+            transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+            animation: 'fadeSlideUp 0.4s ease both'
+          }}
+          onMouseOver={(e) => {
+            e.currentTarget.style.transform = 'translateY(-5px) scale(1.1)';
+            e.currentTarget.style.boxShadow = '0 12px 30px rgba(247, 49, 148, 0.5)';
+          }}
+          onMouseOut={(e) => {
+            e.currentTarget.style.transform = 'translateY(0) scale(1)';
+            e.currentTarget.style.boxShadow = '0 8px 24px rgba(247, 49, 148, 0.4)';
+          }}
+        >
+          <FaArrowUp />
+        </button>
+      )}
     </div>
   );
 };
