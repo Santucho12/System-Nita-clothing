@@ -57,7 +57,7 @@ class Product {
     }
     // Obtener el último SKU numérico
     static async getLastSku() {
-        const [rows] = await db.query('SELECT MAX(CAST(sku AS UNSIGNED)) AS lastSku FROM productos');
+        const [rows] = await db.query('SELECT MAX(CAST(codigo AS UNSIGNED)) AS lastSku FROM productos');
         return rows[0]?.lastSku || 0;
     }
     // Crear producto
@@ -285,13 +285,20 @@ class Product {
         if (!product) return null;
         const copy = { ...product, ...overrides };
         delete copy.id;
-        // Generar código único para el duplicado
-        if (copy.codigo) {
-            copy.codigo = copy.codigo + '-COPY-' + Date.now();
+
+        // Obtener el siguiente SKU correlativo
+        try {
+            const lastSku = await this.getLastSku();
+            const nextSku = parseInt(lastSku || 0) + 1;
+            copy.codigo = String(nextSku);
+        } catch (error) {
+            console.error('[Duplicate] Error generando SKU correlativo:', error);
+            // Fallback por si falla el cast numérico
+            copy.codigo = (copy.codigo || 'SKU') + '-DUP-' + Date.now().toString().slice(-4);
         }
-        if (copy.sku) {
-            copy.sku = copy.sku + '-COPY-' + Date.now();
-        }
+
+        if (copy.sku) delete copy.sku;
+
         copy.created_at = new Date();
         copy.updated_at = new Date();
         return this.create(copy);
